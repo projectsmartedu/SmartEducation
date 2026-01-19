@@ -1,6 +1,7 @@
 const express = require('express');
 const mongoose = require('mongoose');
 const cors = require('cors');
+const serverless = require('serverless-http');
 
 const app = express();
 
@@ -100,4 +101,4 @@ app.use('/api/*', (req, res) => {
   res.status(404).json({ message: 'API route not found' });
 });
 
-module.exports = app;
+module.exports = serverless(app);
