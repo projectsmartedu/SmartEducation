@@ -6,6 +6,9 @@
   ],
   "rewrites": [
     { "source": "/api/(.*)", "destination": "/backend/serverless.js" },
+    { "source": "/static/(.*)", "destination": "/frontend/static/$1" },
+    { "source": "/asset-manifest.json", "destination": "/frontend/asset-manifest.json" },
+    { "source": "/favicon.ico", "destination": "/frontend/favicon.ico" },
     { "source": "/(.*)", "destination": "/frontend/index.html" }
   ]
 }
