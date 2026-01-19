@@ -25,6 +25,7 @@
   "engines": {
     "node": "24.x"
   },
+  "proxy": "http://localhost:5001",
   "eslintConfig": {
     "extends": [
       "react-app"

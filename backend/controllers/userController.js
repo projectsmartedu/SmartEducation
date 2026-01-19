@@ -81,6 +81,14 @@ const createUser = async (req, res) => {
       createdAt: user.createdAt
     });
   } catch (error) {
+    // Handle validation errors
+    if (error.name === 'ValidationError') {
+      const errors = Object.fromEntries(
+        Object.entries(error.errors || {}).map(([key, val]) => [key, val.message])
+      );
+      return res.status(400).json({ message: 'Validation failed', errors });
+    }
+
     console.error('Create user error:', error);
     res.status(500).json({ message: 'Server error' });
   }
