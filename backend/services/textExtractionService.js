@@ -4,7 +4,7 @@
  * Modular component for content extraction
  */
 
-const { PDFParse } = require('pdf-parse');
+const pdfParse = require('pdf-parse');
 
 class TextExtractionService {
   /**
@@ -14,9 +14,8 @@ class TextExtractionService {
    */
   async extractFromPDF(buffer) {
     try {
-      // pdf-parse v2.x uses PDFParse class with options
-      const parser = new PDFParse({ data: buffer });
-      const result = await parser.getText();
+      // pdf-parse v1.x returns an object with { text }
+      const result = await pdfParse(buffer);
       return this.cleanText(result.text);
     } catch (error) {
       console.error('Error extracting text from PDF:', error);
