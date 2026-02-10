@@ -63,6 +63,10 @@ const DownloadForOffline = ({ type, entityId, onDownload, onRemove, size = 'sm' 
         }
     };
 
+    const sizeClasses = size === 'sm'
+        ? 'p-1.5 rounded-lg'
+        : 'px-3 py-2 rounded-xl text-xs font-semibold gap-1.5';
+
     if (checking) {
         return (
             <span className={`inline-flex items-center text-[#94a3b8] ${sizeClasses}`}>
@@ -70,10 +74,6 @@ const DownloadForOffline = ({ type, entityId, onDownload, onRemove, size = 'sm' 
             </span>
         );
     }
-
-    const sizeClasses = size === 'sm'
-        ? 'p-1.5 rounded-lg'
-        : 'px-3 py-2 rounded-xl text-xs font-semibold gap-1.5';
 
     if (loading) {
         return (
