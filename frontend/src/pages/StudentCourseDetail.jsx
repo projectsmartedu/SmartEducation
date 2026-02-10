@@ -2,7 +2,7 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import DashboardLayout from '../components/Layout/DashboardLayout';
 import { coursesAPI, progressAPI } from '../services/api';
-import { ArrowLeft, BookOpen, Clock, CheckCircle, Circle, Loader2, FileText, Award, ChevronRight, X, File } from 'lucide-react';
+import { ArrowLeft, BookOpen, Clock, CheckCircle, Loader2, FileText, Award, ChevronRight, File } from 'lucide-react';
 
 const STATUS_STYLES = {
     'mastered': { bg: 'bg-[#dcfce7]', text: 'text-[#166534]', label: 'Mastered' },
@@ -134,7 +134,6 @@ const StudentCourseDetail = () => {
     if (readingTopic) {
         const prog = getProgress(readingTopic._id);
         const isCompleted = prog?.status === 'completed' || prog?.status === 'mastered';
-        const isStarted = prog?.status === 'in-progress';
 
         return (
             <DashboardLayout>
