@@ -31,7 +31,6 @@ const studentLinks = [
     { label: 'Leaderboard', href: '/student/leaderboard', icon: Trophy },
     { label: 'Course Materials', href: '/student/materials', icon: GraduationCap },
     { label: 'AI Doubt Support', href: '/student/doubt-support', icon: MessageSquare },
-    { label: 'AI Chatbot', href: '/student/chatbot', icon: MessageSquare },
     { label: 'Offline Downloads', href: '/student/offline-downloads', icon: Download }
 ];
 
