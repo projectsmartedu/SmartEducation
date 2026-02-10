@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
+import { useOnlineStatus } from '../../hooks/useOffline';
 import Navbar from './Navbar';
 import {
     LayoutDashboard,
@@ -18,20 +19,21 @@ import {
     X,
     Trophy,
     User,
-    Download
+    Download,
+    WifiOff
 } from 'lucide-react';
 
 const studentLinks = [
-    { label: 'Dashboard', href: '/student', icon: LayoutDashboard },
-    { label: 'My Profile', href: '/student/profile', icon: User },
-    { label: 'My Courses', href: '/student/courses', icon: BookOpen },
-    { label: 'Knowledge Map', href: '/student/knowledge-map', icon: Map },
-    { label: 'Revisions', href: '/student/revisions', icon: CalendarClock },
-    { label: 'Progress', href: '/student/progress', icon: TrendingUp },
-    { label: 'Leaderboard', href: '/student/leaderboard', icon: Trophy },
-    { label: 'Course Materials', href: '/student/materials', icon: GraduationCap },
-    { label: 'AI Doubt Support', href: '/student/doubt-support', icon: MessageSquare },
-    { label: 'Offline Downloads', href: '/student/offline-downloads', icon: Download }
+    { label: 'Dashboard', href: '/student', icon: LayoutDashboard, needsOnline: true },
+    { label: 'My Profile', href: '/student/profile', icon: User, needsOnline: true },
+    { label: 'My Courses', href: '/student/courses', icon: BookOpen, needsOnline: false },
+    { label: 'Knowledge Map', href: '/student/knowledge-map', icon: Map, needsOnline: true },
+    { label: 'Revisions', href: '/student/revisions', icon: CalendarClock, needsOnline: true },
+    { label: 'Progress', href: '/student/progress', icon: TrendingUp, needsOnline: true },
+    { label: 'Leaderboard', href: '/student/leaderboard', icon: Trophy, needsOnline: true },
+    { label: 'Course Materials', href: '/student/materials', icon: GraduationCap, needsOnline: false },
+    { label: 'AI Doubt Support', href: '/student/doubt-support', icon: MessageSquare, needsOnline: true },
+    { label: 'Offline Downloads', href: '/student/offline-downloads', icon: Download, needsOnline: false }
 ];
 
 const teacherLinks = [
@@ -51,10 +53,14 @@ const DashboardLayout = ({ children }) => {
     const location = useLocation();
     const navigate = useNavigate();
     const [mobileOpen, setMobileOpen] = useState(false);
+    const isOnline = useOnlineStatus();
 
     const role = user?.role;
-    const links =
+    const allLinks =
         role === 'teacher' ? teacherLinks : role === 'admin' ? adminLinks : studentLinks;
+
+    // When offline, only show links that work without internet
+    const links = isOnline ? allLinks : allLinks.filter((l) => !l.needsOnline);
 
     const basePath = role === 'teacher' ? '/teacher' : role === 'admin' ? '/admin' : '/student';
     const isSubpage = location.pathname !== basePath;
@@ -100,6 +106,14 @@ const DashboardLayout = ({ children }) => {
                         <ArrowLeft className="h-4 w-4" />
                         Back to Dashboard
                     </button>
+                )}
+
+                {/* Offline mode indicator */}
+                {!isOnline && (
+                    <div className="mx-4 mb-3 flex items-center gap-2 rounded-2xl bg-[#fef3c7] px-4 py-2.5 text-xs font-semibold text-[#92400e]">
+                        <WifiOff className="h-4 w-4" />
+                        Offline Mode
+                    </div>
                 )}
 
                 {/* Nav links */}
