@@ -6,9 +6,13 @@
   ],
   "rewrites": [
     { "source": "/api/(.*)", "destination": "/backend/serverless.js" },
+    { "source": "/sw.js", "destination": "/frontend/sw.js" },
+    { "source": "/manifest.json", "destination": "/frontend/manifest.json" },
     { "source": "/static/(.*)", "destination": "/frontend/static/$1" },
     { "source": "/asset-manifest.json", "destination": "/frontend/asset-manifest.json" },
     { "source": "/favicon.ico", "destination": "/frontend/favicon.ico" },
+    { "source": "/logo192.png", "destination": "/frontend/logo192.png" },
+    { "source": "/logo512.png", "destination": "/frontend/logo512.png" },
     { "source": "/(.*)", "destination": "/frontend/index.html" }
   ]
 }

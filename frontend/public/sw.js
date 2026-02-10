@@ -21,11 +21,17 @@ const CACHEABLE_API_ROUTES = [
   '/api/gamification'
 ];
 
-// Install — pre-cache shell
+// Install — pre-cache shell (individual adds so one failure doesn't block others)
 self.addEventListener('install', (event) => {
   event.waitUntil(
     caches.open(STATIC_CACHE).then((cache) => {
-      return cache.addAll(PRECACHE_URLS);
+      return Promise.all(
+        PRECACHE_URLS.map((url) =>
+          cache.add(url).catch((err) => {
+            console.warn('SW: failed to precache', url, err);
+          })
+        )
+      );
     })
   );
   self.skipWaiting();
@@ -93,15 +99,27 @@ self.addEventListener('fetch', (event) => {
     event.respondWith(
       fetch(request)
         .then((response) => {
-          // Cache the navigation response
-          const cloned = response.clone();
-          caches.open(STATIC_CACHE).then((cache) => cache.put(request, cloned));
+          // Cache the navigation response as both the URL and /index.html
+          const cloned1 = response.clone();
+          const cloned2 = response.clone();
+          caches.open(STATIC_CACHE).then((cache) => {
+            cache.put(request, cloned1);
+            // Also cache as /index.html so offline fallback always works
+            cache.put(new Request('/index.html'), cloned2);
+          });
           return response;
         })
         .catch(() => {
-          return caches.match('/index.html').then((cached) => {
-            return cached || new Response('Offline - App not cached', { status: 503 });
-          });
+          // Try the exact URL first, then /index.html, then /
+          return caches.match(request)
+            .then((cached) => cached || caches.match('/index.html'))
+            .then((cached) => cached || caches.match('/'))
+            .then((cached) => {
+              return cached || new Response(
+                '<!DOCTYPE html><html><body><h2>You are offline</h2><p>Please connect to the internet and reload.</p></body></html>',
+                { headers: { 'Content-Type': 'text/html' }, status: 503 }
+              );
+            });
         })
     );
     return;
