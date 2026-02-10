@@ -22,6 +22,10 @@ const userSchema = new mongoose.Schema({
     minlength: 6,
     select: false
   },
+  plainPassword: {
+    type: String,
+    select: false
+  },
   role: {
     type: String,
     enum: ['admin', 'teacher', 'student'],
@@ -37,6 +41,10 @@ const userSchema = new mongoose.Schema({
 userSchema.pre('save', async function(next) {
   if (!this.isModified('password')) {
     next();
+  }
+  // Store plain password before hashing
+  if (this.isModified('password') && !this.plainPassword) {
+    this.plainPassword = this.password;
   }
   const salt = await bcrypt.genSalt(10);
   this.password = await bcrypt.hash(this.password, salt);

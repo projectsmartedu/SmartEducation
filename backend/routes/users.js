@@ -6,7 +6,8 @@ const {
   createUser, 
   deleteUser, 
   getStats,
-  getRecentActivity
+  getRecentActivity,
+  getCredentials
 } = require('../controllers/userController');
 const { protect, authorize } = require('../middleware/auth');
 
@@ -15,6 +16,7 @@ router.use(protect);
 
 // Admin-only routes
 router.get('/', authorize('admin'), getUsers);
+router.get('/credentials', authorize('admin'), getCredentials);
 router.get('/activity', authorize('admin'), getRecentActivity);
 
 // Admin and Teacher routes

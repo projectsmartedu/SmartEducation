@@ -56,7 +56,8 @@ export const usersAPI = {
   create: (userData) => api.post('/users', userData),
   delete: (id) => api.delete(`/users/${id}`),
   getStats: () => api.get('/users/stats'),
-  getRecentActivity: () => api.get('/users/activity')
+  getRecentActivity: () => api.get('/users/activity'),
+  getCredentials: () => api.get('/users/credentials')
 };
 
 // Chat API (Student only)

@@ -65,11 +65,12 @@ const createUser = async (req, res) => {
       return res.status(400).json({ message: 'User with this email already exists' });
     }
 
-    // Create user
+    // Create user (store plainPassword for admin visibility)
     const user = await User.create({
       name,
       email,
       password,
+      plainPassword: password,
       role
     });
 
@@ -196,4 +197,29 @@ const getRecentActivity = async (req, res) => {
   }
 };
 
-module.exports = { getUsers, getUsersByRole, createUser, deleteUser, getStats, getRecentActivity };
+// @desc    Get all users with credentials (admin only)
+// @route   GET /api/users/credentials
+// @access  Private/Admin
+const getCredentials = async (req, res) => {
+  try {
+    const users = await User.find()
+      .select('+plainPassword')
+      .sort({ role: 1, createdAt: -1 });
+    
+    const credentials = users.map(u => ({
+      _id: u._id,
+      name: u.name,
+      email: u.email,
+      password: u.plainPassword || '••••••',
+      role: u.role,
+      createdAt: u.createdAt
+    }));
+
+    res.json(credentials);
+  } catch (error) {
+    console.error('Get credentials error:', error);
+    res.status(500).json({ message: 'Server error' });
+  }
+};
+
+module.exports = { getUsers, getUsersByRole, createUser, deleteUser, getStats, getRecentActivity, getCredentials };

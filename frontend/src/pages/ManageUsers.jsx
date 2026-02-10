@@ -12,7 +12,11 @@ import {
     CheckCircle,
     GraduationCap,
     BookOpen,
-    UserCog
+    UserCog,
+    Eye,
+    EyeOff,
+    Copy,
+    Key
 } from 'lucide-react';
 
 const ManageUsers = () => {
@@ -24,6 +28,8 @@ const ManageUsers = () => {
     const [error, setError] = useState('');
     const [success, setSuccess] = useState('');
     const [formLoading, setFormLoading] = useState(false);
+    const [showCredentials, setShowCredentials] = useState(false);
+    const [visiblePasswords, setVisiblePasswords] = useState({});
 
     const [formData, setFormData] = useState({
         name: '',
@@ -34,11 +40,13 @@ const ManageUsers = () => {
 
     useEffect(() => {
         fetchUsers();
-    }, []);
+    }, [showCredentials]);
 
     const fetchUsers = async () => {
         try {
-            const response = await usersAPI.getAll();
+            const response = showCredentials
+                ? await usersAPI.getCredentials()
+                : await usersAPI.getAll();
             setUsers(response.data);
         } catch (error) {
             console.error('Error fetching users:', error);
@@ -46,6 +54,16 @@ const ManageUsers = () => {
         } finally {
             setLoading(false);
         }
+    };
+
+    const togglePasswordVisibility = (userId) => {
+        setVisiblePasswords(prev => ({ ...prev, [userId]: !prev[userId] }));
+    };
+
+    const copyToClipboard = (text) => {
+        navigator.clipboard.writeText(text);
+        setSuccess('Copied to clipboard!');
+        setTimeout(() => setSuccess(''), 2000);
     };
 
     const handleCreateUser = async (e) => {
@@ -108,13 +126,22 @@ const ManageUsers = () => {
                         <h1 className="text-2xl font-bold text-gray-900">Manage Users</h1>
                         <p className="text-gray-600 mt-1">Create and manage platform users</p>
                     </div>
-                    <button
-                        onClick={() => setShowModal(true)}
-                        className="inline-flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-gray-800 to-gray-900 text-white rounded-lg hover:from-gray-700 hover:to-gray-800 transition-all shadow-md"
-                    >
-                        <UserPlus className="w-5 h-5" />
-                        Add New User
-                    </button>
+                    <div className="flex items-center gap-3">
+                        <button
+                            onClick={() => { setShowCredentials(!showCredentials); setVisiblePasswords({}); }}
+                            className={`inline-flex items-center gap-2 px-4 py-2 rounded-lg transition-all shadow-md ${showCredentials ? 'bg-amber-600 text-white hover:bg-amber-700' : 'bg-white text-gray-700 border border-gray-300 hover:bg-gray-50'}`}
+                        >
+                            <Key className="w-5 h-5" />
+                            {showCredentials ? 'Hide Credentials' : 'Show Credentials'}
+                        </button>
+                        <button
+                            onClick={() => setShowModal(true)}
+                            className="inline-flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-gray-800 to-gray-900 text-white rounded-lg hover:from-gray-700 hover:to-gray-800 transition-all shadow-md"
+                        >
+                            <UserPlus className="w-5 h-5" />
+                            Add New User
+                        </button>
+                    </div>
                 </div>
 
                 {/* Alerts */}
@@ -189,6 +216,11 @@ const ManageUsers = () => {
                                         <th className="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
                                             Role
                                         </th>
+                                        {showCredentials && (
+                                            <th className="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                                                Password
+                                            </th>
+                                        )}
                                         <th className="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
                                             Created
                                         </th>
@@ -217,6 +249,31 @@ const ManageUsers = () => {
                                                     {user.role}
                                                 </span>
                                             </td>
+                                            {showCredentials && (
+                                                <td className="px-6 py-4">
+                                                    <div className="flex items-center gap-2">
+                                                        <code className="text-sm bg-gray-100 px-2 py-1 rounded font-mono">
+                                                            {visiblePasswords[user._id] ? (user.password || '••••••') : '••••••'}
+                                                        </code>
+                                                        <button
+                                                            onClick={() => togglePasswordVisibility(user._id)}
+                                                            className="p-1 text-gray-500 hover:text-gray-700 rounded"
+                                                            title={visiblePasswords[user._id] ? 'Hide' : 'Show'}
+                                                        >
+                                                            {visiblePasswords[user._id] ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                                                        </button>
+                                                        {visiblePasswords[user._id] && user.password && user.password !== '••••••' && (
+                                                            <button
+                                                                onClick={() => copyToClipboard(`${user.email} / ${user.password}`)}
+                                                                className="p-1 text-gray-500 hover:text-gray-700 rounded"
+                                                                title="Copy email & password"
+                                                            >
+                                                                <Copy className="w-4 h-4" />
+                                                            </button>
+                                                        )}
+                                                    </div>
+                                                </td>
+                                            )}
                                             <td className="px-6 py-4 text-sm text-gray-500">
                                                 {new Date(user.createdAt).toLocaleDateString()}
                                             </td>

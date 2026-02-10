@@ -215,7 +215,7 @@ const seedDB = async () => {
     console.log('\n--- Creating Users ---');
     const users = {};
     for (const userData of usersData) {
-      const user = await User.create(userData);
+      const user = await User.create({ ...userData, plainPassword: userData.password });
       users[user.email] = user;
       console.log(`  Created ${user.role}: ${user.name} (${user.email})`);
     }
