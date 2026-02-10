@@ -1,8 +1,8 @@
 /* eslint-disable no-restricted-globals */
 
-const CACHE_NAME = 'smart-edu-v2';
-const STATIC_CACHE = 'smart-edu-static-v2';
-const API_CACHE = 'smart-edu-api-v2';
+const CACHE_NAME = 'smart-edu-v3';
+const STATIC_CACHE = 'smart-edu-static-v3';
+const API_CACHE = 'smart-edu-api-v3';
 
 // Static assets to pre-cache on install
 const PRECACHE_URLS = [
@@ -21,17 +21,40 @@ const CACHEABLE_API_ROUTES = [
   '/api/gamification'
 ];
 
-// Install — pre-cache shell (individual adds so one failure doesn't block others)
+// Install — pre-cache shell + all build assets from asset-manifest.json
 self.addEventListener('install', (event) => {
   event.waitUntil(
-    caches.open(STATIC_CACHE).then((cache) => {
-      return Promise.all(
+    caches.open(STATIC_CACHE).then(async (cache) => {
+      // Pre-cache basic shell
+      await Promise.all(
         PRECACHE_URLS.map((url) =>
           cache.add(url).catch((err) => {
             console.warn('SW: failed to precache', url, err);
           })
         )
       );
+
+      // Fetch asset-manifest.json to get all build output files (main.*.js, main.*.css, etc.)
+      try {
+        const manifestRes = await fetch('/asset-manifest.json');
+        if (manifestRes.ok) {
+          const manifest = await manifestRes.json();
+          const filesToCache = Object.values(manifest.files || {}).filter(
+            (f) => typeof f === 'string' && (f.endsWith('.js') || f.endsWith('.css'))
+          );
+          await Promise.all(
+            filesToCache.map((url) =>
+              cache.add(url).catch((err) => {
+                console.warn('SW: failed to cache build asset', url, err);
+              })
+            )
+          );
+          // Also cache the manifest itself
+          cache.put('/asset-manifest.json', manifestRes.clone()).catch(() => {});
+        }
+      } catch (err) {
+        console.warn('SW: could not fetch asset-manifest.json', err);
+      }
     })
   );
   self.skipWaiting();
