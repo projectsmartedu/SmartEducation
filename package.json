@@ -1,21 +1,9 @@
 {
-  "name": "smart-education-platform",
+  "name": "finalpro-monorepo",
+  "private": true,
   "version": "1.0.0",
-  "description": "Smart Education Platform with AI Chatbot and Doubt Resolution",
-  "dependencies": {
-    "@google/generative-ai": "^0.24.1",
-    "axios": "^1.13.2",
-    "bcryptjs": "^2.4.3",
-    "cors": "^2.8.5",
-    "dotenv": "^16.3.1",
-    "express": "^4.18.2",
-    "jsonwebtoken": "^9.0.2",
-    "mongoose": "^8.0.3",
-    "openai": "^4.24.1",
-    "pdf-parse": "^1.1.1",
-    "serverless-http": "^3.2.0"
-  },
-  "engines": {
-    "node": "24.x"
-  }
+  "workspaces": [
+    "backend",
+    "frontend"
+  ]
 }
