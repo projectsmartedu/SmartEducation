@@ -1,7 +1,7 @@
 import axios from 'axios';
 
-// Use relative URL for same-domain deployment, fallback to localhost for dev
-const API_BASE_URL = process.env.REACT_APP_API_URL || '/api';
+// Use Vite env var for deployments, fallback to relative API for dev/proxy
+const API_BASE_URL = import.meta.env.VITE_API_URL || '/api';
 
 const api = axios.create({
   baseURL: API_BASE_URL,
