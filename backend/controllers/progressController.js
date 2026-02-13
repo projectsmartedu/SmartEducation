@@ -140,7 +140,20 @@ exports.updateProgress = async (req, res) => {
         // Award points via gamification
         const topic = await Topic.findById(req.params.topicId);
         if (topic) {
-          await awardPoints(req.user._id, topic.pointsReward, 'lesson', `Completed topic: ${topic.title}`, topic._id);
+          const scorePercent = typeof lastScore === 'number'
+            ? Math.max(0, Math.min(100, lastScore))
+            : null;
+          const pointsToAward = (status === 'completed' && scorePercent !== null)
+            ? Math.round(topic.pointsReward * (scorePercent / 100))
+            : topic.pointsReward;
+          const source = scorePercent !== null ? 'quiz' : 'lesson';
+          const reason = scorePercent !== null
+            ? `Quiz score ${scorePercent}%: ${topic.title}`
+            : `Completed topic: ${topic.title}`;
+
+          if (pointsToAward > 0) {
+            await awardPoints(req.user._id, pointsToAward, source, reason, topic._id);
+          }
         }
       }
     }
