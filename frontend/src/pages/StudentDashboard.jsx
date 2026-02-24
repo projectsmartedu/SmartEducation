@@ -12,7 +12,7 @@ import {
     Target,
     MessageSquare
 } from 'lucide-react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { progressAPI, revisionsAPI, gamificationAPI, coursesAPI } from '../services/api';
 
 const BADGE_ACCENT_MAP = {
@@ -32,6 +32,8 @@ const StudentDashboard = () => {
     const [gamification, setGamification] = useState(null);
     const [progressStats, setProgressStats] = useState(null);
     const [loading, setLoading] = useState(true);
+
+    const navigate = useNavigate();
 
     useEffect(() => {
         const fetchAll = async () => {
@@ -265,9 +267,10 @@ const StudentDashboard = () => {
                                                     style={{ width: `${prog.percent}%` }} />
                                             </div>
                                         </div>
-                                        <div className="mt-3 flex items-center gap-1 text-xs font-semibold text-[#4338ca] opacity-0 group-hover:opacity-100 transition">
-                                            {isComplete ? 'Review' : prog.completedTopics > 0 ? 'Continue' : 'Start'} <ArrowRight className="h-3.5 w-3.5" />
-                                        </div>
+                                            <div className="mt-3 flex items-center gap-1 text-xs font-semibold text-[#4338ca] opacity-0 group-hover:opacity-100 transition">
+                                                {isComplete ? 'Review' : prog.completedTopics > 0 ? 'Continue' : 'Start'} <ArrowRight className="h-3.5 w-3.5" />
+                                            </div>
+                                            
                                     </Link>
                                 );
                             })}

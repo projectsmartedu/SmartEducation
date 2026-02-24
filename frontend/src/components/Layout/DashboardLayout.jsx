@@ -32,7 +32,6 @@ const studentLinks = [
     { label: 'Progress', href: '/student/progress', icon: TrendingUp, needsOnline: true },
     { label: 'Leaderboard', href: '/student/leaderboard', icon: Trophy, needsOnline: true },
     { label: 'Course Materials', href: '/student/materials', icon: GraduationCap, needsOnline: false },
-    { label: 'AI Doubt Support', href: '/student/doubt-support', icon: MessageSquare, needsOnline: true },
     { label: 'Offline Downloads', href: '/student/offline-downloads', icon: Download, needsOnline: false }
 ];
 

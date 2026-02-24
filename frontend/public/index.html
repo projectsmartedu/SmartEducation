@@ -8,6 +8,50 @@
   <meta name="theme-color" content="#4338ca" />
   <meta name="description" content="Smart Education Platform - Learn Smarter" />
   <link rel="manifest" href="%PUBLIC_URL%/manifest.json" />
+  <!-- Dev-only: override WebSocket on localhost to prevent injected dev-client forcing reloads -->
+  <script>
+    try {
+      if (location && (location.hostname === 'localhost' || location.hostname === '127.0.0.1')) {
+        // Provide a safe dummy WebSocket implementation in dev so the
+        // injected webpack-dev-server client won't open a real connection
+        // or throw when constructing a WebSocket.
+        class DummyWebSocket {
+          constructor(url, protocols) {
+            this.url = url;
+            this.protocols = protocols;
+            this.readyState = 3; // CLOSED
+            this.bufferedAmount = 0;
+            this.extensions = '';
+            this.protocol = '';
+            // event handler placeholders
+            this.onopen = null;
+            this.onmessage = null;
+            this.onclose = null;
+            this.onerror = null;
+            // mimic async close/open behavior
+            setTimeout(() => {
+              if (typeof this.onclose === 'function') this.onclose({ code: 1000, reason: 'dev-dummy' });
+            }, 0);
+          }
+          send() {}
+          close() {}
+          addEventListener(type, listener) {
+            // support adding listeners but do not call them
+            // store last listener for compatibility
+            this['__' + type] = listener;
+          }
+          removeEventListener(type) {
+            delete this['__' + type];
+          }
+          dispatchEvent() { return false; }
+        }
+        window.__DEV_WS_OVERRIDE__ = true;
+        window.WebSocket = DummyWebSocket;
+      }
+    } catch (e) {
+      // ignore
+    }
+  </script>
   <title>Smart Education Platform</title>
 </head>
 

@@ -161,10 +161,11 @@ Please provide a helpful, accurate, and educational answer:`;
    * @returns {Promise<Object[]>} - List of doubts
    */
   async getUserDoubts(userId, options = {}) {
-    const { page = 1, limit = 10, subject = null } = options;
-    
+    const { page = 1, limit = 10, subject = null, topic = null } = options;
+
     const query = { askedBy: userId };
     if (subject) query.subject = subject;
+    if (topic) query.topic = topic;
 
     const doubts = await Doubt.find(query)
       .sort({ createdAt: -1 })

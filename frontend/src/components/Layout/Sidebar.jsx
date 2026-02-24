@@ -41,7 +41,7 @@ const Sidebar = () => {
                     { path: '/teacher/students', icon: GraduationCap, label: 'My Students' }
                 ];
             case 'student':
-                return [
+                    return [
                     { path: '/student', icon: LayoutDashboard, label: 'Dashboard' },
                     { path: '/student/profile', icon: User, label: 'My Profile' },
                     { path: '/student/courses', icon: BookOpen, label: 'My Courses' },
@@ -49,7 +49,6 @@ const Sidebar = () => {
                     { path: '/student/knowledge-map', icon: Map, label: 'Knowledge Map' },
                     { path: '/student/revisions', icon: CalendarClock, label: 'Revisions' },
                     { path: '/student/progress', icon: TrendingUp, label: 'Progress' },
-                    { path: '/student/doubt-support', icon: Sparkles, label: 'AI Doubt Support' },
                     { path: '/student/chatbot', icon: MessageSquare, label: 'AI Chatbot' }
                 ];
             default:

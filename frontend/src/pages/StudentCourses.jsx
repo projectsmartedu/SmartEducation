@@ -2,7 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import DashboardLayout from '../components/Layout/DashboardLayout';
 import { coursesAPI, progressAPI } from '../services/api';
-import { BookOpen, Users, Clock, ArrowRight, PlusCircle, WifiOff } from 'lucide-react';
+import { BookOpen, Users, Clock, ArrowRight, PlusCircle, WifiOff, MessageSquare } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 import DownloadForOffline from '../components/DownloadForOffline';
 import {
     saveCourseOffline,
@@ -140,6 +141,8 @@ const StudentCourses = () => {
 
     const availableCourses = allCourses.filter(c => !enrolledIds.has(c._id) && c.isPublished);
 
+    const navigate = useNavigate();
+
     if (loading) {
         return (
             <DashboardLayout>
@@ -199,10 +202,19 @@ const StudentCourses = () => {
                                         />
                                     </div>
                                     <div className="mt-2 flex items-center justify-between">
-                                        <Link to={`/student/courses/${course._id}`}
-                                            className="inline-flex items-center gap-1 text-xs font-semibold text-[#4338ca] hover:text-[#312e81]">
-                                            Open course <ArrowRight className="h-3.5 w-3.5" />
-                                        </Link>
+                                        <div className="flex items-center gap-2">
+                                            <Link to={`/student/courses/${course._id}`}
+                                                className="inline-flex items-center gap-1 text-xs font-semibold text-[#4338ca] hover:text-[#312e81]">
+                                                Open course <ArrowRight className="h-3.5 w-3.5" />
+                                            </Link>
+                                            <button onClick={() => {
+                                                const params = new URLSearchParams();
+                                                if (course.subject) params.set('subject', course.subject);
+                                                navigate(`/student/doubt-support?${params.toString()}`);
+                                            }} className="inline-flex items-center gap-1 text-xs font-semibold text-[#4338ca] hover:text-[#312e81]">
+                                                <MessageSquare className="h-4 w-4" /> Ask AI
+                                            </button>
+                                        </div>
                                         <div className="flex items-center gap-2">
                                             {!offlineMode && (
                                                 <button onClick={() => handleUnenroll(course._id)} disabled={enrolling === course._id}

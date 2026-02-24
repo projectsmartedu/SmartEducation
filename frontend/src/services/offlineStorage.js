@@ -82,6 +82,30 @@ async function putItems(storeName, items) {
   });
 }
 
+function stableProgressId(p) {
+  if (p._id) return p._id;
+  if (p.topic) return p.topic;
+  // Fallback: deterministic hash of the item contents so id is stable
+  try {
+    const str = JSON.stringify(p);
+    let hash = 5381;
+    for (let i = 0; i < str.length; i++) {
+      hash = ((hash << 5) + hash) + str.charCodeAt(i); /* hash * 33 + c */
+      // keep in 32-bit range
+      hash = hash & 0xFFFFFFFF;
+    }
+    return `progress_${Math.abs(hash)}`;
+  } catch (e) {
+    if (typeof process !== 'undefined' && process.env && process.env.NODE_ENV !== 'production') {
+      try {
+        // eslint-disable-next-line no-console
+        console.debug('[offlineStorage] stableProgressId fallback used for item', p, e && e.message);
+      } catch (_) {}
+    }
+    return `progress_${Date.now()}`;
+  }
+}
+
 async function getItem(storeName, key) {
   const db = await openDB();
   return new Promise((resolve, reject) => {
@@ -214,8 +238,8 @@ export async function removeMaterialOffline(materialId) {
 export async function saveProgressOffline(progressItems) {
   const items = progressItems.map(p => ({
     ...p,
-    // Ensure _id is set for IndexedDB keyPath
-    _id: p._id || p.topic || `progress_${Date.now()}`,
+    // Ensure _id is set for IndexedDB keyPath. Prefer topic or existing _id.
+    _id: stableProgressId(p),
     _offlineAt: new Date().toISOString()
   }));
   await putItems(STORES.PROGRESS, items);

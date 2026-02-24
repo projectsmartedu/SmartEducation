@@ -10,6 +10,7 @@ const Topic = require('../models/Topic');
 const StudentProgress = require('../models/StudentProgress');
 const Material = require('../models/Material');
 const textExtractionService = require('../services/textExtractionService');
+const notifications = require('../notifications');
 
 // @desc    Create a new course
 // @route   POST /api/courses
@@ -31,6 +32,13 @@ exports.createCourse = async (req, res) => {
       coverImage: coverImage || '',
       createdBy: req.user._id
     });
+
+    // emit real-time notification about new course
+    try {
+      notifications.emitNewCourse(course);
+    } catch (e) {
+      // ignore if sockets not initialized
+    }
 
     res.status(201).json({ message: 'Course created successfully', course });
   } catch (error) {
@@ -345,6 +353,13 @@ exports.createTopic = async (req, res) => {
       } catch (e) {
         if (e.code !== 11000) throw e;
       }
+    }
+
+    // emit real-time notification about new topic
+    try {
+      notifications.emitNewTopic(topic, course._id);
+    } catch (e) {
+      // ignore if sockets not initialized
     }
 
     res.status(201).json({ message: 'Topic created', topic });

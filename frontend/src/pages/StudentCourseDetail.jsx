@@ -2,7 +2,7 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import DashboardLayout from '../components/Layout/DashboardLayout';
 import { coursesAPI, progressAPI } from '../services/api';
-import { ArrowLeft, BookOpen, Clock, CheckCircle, Loader2, FileText, Award, ChevronRight, File, Star, RotateCcw, WifiOff } from 'lucide-react';
+import { ArrowLeft, BookOpen, Clock, CheckCircle, Loader2, FileText, Award, ChevronRight, File, Star, RotateCcw, WifiOff, MessageSquare } from 'lucide-react';
 import {
     getCourseOffline,
     getTopicContentOffline,
@@ -13,6 +13,8 @@ import {
     getPendingSyncs,
     clearPendingSyncs
 } from '../services/offlineStorage';
+import CourseChat from '../components/CourseChat';
+import { useNavigate } from 'react-router-dom';
 
 const STATUS_STYLES = {
     'mastered': { bg: 'bg-[#dcfce7]', text: 'text-[#166534]', label: 'Mastered' },
@@ -35,6 +37,7 @@ const StudentCourseDetail = () => {
     const [topicContent, setTopicContent] = useState(null);
     const [contentLoading, setContentLoading] = useState(false);
     const [completionSuccess, setCompletionSuccess] = useState(null);
+    const navigate = useNavigate();
 
     const loadFromOffline = useCallback(async () => {
         try {
@@ -140,6 +143,7 @@ const StudentCourseDetail = () => {
 
     const openTopicReader = async (topic) => {
         setReadingTopic(topic);
+        setChatOpen(true);
         setContentLoading(true);
         setTopicContent(null);
 
@@ -278,6 +282,8 @@ const StudentCourseDetail = () => {
 
     const sortedTopics = [...topics].sort((a, b) => a.order - b.order);
 
+    const [chatOpen, setChatOpen] = useState(false);
+
     // Check if the previous topic is completed (for sequential unlock)
     // In offline mode, unlock all topics so students can study freely
     const isTopicUnlocked = (index) => {
@@ -293,6 +299,7 @@ const StudentCourseDetail = () => {
             <DashboardLayout>
                 <div className="flex items-center justify-center py-24">
                     <div className="h-10 w-10 animate-spin rounded-full border-4 border-[#e2e8f0] border-t-[#4338ca]" />
+                    <CourseChat courseId={courseId} course={course} topic={readingTopic} visible={chatOpen} onClose={() => setChatOpen(false)} />
                 </div>
             </DashboardLayout>
         );
@@ -380,8 +387,11 @@ const StudentCourseDetail = () => {
                         </div>
                     </div>
 
-                    {/* Content Area */}
-                    <div className="rounded-[28px] bg-white shadow-xl ring-1 ring-[#e2e8f0] overflow-hidden">
+                    {/* Main area with content and a right column for the topic chat */}
+                    <div className="grid grid-cols-1 lg:grid-cols-[1fr_24rem] gap-6">
+                        <div className="relative">
+                            {/* Content Area */}
+                            <div className="rounded-[28px] bg-white shadow-xl ring-1 ring-[#e2e8f0] overflow-hidden">
                         {contentLoading ? (
                             <div className="flex flex-col items-center justify-center py-24">
                                 <Loader2 className="h-10 w-10 animate-spin text-[#4338ca]" />
@@ -444,16 +454,29 @@ const StudentCourseDetail = () => {
                             </div>
                         )}
                     </div>
+                            {/* Small floating toggle for topic chat (appears inside reader) */}
+                            <button
+                                onClick={() => setChatOpen(prev => !prev)}
+                                aria-label="Toggle topic chat"
+                                className="absolute bottom-6 right-6 z-50 h-12 w-12 rounded-full bg-[#4338ca] text-white flex items-center justify-center shadow-lg hover:scale-105 transition"
+                            >
+                                <MessageSquare className="h-6 w-6" />
+                            </button>
+
+                        </div>
+
+                        {/* Chat panel: open side overlay when toggled */}
+                        {chatOpen && (
+                            <CourseChat side={true} courseId={courseId} course={course} topic={readingTopic} visible={chatOpen} onClose={() => setChatOpen(false)} />
+                        )}
+                    </div>
                 </div>
             </DashboardLayout>
         );
     }
-
-    // Course overview (topic list)
+    // Main page render
     return (
         <DashboardLayout>
-            <div className="space-y-6">
-                {/* Completion success toast */}
                 {completionSuccess && (
                     <div className="fixed top-4 right-4 z-50 animate-bounce rounded-2xl bg-[#16a34a] px-6 py-4 text-white shadow-2xl">
                         <div className="flex items-center gap-3">
@@ -494,6 +517,20 @@ const StudentCourseDetail = () => {
                         </div>
                     </div>
                 </section>
+                {/* Floating AI actions: open in-course chat or open doubt-support page */}
+                <div className="fixed bottom-6 right-6 z-50">
+                    <button
+                        onClick={() => setChatOpen(true)}
+                        className="inline-flex items-center gap-2 rounded-full bg-[#16a34a] px-4 py-3 text-white shadow-lg hover:bg-[#15803d]">
+                        <MessageSquare className="h-5 w-5" /> Ask AI (Chat)
+                    </button>
+                </div>
+
+                {/* Global modal chat when not in reader; side panel chat when reading a topic */}
+                {!readingTopic && (
+                    <CourseChat courseId={courseId} course={course} topic={readingTopic} visible={chatOpen} onClose={() => setChatOpen(false)} />
+                )}
+                {/* readingTopic chat rendered inside the reader as a right column */}
 
                 {error && <div className="rounded-2xl bg-red-50 p-4 text-sm text-red-700">{error}</div>}
 
@@ -636,7 +673,6 @@ const StudentCourseDetail = () => {
                         </div>
                     )}
                 </section>
-            </div>
         </DashboardLayout>
     );
 };

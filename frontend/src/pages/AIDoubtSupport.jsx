@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
+import { useLocation } from 'react-router-dom';
 import DashboardLayout from '../components/Layout/DashboardLayout';
 import { doubtsAPI, materialsAPI } from '../services/api';
 import {
@@ -42,6 +43,16 @@ const AIDoubtSupport = () => {
         fetchStats();
         fetchSubjects();
     }, []);
+
+    // Prefill subject/topic from URL query params (e.g. from course page)
+    const location = useLocation();
+    useEffect(() => {
+        const sp = new URLSearchParams(location.search);
+        const s = sp.get('subject');
+        const t = sp.get('topic');
+        if (s) setSelectedSubject(s);
+        if (t) setSelectedTopic(t);
+    }, [location.search]);
 
     useEffect(() => {
         if (selectedSubject) {

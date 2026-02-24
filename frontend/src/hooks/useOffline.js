@@ -30,7 +30,8 @@ export function useServiceWorker() {
   const [registration, setRegistration] = useState(null);
 
   useEffect(() => {
-    if ('serviceWorker' in navigator) {
+    // Register service worker only in production to avoid dev-time reloads
+    if (typeof process !== 'undefined' && process.env && process.env.NODE_ENV === 'production' && 'serviceWorker' in navigator) {
       navigator.serviceWorker
         .register('/sw.js')
         .then((reg) => {
@@ -54,7 +55,19 @@ export function useServiceWorker() {
   const applyUpdate = useCallback(() => {
     if (registration?.waiting) {
       registration.waiting.postMessage({ type: 'SKIP_WAITING' });
-      window.location.reload();
+      // In development, avoid forcing a full reload from code — let the
+      // developer decide when to refresh. Log for visibility instead.
+      if (typeof process !== 'undefined' && process.env && process.env.NODE_ENV !== 'production') {
+        try {
+          // eslint-disable-next-line no-console
+          console.debug('[useServiceWorker] requested SKIP_WAITING (dev)');
+        } catch (_) {}
+      } else {
+        // In production, it's OK to reload to activate the new SW
+        try {
+          window.location.reload();
+        } catch (_) {}
+      }
     }
   }, [registration]);
 

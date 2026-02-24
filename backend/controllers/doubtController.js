@@ -87,12 +87,13 @@ exports.getDoubtById = async (req, res) => {
 // @access  Private
 exports.getMyDoubts = async (req, res) => {
   try {
-    const { page = 1, limit = 10, subject } = req.query;
+    const { page = 1, limit = 10, subject, topic } = req.query;
 
     const result = await doubtResolutionService.getUserDoubts(req.user._id, {
       page: parseInt(page),
       limit: parseInt(limit),
-      subject
+      subject,
+      topic
     });
 
     res.json(result);
