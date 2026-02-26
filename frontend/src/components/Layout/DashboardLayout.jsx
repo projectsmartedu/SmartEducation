@@ -8,7 +8,6 @@ import {
     Map,
     CalendarClock,
     TrendingUp,
-    MessageSquare,
     BookOpen,
     Users2,
     GraduationCap,
