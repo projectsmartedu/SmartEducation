@@ -32,7 +32,10 @@ const StudentDashboard = () => {
     const [progressStats, setProgressStats] = useState(null);
     const [loading, setLoading] = useState(true);
 
+<<<<<<< HEAD
     
+=======
+>>>>>>> 6f71340fc09b63b6de18973f04f97a2177a92935
 
     useEffect(() => {
         const fetchAll = async () => {
@@ -266,10 +269,10 @@ const StudentDashboard = () => {
                                                     style={{ width: `${prog.percent}%` }} />
                                             </div>
                                         </div>
-                                            <div className="mt-3 flex items-center gap-1 text-xs font-semibold text-[#4338ca] opacity-0 group-hover:opacity-100 transition">
-                                                {isComplete ? 'Review' : prog.completedTopics > 0 ? 'Continue' : 'Start'} <ArrowRight className="h-3.5 w-3.5" />
-                                            </div>
-                                            
+                                        <div className="mt-3 flex items-center gap-1 text-xs font-semibold text-[#4338ca] opacity-0 group-hover:opacity-100 transition">
+                                            {isComplete ? 'Review' : prog.completedTopics > 0 ? 'Continue' : 'Start'} <ArrowRight className="h-3.5 w-3.5" />
+                                        </div>
+
                                     </Link>
                                 );
                             })}
