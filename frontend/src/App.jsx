@@ -23,7 +23,6 @@ import StudentRevisions from './pages/StudentRevisions';
 import StudentProgress from './pages/StudentProgress';
 import StudentLeaderboard from './pages/StudentLeaderboard';
 import StudentProfile from './pages/StudentProfile';
-import AIDoubtSupport from './pages/AIDoubtSupport';
 import Chatbot from './pages/Chatbot';
 import StudentOfflineDownloads from './pages/StudentOfflineDownloads';
 import OfflineIndicator from './components/OfflineIndicator';
@@ -149,14 +148,7 @@ function App() {
                             </ProtectedRoute>
                         }
                     />
-                    <Route
-                        path="/student/doubt-support"
-                        element={
-                            <ProtectedRoute allowedRoles={['student']}>
-                                <AIDoubtSupport />
-                            </ProtectedRoute>
-                        }
-                    />
+                    
                     <Route
                         path="/student/chatbot"
                         element={

@@ -9,10 +9,9 @@ import {
     Award,
     Sparkles,
     Zap,
-    Target,
-    MessageSquare
+    Target
 } from 'lucide-react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 import { progressAPI, revisionsAPI, gamificationAPI, coursesAPI } from '../services/api';
 
 const BADGE_ACCENT_MAP = {
@@ -33,7 +32,7 @@ const StudentDashboard = () => {
     const [progressStats, setProgressStats] = useState(null);
     const [loading, setLoading] = useState(true);
 
-    const navigate = useNavigate();
+    
 
     useEffect(() => {
         const fetchAll = async () => {
@@ -406,10 +405,7 @@ const StudentDashboard = () => {
                             <Clock className="h-6 w-6 text-[#0e7490]" />
                             <span className="text-xs font-semibold text-[#0e7490]">Revisions</span>
                         </Link>
-                        <Link to="/student/doubt-support" className="flex flex-col items-center gap-2 rounded-2xl bg-[#dcfce7] p-5 text-center transition hover:-translate-y-1 hover:shadow-lg">
-                            <MessageSquare className="h-6 w-6 text-[#166534]" />
-                            <span className="text-xs font-semibold text-[#166534]">Doubt Solver</span>
-                        </Link>
+                        {/* Doubt Support removed - use topic-scoped chat inside courses */}
                     </div>
                 </section>
             </div>

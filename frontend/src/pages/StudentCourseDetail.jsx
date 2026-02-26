@@ -14,7 +14,6 @@ import {
     clearPendingSyncs
 } from '../services/offlineStorage';
 import CourseChat from '../components/CourseChat';
-import { useNavigate } from 'react-router-dom';
 
 const STATUS_STYLES = {
     'mastered': { bg: 'bg-[#dcfce7]', text: 'text-[#166534]', label: 'Mastered' },
@@ -37,7 +36,7 @@ const StudentCourseDetail = () => {
     const [topicContent, setTopicContent] = useState(null);
     const [contentLoading, setContentLoading] = useState(false);
     const [completionSuccess, setCompletionSuccess] = useState(null);
-    const navigate = useNavigate();
+
 
     const loadFromOffline = useCallback(async () => {
         try {

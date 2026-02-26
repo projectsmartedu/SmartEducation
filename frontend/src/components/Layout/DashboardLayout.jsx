@@ -8,7 +8,7 @@ import {
     Map,
     CalendarClock,
     TrendingUp,
-    MessageSquare,
+    // MessageSquare removed (unused)
     BookOpen,
     Users2,
     GraduationCap,
