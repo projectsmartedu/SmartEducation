@@ -8,10 +8,6 @@ import {
     Map,
     CalendarClock,
     TrendingUp,
-<<<<<<< HEAD
-    // MessageSquare removed (unused)
-=======
->>>>>>> 6f71340fc09b63b6de18973f04f97a2177a92935
     BookOpen,
     Users2,
     GraduationCap,

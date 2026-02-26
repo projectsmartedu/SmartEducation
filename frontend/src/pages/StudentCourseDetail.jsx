@@ -36,10 +36,7 @@ const StudentCourseDetail = () => {
     const [topicContent, setTopicContent] = useState(null);
     const [contentLoading, setContentLoading] = useState(false);
     const [completionSuccess, setCompletionSuccess] = useState(null);
-<<<<<<< HEAD
-
-=======
->>>>>>> 6f71340fc09b63b6de18973f04f97a2177a92935
+    // ...existing code...
 
     const loadFromOffline = useCallback(async () => {
         try {
