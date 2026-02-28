@@ -1,11 +1,12 @@
 import React, { useState, useEffect } from 'react';
+import { Link } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import { Bell } from 'lucide-react';
 import { notificationsAPI } from '../../services/api';
 import { formatDistanceToNow } from 'date-fns';
 
 const Navbar = () => {
-    const { user } = useAuth();
+    const { user, notifications: ctxNotifs = [] } = useAuth();
     const [showNotifications, setShowNotifications] = useState(false);
     const [notifications, setNotifications] = useState([]);
     const [loadingNotifs, setLoadingNotifs] = useState(false);
@@ -39,9 +40,9 @@ const Navbar = () => {
                             className="p-2 text-gray-600 hover:text-gray-900 relative"
                         >
                             <Bell className="w-5 h-5" />
-                            {notifications.filter(n => !n.read).length > 0 && (
+                            {(notifications.length > 0 ? notifications : ctxNotifs).filter(n => !n.read).length > 0 && (
                                 <span className="absolute top-0 right-0 -mt-0.5 -mr-0.5 inline-flex items-center justify-center px-1.5 py-0.5 text-xs font-bold leading-none text-white bg-red-600 rounded-full">
-                                    {notifications.filter(n => !n.read).length}
+                                    {(notifications.length > 0 ? notifications : ctxNotifs).filter(n => !n.read).length}
                                 </span>
                             )}
                         </button>
@@ -56,10 +57,10 @@ const Navbar = () => {
                                     {loadingNotifs && (
                                         <div className="px-4 py-3 text-sm text-gray-500">Loading...</div>
                                     )}
-                                    {!loadingNotifs && notifications.length === 0 && (
+                                    {!loadingNotifs && (notifications.length === 0 && ctxNotifs.length === 0) && (
                                         <div className="px-4 py-3 text-sm text-gray-500">No notifications</div>
                                     )}
-                                    {!loadingNotifs && notifications.map((n) => (
+                                    {!loadingNotifs && (notifications.length > 0 ? notifications : ctxNotifs).map((n) => (
                                         <div key={n._id} className={`px-4 py-3 border-b border-gray-100 hover:bg-gray-50 flex justify-between items-start ${!n.read ? 'bg-white' : 'bg-gray-50'}`}>
                                             <div>
                                                 <div className={`text-sm ${!n.read ? 'font-medium text-gray-800' : 'text-gray-700'}`}>{n.message}</div>
@@ -74,7 +75,7 @@ const Navbar = () => {
                                     ))}
                                 </div>
                                 <div className="px-4 py-2 text-center">
-                                    <a href="/notifications" className="text-sm text-blue-600">View all</a>
+                                    <Link to="/notifications" className="text-sm text-blue-600">View all</Link>
                                 </div>
                             </div>
                         )}

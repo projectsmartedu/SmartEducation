@@ -26,6 +26,7 @@ import StudentProfile from './pages/StudentProfile';
 import Chatbot from './pages/Chatbot';
 import StudentOfflineDownloads from './pages/StudentOfflineDownloads';
 import OfflineIndicator from './components/OfflineIndicator';
+import Notifications from './pages/Notifications';
 
 function App() {
     return (
@@ -184,6 +185,14 @@ function App() {
 
                     {/* Default Redirect */}
                     <Route path="*" element={<Navigate to="/" replace />} />
+                    <Route
+                        path="/notifications"
+                        element={
+                            <ProtectedRoute>
+                                <Notifications />
+                            </ProtectedRoute>
+                        }
+                    />
                 </Routes>
             </Router>
         </AuthProvider>
