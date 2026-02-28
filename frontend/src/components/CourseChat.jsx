@@ -53,12 +53,20 @@ export default function CourseChat({ courseId, course = null, topic = null, visi
   }, [visibleProp, topic]);
 
   const scrollToBottom = () => {
-    try { if (listRef.current) listRef.current.scrollTop = listRef.current.scrollHeight; } catch (_) {}
+    try { if (listRef.current) listRef.current.scrollTop = listRef.current.scrollHeight; } catch (_) { }
   };
 
   const handleSend = async () => {
     const text = (input || '').trim();
     if (!text) return;
+    // Client-side validation for doubt question length
+    if ((course || topic || courseId) && text.length < 10) {
+      setMessages(prev => [
+        ...prev,
+        { role: 'assistant', content: 'Please enter a question with at least 10 characters.' }
+      ]);
+      return;
+    }
     setLoading(true);
     try {
       // Optimistic UI
@@ -99,7 +107,7 @@ export default function CourseChat({ courseId, course = null, topic = null, visi
   if (inline) {
     return (
       <div className="w-full max-w-2xl pointer-events-auto p-4">
-        <div className="rounded-2xl bg-white shadow-lg ring-1 ring-[#e2e8f0] overflow-hidden flex flex-col" style={{height: '60vh'}}>
+        <div className="rounded-2xl bg-white shadow-lg ring-1 ring-[#e2e8f0] overflow-hidden flex flex-col" style={{ height: '60vh' }}>
           <div className="flex items-center justify-between px-4 py-3 border-b">
             <div className="flex items-center gap-2">
               <MessageSquare className="h-5 w-5 text-[#4338ca]" />
@@ -121,7 +129,7 @@ export default function CourseChat({ courseId, course = null, topic = null, visi
             {messages.map((m, idx) => (
               <div key={idx} className={`max-w-full ${m.role === 'user' ? 'ml-auto text-right' : 'mr-auto text-left'}`}>
                 <div className={`inline-block px-4 py-2 rounded-2xl ${m.role === 'user' ? 'bg-[#4338ca] text-white' : 'bg-[#f1f5f9] text-[#0f172a]'}`}>
-                  <div style={{whiteSpace: 'pre-wrap'}}>{m.content}</div>
+                  <div style={{ whiteSpace: 'pre-wrap' }}>{m.content}</div>
                 </div>
               </div>
             ))}
@@ -150,7 +158,11 @@ export default function CourseChat({ courseId, course = null, topic = null, visi
         />
 
         {/* Panel */}
+<<<<<<< HEAD
         <div className={`relative w-96 p-4 h-full transform transition-transform ${visibleProp ? 'translate-x-0' : 'translate-x-full'}`} style={{maxHeight: 'calc(100vh - 4rem)'}}>
+=======
+        <div className={`relative w-96 p-4 h-full transform transition-transform ${visible ? 'translate-x-0' : 'translate-x-full'}`} style={{ maxHeight: 'calc(100vh - 4rem)' }}>
+>>>>>>> 93d1181eb60564b163460437d1196d38e6a57706
           <div className="rounded-2xl bg-white shadow-lg ring-1 ring-[#e2e8f0] overflow-hidden flex flex-col h-full">
             <div className="flex items-center justify-between px-4 py-3 border-b">
               <div className="flex items-center gap-2">
@@ -172,7 +184,7 @@ export default function CourseChat({ courseId, course = null, topic = null, visi
               {messages.map((m, idx) => (
                 <div key={idx} className={`max-w-full ${m.role === 'user' ? 'ml-auto text-right' : 'mr-auto text-left'}`}>
                   <div className={`inline-block px-4 py-2 rounded-2xl ${m.role === 'user' ? 'bg-[#4338ca] text-white' : 'bg-[#f1f5f9] text-[#0f172a]'}`}>
-                    <div style={{whiteSpace: 'pre-wrap'}}>{m.content}</div>
+                    <div style={{ whiteSpace: 'pre-wrap' }}>{m.content}</div>
                   </div>
                 </div>
               ))}
@@ -195,7 +207,7 @@ export default function CourseChat({ courseId, course = null, topic = null, visi
   return (
     <div className="fixed right-6 bottom-6 z-[9999] pointer-events-auto">
       <div className="w-96 pointer-events-auto p-4">
-        <div className="rounded-2xl bg-white shadow-lg ring-1 ring-[#e2e8f0] overflow-hidden flex flex-col" style={{height: '70vh', width: '24rem'}}>
+        <div className="rounded-2xl bg-white shadow-lg ring-1 ring-[#e2e8f0] overflow-hidden flex flex-col" style={{ height: '70vh', width: '24rem' }}>
           <div className="flex items-center justify-between px-4 py-3 border-b">
             <div className="flex items-center gap-2">
               <MessageSquare className="h-5 w-5 text-[#4338ca]" />
@@ -210,17 +222,17 @@ export default function CourseChat({ courseId, course = null, topic = null, visi
           </div>
 
           <div ref={listRef} className="flex-1 overflow-auto p-4 space-y-3 bg-white">
-           {messages.length === 0 && (
+            {messages.length === 0 && (
               <div className="text-center text-sm text-[#94a3b8]">No messages yet — ask anything about the course.</div>
             )}
             {messages.map((m, idx) => (
               <div key={idx} className={`max-w-full ${m.role === 'user' ? 'ml-auto text-right' : 'mr-auto text-left'}`}>
                 <div className={`inline-block px-4 py-2 rounded-2xl ${m.role === 'user' ? 'bg-[#4338ca] text-white' : 'bg-[#f1f5f9] text-[#0f172a]'}`}>
-                  <div style={{whiteSpace: 'pre-wrap'}}>{m.content}</div>
+                  <div style={{ whiteSpace: 'pre-wrap' }}>{m.content}</div>
                 </div>
               </div>
             ))}
-           </div>
+          </div>
 
           <div className="px-4 py-3 border-t bg-white">
             <div className="flex items-center gap-2">

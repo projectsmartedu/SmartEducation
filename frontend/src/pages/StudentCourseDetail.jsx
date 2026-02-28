@@ -37,6 +37,11 @@ const StudentCourseDetail = () => {
     const [topicContent, setTopicContent] = useState(null);
     const [contentLoading, setContentLoading] = useState(false);
     const [completionSuccess, setCompletionSuccess] = useState(null);
+<<<<<<< HEAD
+=======
+    // ...existing code...
+
+>>>>>>> 93d1181eb60564b163460437d1196d38e6a57706
     const loadFromOffline = useCallback(async () => {
         try {
             const offlineData = await getCourseOffline(courseId);
