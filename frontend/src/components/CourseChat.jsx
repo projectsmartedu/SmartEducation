@@ -158,11 +158,7 @@ export default function CourseChat({ courseId, course = null, topic = null, visi
         />
 
         {/* Panel */}
-<<<<<<< HEAD
-        <div className={`relative w-96 p-4 h-full transform transition-transform ${visibleProp ? 'translate-x-0' : 'translate-x-full'}`} style={{maxHeight: 'calc(100vh - 4rem)'}}>
-=======
-        <div className={`relative w-96 p-4 h-full transform transition-transform ${visible ? 'translate-x-0' : 'translate-x-full'}`} style={{ maxHeight: 'calc(100vh - 4rem)' }}>
->>>>>>> 93d1181eb60564b163460437d1196d38e6a57706
+        <div className={`relative w-96 p-4 h-full transform transition-transform ${visibleProp ? 'translate-x-0' : 'translate-x-full'}`} style={{ maxHeight: 'calc(100vh - 4rem)' }}>
           <div className="rounded-2xl bg-white shadow-lg ring-1 ring-[#e2e8f0] overflow-hidden flex flex-col h-full">
             <div className="flex items-center justify-between px-4 py-3 border-b">
               <div className="flex items-center gap-2">
