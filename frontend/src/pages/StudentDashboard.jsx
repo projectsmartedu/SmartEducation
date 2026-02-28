@@ -32,11 +32,6 @@ const StudentDashboard = () => {
     const [progressStats, setProgressStats] = useState(null);
     const [loading, setLoading] = useState(true);
 
-<<<<<<< HEAD
-    
-=======
->>>>>>> 6f71340fc09b63b6de18973f04f97a2177a92935
-
     useEffect(() => {
         const fetchAll = async () => {
             try {

@@ -13,6 +13,7 @@ const progressRoutes = require('./routes/progress');
 const revisionRoutes = require('./routes/revisions');
 const gamificationRoutes = require('./routes/gamification');
 const aiRoutes = require('./routes/ai');
+const notificationRoutes = require('./routes/notifications');
 
 const app = express();
 
@@ -32,6 +33,7 @@ app.use('/api/progress', progressRoutes);
 app.use('/api/revisions', revisionRoutes);
 app.use('/api/gamification', gamificationRoutes);
 app.use('/api/ai', aiRoutes);
+app.use('/api/notifications', notificationRoutes);
 
 // Root route (for Render health checks)
 app.get('/', (req, res) => {

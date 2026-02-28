@@ -14,6 +14,7 @@ import {
     clearPendingSyncs
 } from '../services/offlineStorage';
 import CourseChat from '../components/CourseChat';
+import FloatingChatButton from '../components/FloatingChatButton';
 
 const STATUS_STYLES = {
     'mastered': { bg: 'bg-[#dcfce7]', text: 'text-[#166534]', label: 'Mastered' },
@@ -36,11 +37,6 @@ const StudentCourseDetail = () => {
     const [topicContent, setTopicContent] = useState(null);
     const [contentLoading, setContentLoading] = useState(false);
     const [completionSuccess, setCompletionSuccess] = useState(null);
-<<<<<<< HEAD
-
-=======
->>>>>>> 6f71340fc09b63b6de18973f04f97a2177a92935
-
     const loadFromOffline = useCallback(async () => {
         try {
             const offlineData = await getCourseOffline(courseId);
@@ -285,6 +281,26 @@ const StudentCourseDetail = () => {
     const sortedTopics = [...topics].sort((a, b) => a.order - b.order);
 
     const [chatOpen, setChatOpen] = useState(false);
+    const chatClickRef = React.useRef(0);
+    const openChatOnce = () => {
+        const now = Date.now();
+        if (now - chatClickRef.current < 300) return; // debounce rapid clicks
+        chatClickRef.current = now;
+        setChatOpen(true);
+    };
+
+    // Auto-open topic chat the first time a topic is opened (per-topic flag in localStorage)
+    useEffect(() => {
+        if (!readingTopic) return;
+        try {
+            const key = `topicChatSeen:${readingTopic._id}`;
+            const seen = localStorage.getItem(key);
+            if (!seen) {
+                setChatOpen(true);
+                localStorage.setItem(key, '1');
+            }
+        } catch (_) {}
+    }, [readingTopic]);
 
     // Check if the previous topic is completed (for sequential unlock)
     // In offline mode, unlock all topics so students can study freely
@@ -301,7 +317,6 @@ const StudentCourseDetail = () => {
             <DashboardLayout>
                 <div className="flex items-center justify-center py-24">
                     <div className="h-10 w-10 animate-spin rounded-full border-4 border-[#e2e8f0] border-t-[#4338ca]" />
-                    <CourseChat courseId={courseId} course={course} topic={readingTopic} visible={chatOpen} onClose={() => setChatOpen(false)} />
                 </div>
             </DashboardLayout>
         );
@@ -389,8 +404,8 @@ const StudentCourseDetail = () => {
                         </div>
                     </div>
 
-                    {/* Main area with content and a right column for the topic chat */}
-                    <div className="grid grid-cols-1 lg:grid-cols-[1fr_24rem] gap-6">
+                    {/* Main area with full-width content; chat is an overlay */}
+                    <div className="grid grid-cols-1 gap-6">
                         <div className="relative">
                             {/* Content Area */}
                             <div className="rounded-[28px] bg-white shadow-xl ring-1 ring-[#e2e8f0] overflow-hidden">
@@ -456,21 +471,15 @@ const StudentCourseDetail = () => {
                                     </div>
                                 )}
                             </div>
-                            {/* Small floating toggle for topic chat (appears inside reader) */}
-                            <button
-                                onClick={() => setChatOpen(prev => !prev)}
-                                aria-label="Toggle topic chat"
-                                className="absolute bottom-6 right-6 z-50 h-12 w-12 rounded-full bg-[#4338ca] text-white flex items-center justify-center shadow-lg hover:scale-105 transition"
-                            >
-                                <MessageSquare className="h-6 w-6" />
-                            </button>
+                            {/* Floating toggle for topic chat (rendered into a top-level portal to avoid overlay capture) */}
+                            <FloatingChatButton onActivate={openChatOnce} />
+
+                            {/* Render the chat panel while in reader mode so side panel is available */}
+                            <CourseChat side={true} courseId={courseId} course={course} topic={readingTopic} visible={chatOpen} onClose={() => setChatOpen(false)} />
 
                         </div>
 
-                        {/* Chat panel: open side overlay when toggled */}
-                        {chatOpen && (
-                            <CourseChat side={true} courseId={courseId} course={course} topic={readingTopic} visible={chatOpen} onClose={() => setChatOpen(false)} />
-                        )}
+                        {/* Chat panel space removed here; chat renders globally so content stays full-width */}
                     </div>
                 </div>
             </DashboardLayout>
@@ -520,18 +529,18 @@ const StudentCourseDetail = () => {
                 </div>
             </section>
             {/* Floating AI actions: open in-course chat or open doubt-support page */}
-            <div className="fixed bottom-6 right-6 z-50">
-                <button
-                    onClick={() => setChatOpen(true)}
-                    className="inline-flex items-center gap-2 rounded-full bg-[#16a34a] px-4 py-3 text-white shadow-lg hover:bg-[#15803d]">
-                    <MessageSquare className="h-5 w-5" /> Ask AI (Chat)
-                </button>
-            </div>
-
-            {/* Global modal chat when not in reader; side panel chat when reading a topic */}
             {!readingTopic && (
-                <CourseChat courseId={courseId} course={course} topic={readingTopic} visible={chatOpen} onClose={() => setChatOpen(false)} />
+                <div className="fixed bottom-6 right-6 z-50">
+                    <button
+                        onClick={() => { openChatOnce(); }}
+                        className="inline-flex items-center gap-2 rounded-full bg-[#16a34a] px-4 py-3 text-white shadow-lg hover:bg-[#15803d]">
+                        <MessageSquare className="h-5 w-5" /> Ask AI (Chat)
+                    </button>
+                </div>
             )}
+
+            {/* Single global chat component (side when reading a topic, modal otherwise) */}
+            <CourseChat side={!!readingTopic} courseId={courseId} course={course} topic={readingTopic} visible={chatOpen} onClose={() => setChatOpen(false)} />
             {/* readingTopic chat rendered inside the reader as a right column */}
 
             {error && <div className="rounded-2xl bg-red-50 p-4 text-sm text-red-700">{error}</div>}

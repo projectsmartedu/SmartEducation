@@ -6,6 +6,9 @@
 const Doubt = require('../models/Doubt');
 const doubtResolutionService = require('../services/doubtResolutionService');
 const semanticSearchService = require('../services/semanticSearchService');
+const notifications = require('../notifications');
+const Notification = require('../models/Notification');
+const User = require('../models/User');
 
 // @desc    Submit a new doubt
 // @route   POST /api/doubts
@@ -25,6 +28,28 @@ exports.submitDoubt = async (req, res) => {
       { question, subject, topic },
       req.user._id
     );
+
+    // persist notifications for teachers and emit real-time event
+    try {
+      const teachers = await User.find({ role: 'teacher' }).select('_id');
+      if (teachers && teachers.length > 0) {
+        const notifDocs = teachers.map(t => ({
+          recipient: t._id,
+          sender: req.user._id,
+          type: 'doubt',
+          message: 'A student submitted a new doubt',
+          data: { doubtId: doubt._id, question: doubt.question }
+        }));
+        try {
+          await Notification.insertMany(notifDocs, { ordered: false });
+        } catch (e) {
+          // ignore duplicate/partial errors
+        }
+      }
+      notifications.emitNewDoubt(doubt);
+    } catch (e) {
+      // ignore if sockets not initialized or persistence fails
+    }
 
     res.status(201).json({
       message: 'Doubt resolved successfully',

@@ -170,6 +170,12 @@ export const gamificationAPI = {
   getClassOverview: () => api.get('/gamification/overview')
 };
 
+// Notifications API
+export const notificationsAPI = {
+  getMy: (params = {}) => api.get('/notifications/my', { params }),
+  markAsRead: (id) => api.post(`/notifications/${id}/read`)
+};
+
 // AI Mock API
 export const aiAPI = {
   predictMastery: (data) => api.post('/ai/predict-mastery', data),

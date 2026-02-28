@@ -85,7 +85,8 @@ const studentProgressSchema = new mongoose.Schema({
 
 // Compound index: one progress record per student per topic
 studentProgressSchema.index({ student: 1, topic: 1 }, { unique: true });
-studentProgressSchema.index({ student: 1, course: 1 });
+// Removed duplicate/overlapping index on { student: 1, course: 1 } to avoid duplicate-index warnings.
+// Revision model keeps an index for { student: 1, course: 1 } where needed.
 studentProgressSchema.index({ student: 1, forgetRisk: 1 });
 
 module.exports = mongoose.model('StudentProgress', studentProgressSchema);

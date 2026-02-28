@@ -11,6 +11,7 @@ const StudentProgress = require('../models/StudentProgress');
 const Material = require('../models/Material');
 const textExtractionService = require('../services/textExtractionService');
 const notifications = require('../notifications');
+const Notification = require('../models/Notification');
 
 // @desc    Create a new course
 // @route   POST /api/courses
@@ -357,9 +358,37 @@ exports.createTopic = async (req, res) => {
 
     // emit real-time notification about new topic
     try {
-      notifications.emitNewTopic(topic, course._id);
+      // Persist notifications for enrolled students
+      const enrolled = course.enrolledStudents || [];
+      if (enrolled.length > 0) {
+        const notifDocs = enrolled.map((studentId) => ({
+          recipient: studentId,
+          sender: req.user._id,
+          type: 'topic',
+          message: `New topic added: ${topic.title}`,
+          data: { topicId: topic._id, courseId: course._id }
+        }));
+        try {
+          await Notification.insertMany(notifDocs, { ordered: false });
+        } catch (e) {
+          // ignore insert errors
+        }
+      }
+
+      // Emit to specific user rooms so only enrolled students receive it
+      try {
+        const io = notifications.getIO();
+        (enrolled || []).forEach((studentId) => {
+          try {
+            io.to(`user_${studentId}`).emit('topicCreated', { topic, courseId: course._id });
+          } catch (e) {}
+        });
+      } catch (e) {
+        // fallback to global emit if sockets not initialized
+        try { notifications.emitNewTopic(topic, course._id); } catch (ex) {}
+      }
     } catch (e) {
-      // ignore if sockets not initialized
+      // ignore if sockets not initialized or persistence fails
     }
 
     res.status(201).json({ message: 'Topic created', topic });

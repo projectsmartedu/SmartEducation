@@ -2,20 +2,22 @@ import React, { useState, useEffect, useRef } from 'react';
 import { chatAPI, doubtsAPI } from '../services/api';
 import { X, Send, MessageSquare } from 'lucide-react';
 
-export default function CourseChat({ courseId, course = null, topic = null, visible: initialVisible = false, onClose, inline = false, side = false }) {
-  const [visible, setVisible] = useState(initialVisible);
+export default function CourseChat({ courseId, course = null, topic = null, visible = false, onClose, inline = false, side = false }) {
+  // Controlled component: visibility is driven by the `visible` prop
+  const visibleProp = !!visible;
   const [messages, setMessages] = useState([]);
   const [input, setInput] = useState('');
   const [loading, setLoading] = useState(false);
   const listRef = useRef(null);
 
   useEffect(() => {
-    setVisible(initialVisible);
-  }, [initialVisible]);
+    // when opened, scroll and load history handled in next effect
+    if (visibleProp) scrollToBottom();
+  }, [visibleProp]);
 
   useEffect(() => {
     // Load history when opened or when topic changes
-    if (visible) {
+    if (visibleProp) {
       // If a topic is provided, load doubts history scoped to that topic
       if (topic && topic.title) {
         doubtsAPI.getMyDoubts({ topic: topic.title }).then(res => {
@@ -44,7 +46,11 @@ export default function CourseChat({ courseId, course = null, topic = null, visi
       }
       setTimeout(() => scrollToBottom(), 100);
     }
-  }, [visible, course, courseId, topic]);
+  }, [visibleProp, course, courseId, topic]);
+
+  useEffect(() => {
+    console.log('CourseChat visibleProp ->', visibleProp, 'topic ->', topic?._id || topic?.title);
+  }, [visibleProp, topic]);
 
   const scrollToBottom = () => {
     try { if (listRef.current) listRef.current.scrollTop = listRef.current.scrollHeight; } catch (_) {}
@@ -87,7 +93,7 @@ export default function CourseChat({ courseId, course = null, topic = null, visi
   };
 
   // For side panel we render the container so we can animate open/close.
-  if (!visible && !side) return null;
+  if (!visibleProp && !side) return null;
 
   // Choose layout: modal (default) or inline panel
   if (inline) {
@@ -101,7 +107,7 @@ export default function CourseChat({ courseId, course = null, topic = null, visi
               <span className="text-xs text-[#94a3b8] ml-2">{topic?.title ? `Topic: ${topic.title}` : 'Ask questions about this topic'}</span>
             </div>
             <div>
-              <button onClick={() => { setVisible(false); if (onClose) onClose(); }} className="rounded-full p-2 hover:bg-gray-50">
+              <button onClick={() => { if (onClose) onClose(); }} className="rounded-full p-2 hover:bg-gray-50">
                 <X className="h-4 w-4" />
               </button>
             </div>
@@ -136,15 +142,15 @@ export default function CourseChat({ courseId, course = null, topic = null, visi
 
   if (side) {
     return (
-      <div className={`fixed inset-0 z-[9999] pointer-events-auto flex justify-end ${visible ? '' : 'pointer-events-none'}`}>
+      <div className={`fixed inset-0 z-[9999] pointer-events-auto flex justify-end ${visibleProp ? '' : 'pointer-events-none'}`}>
         {/* Backdrop */}
         <div
-          onClick={() => { setVisible(false); if (onClose) onClose(); }}
-          className={`absolute inset-0 bg-black/40 transition-opacity ${visible ? 'opacity-100' : 'opacity-0'}`}
+          onClick={() => { if (onClose) onClose(); }}
+          className={`absolute inset-0 bg-black/40 transition-opacity ${visibleProp ? 'opacity-100' : 'opacity-0'}`}
         />
 
         {/* Panel */}
-        <div className={`relative w-96 p-4 h-full transform transition-transform ${visible ? 'translate-x-0' : 'translate-x-full'}`} style={{maxHeight: 'calc(100vh - 4rem)'}}>
+        <div className={`relative w-96 p-4 h-full transform transition-transform ${visibleProp ? 'translate-x-0' : 'translate-x-full'}`} style={{maxHeight: 'calc(100vh - 4rem)'}}>
           <div className="rounded-2xl bg-white shadow-lg ring-1 ring-[#e2e8f0] overflow-hidden flex flex-col h-full">
             <div className="flex items-center justify-between px-4 py-3 border-b">
               <div className="flex items-center gap-2">
@@ -153,7 +159,7 @@ export default function CourseChat({ courseId, course = null, topic = null, visi
                 <span className="text-xs text-[#94a3b8] ml-2">{topic?.title ? `Topic: ${topic.title}` : 'Ask questions'}</span>
               </div>
               <div>
-                <button onClick={() => { setVisible(false); if (onClose) onClose(); }} className="rounded-full p-2 hover:bg-gray-50">
+                <button onClick={() => { if (onClose) onClose(); }} className="rounded-full p-2 hover:bg-gray-50">
                   <X className="h-4 w-4" />
                 </button>
               </div>
@@ -197,7 +203,7 @@ export default function CourseChat({ courseId, course = null, topic = null, visi
               <span className="text-xs text-[#94a3b8] ml-2">{topic?.title ? `Topic: ${topic.title}` : 'Ask questions'}</span>
             </div>
             <div>
-              <button onClick={() => { setVisible(false); if (onClose) onClose(); }} className="rounded-full p-2 hover:bg-gray-50">
+              <button onClick={() => { if (onClose) onClose(); }} className="rounded-full p-2 hover:bg-gray-50">
                 <X className="h-4 w-4" />
               </button>
             </div>
