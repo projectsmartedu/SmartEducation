@@ -254,10 +254,6 @@ const StudentCourseDetail = () => {
     const getProgress = (topicId) => progressMap[topicId] || null;
 
     const handleAttemptQuiz = (topic) => {
-        if (!navigator.onLine) {
-            setError('Quiz requires an internet connection. Please try again when you are online.');
-            return;
-        }
         navigate(`/student/courses/${courseId}/topics/${topic._id}/quiz`);
     };
 
