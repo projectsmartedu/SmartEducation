@@ -14,6 +14,7 @@ const revisionRoutes = require('./routes/revisions');
 const gamificationRoutes = require('./routes/gamification');
 const aiRoutes = require('./routes/ai');
 const notificationRoutes = require('./routes/notifications');
+const quizRoutes = require('./routes/quiz');
 
 const app = express();
 
@@ -34,6 +35,7 @@ app.use('/api/revisions', revisionRoutes);
 app.use('/api/gamification', gamificationRoutes);
 app.use('/api/ai', aiRoutes);
 app.use('/api/notifications', notificationRoutes);
+app.use('/api/quiz', quizRoutes);
 
 // Root route (for Render health checks)
 app.get('/', (req, res) => {

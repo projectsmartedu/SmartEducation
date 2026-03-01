@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { useParams, Link } from 'react-router-dom';
+import { useParams, Link, useNavigate } from 'react-router-dom';
 import DashboardLayout from '../components/Layout/DashboardLayout';
 import { coursesAPI, progressAPI } from '../services/api';
 import { ArrowLeft, BookOpen, Clock, CheckCircle, Loader2, FileText, Award, ChevronRight, File, Star, RotateCcw, WifiOff, MessageSquare } from 'lucide-react';
@@ -25,6 +25,7 @@ const STATUS_STYLES = {
 
 const StudentCourseDetail = () => {
     const { courseId } = useParams();
+    const navigate = useNavigate();
     const [course, setCourse] = useState(null);
     const [topics, setTopics] = useState([]);
     const [progressMap, setProgressMap] = useState({});
@@ -202,32 +203,6 @@ const StudentCourseDetail = () => {
         }
     };
 
-    const handleCompleteTopic = async (topic) => {
-        setUpdating(topic._id);
-        const data = { status: 'completed', masteryLevel: 0.8, timeSpentMinutes: topic.estimatedMinutes || 15 };
-        try {
-            if (navigator.onLine) {
-                await progressAPI.updateProgress(topic._id, data);
-                await fetchData();
-            } else {
-                await saveProgressItemOffline(topic._id, courseId, data);
-                await queueProgressSync(topic._id, data);
-                setProgressMap(prev => ({ ...prev, [topic._id]: { ...prev[topic._id], topic: topic._id, ...data } }));
-            }
-            setCompletionSuccess(topic);
-            setTimeout(() => setCompletionSuccess(null), 3000);
-        } catch {
-            // Fallback to offline save
-            await saveProgressItemOffline(topic._id, courseId, data);
-            await queueProgressSync(topic._id, data);
-            setProgressMap(prev => ({ ...prev, [topic._id]: { ...prev[topic._id], topic: topic._id, ...data } }));
-            setCompletionSuccess(topic);
-            setTimeout(() => setCompletionSuccess(null), 3000);
-        } finally {
-            setUpdating(null);
-        }
-    };
-
     const handleMasterTopic = async (topic) => {
         setUpdating(topic._id);
         const data = { status: 'mastered', masteryLevel: 1.0 };
@@ -277,6 +252,14 @@ const StudentCourseDetail = () => {
     };
 
     const getProgress = (topicId) => progressMap[topicId] || null;
+
+    const handleAttemptQuiz = (topic) => {
+        if (!navigator.onLine) {
+            setError('Quiz requires an internet connection. Please try again when you are online.');
+            return;
+        }
+        navigate(`/student/courses/${courseId}/topics/${topic._id}/quiz`);
+    };
 
     const sortedTopics = [...topics].sort((a, b) => a.order - b.order);
 
@@ -390,14 +373,10 @@ const StudentCourseDetail = () => {
                                     </>
                                 ) : (
                                     <button
-                                        onClick={() => handleCompleteTopic(readingTopic)}
+                                        onClick={() => handleAttemptQuiz(readingTopic)}
                                         disabled={updating === readingTopic._id}
-                                        className="inline-flex items-center gap-2 rounded-full bg-[#16a34a] px-5 py-2 text-sm font-semibold text-white shadow hover:bg-[#15803d] disabled:opacity-50 transition">
-                                        {updating === readingTopic._id ? (
-                                            <><Loader2 className="h-4 w-4 animate-spin" /> Completing...</>
-                                        ) : (
-                                            <><CheckCircle className="h-4 w-4" /> Mark as Complete (+{readingTopic.pointsReward} XP)</>
-                                        )}
+                                        className="inline-flex items-center gap-2 rounded-full bg-[#4338ca] px-5 py-2 text-sm font-semibold text-white shadow hover:bg-[#312e81] disabled:opacity-50 transition">
+                                        <><Award className="h-4 w-4" /> Attempt Quiz to Complete</>
                                     </button>
                                 )}
                             </div>
@@ -424,10 +403,10 @@ const StudentCourseDetail = () => {
                                         <h3 className="mt-4 text-lg font-semibold text-[#475569]">No Content Available</h3>
                                         <p className="mt-2 text-sm text-[#94a3b8]">The teacher hasn't uploaded material for this topic yet.</p>
                                         {!isCompleted && (
-                                            <button onClick={() => handleCompleteTopic(readingTopic)}
+                                            <button onClick={() => handleAttemptQuiz(readingTopic)}
                                                 disabled={updating === readingTopic._id}
-                                                className="mt-6 rounded-full bg-[#16a34a] px-6 py-2 text-sm font-semibold text-white hover:bg-[#15803d] disabled:opacity-50">
-                                                {updating === readingTopic._id ? 'Completing...' : `Mark Complete Anyway (+${readingTopic.pointsReward} XP)`}
+                                                className="mt-6 rounded-full bg-[#4338ca] px-6 py-2 text-sm font-semibold text-white hover:bg-[#312e81] disabled:opacity-50">
+                                                Attempt Quiz to Complete
                                             </button>
                                         )}
                                     </div>
@@ -457,14 +436,10 @@ const StudentCourseDetail = () => {
                                         {/* Bottom completion button */}
                                         {!isCompleted && (
                                             <div className="mt-10 flex justify-center border-t border-[#e2e8f0] pt-8">
-                                                <button onClick={() => handleCompleteTopic(readingTopic)}
+                                                <button onClick={() => handleAttemptQuiz(readingTopic)}
                                                     disabled={updating === readingTopic._id}
-                                                    className="inline-flex items-center gap-2 rounded-full bg-[#16a34a] px-8 py-3 text-base font-semibold text-white shadow-lg hover:bg-[#15803d] disabled:opacity-50 transition transform hover:scale-105">
-                                                    {updating === readingTopic._id ? (
-                                                        <><Loader2 className="h-5 w-5 animate-spin" /> Completing...</>
-                                                    ) : (
-                                                        <><Award className="h-5 w-5" /> I've finished reading — Complete Topic (+{readingTopic.pointsReward} XP)</>
-                                                    )}
+                                                    className="inline-flex items-center gap-2 rounded-full bg-[#4338ca] px-8 py-3 text-base font-semibold text-white shadow-lg hover:bg-[#312e81] disabled:opacity-50 transition transform hover:scale-105">
+                                                    <><Award className="h-5 w-5" /> Attempt Quiz to Complete</>
                                                 </button>
                                             </div>
                                         )}
@@ -478,8 +453,6 @@ const StudentCourseDetail = () => {
                             <CourseChat side={true} courseId={courseId} course={course} topic={readingTopic} visible={chatOpen} onClose={() => setChatOpen(false)} />
 
                         </div>
-
-                        {/* Chat panel space removed here; chat renders globally so content stays full-width */}
                     </div>
                 </div>
             </DashboardLayout>

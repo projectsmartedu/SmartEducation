@@ -184,4 +184,9 @@ export const aiAPI = {
   getRecommendations: () => api.get('/ai/recommendations')
 };
 
+// Quiz API
+export const quizAPI = {
+  generateTopicQuiz: (topicId, data = {}) => api.post(`/quiz/topic/${topicId}`, data)
+};
+
 export default api;
