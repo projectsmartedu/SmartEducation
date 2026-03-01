@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 import DashboardLayout from '../components/Layout/DashboardLayout';
 import { useAuth } from '../context/AuthContext';
 import { notificationsAPI } from '../services/api';
@@ -8,11 +8,8 @@ const Notifications = () => {
     const { notifications: ctxNotifs = [] } = useAuth();
     const [notifications, setNotifications] = useState([]);
     const [loading, setLoading] = useState(true);
-    const [page, setPage] = useState(1);
 
-    useEffect(() => { loadNotifications(1); }, []);
-
-    const loadNotifications = async (p = 1) => {
+    const loadNotifications = useCallback(async (p = 1) => {
         setLoading(true);
         try {
             const res = await notificationsAPI.getMy({ limit: 50, page: p });
@@ -26,7 +23,9 @@ const Notifications = () => {
         } finally {
             setLoading(false);
         }
-    };
+    }, [ctxNotifs]);
+
+    useEffect(() => { loadNotifications(1); }, [loadNotifications]);
 
     const markRead = async (id) => {
         try {
