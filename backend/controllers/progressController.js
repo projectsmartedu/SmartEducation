@@ -100,6 +100,9 @@ exports.getCourseProgress = async (req, res) => {
 exports.updateProgress = async (req, res) => {
   try {
     const { masteryLevel, status, timeSpentMinutes, lastScore, notes } = req.body;
+    const scorePercent = typeof lastScore === 'number'
+      ? Math.max(0, Math.min(100, lastScore))
+      : null;
 
     let progress = await StudentProgress.findOne({
       student: req.user._id,
@@ -127,23 +130,25 @@ exports.updateProgress = async (req, res) => {
     if (masteryLevel !== undefined) progress.masteryLevel = Math.min(1, Math.max(0, masteryLevel));
     if (timeSpentMinutes !== undefined) progress.timeSpentMinutes += timeSpentMinutes;
     if (lastScore !== undefined) {
-      progress.lastScore = lastScore;
+      progress.lastScore = scorePercent;
       progress.attempts += 1;
     }
     if (notes !== undefined) progress.notes = notes;
 
     // Handle status transitions
     if (status) {
-      progress.status = status;
-      if (status === 'completed' || status === 'mastered') {
+      let nextStatus = status;
+      if (status === 'completed' && scorePercent !== null && scorePercent < 50) {
+        nextStatus = 'in-progress';
+      }
+
+      progress.status = nextStatus;
+      if (nextStatus === 'completed' || nextStatus === 'mastered') {
         progress.completedAt = new Date();
         // Award points via gamification
         const topic = await Topic.findById(req.params.topicId);
         if (topic) {
-          const scorePercent = typeof lastScore === 'number'
-            ? Math.max(0, Math.min(100, lastScore))
-            : null;
-          const pointsToAward = (status === 'completed' && scorePercent !== null)
+          const pointsToAward = (nextStatus === 'completed' && scorePercent !== null)
             ? Math.round(topic.pointsReward * (scorePercent / 100))
             : topic.pointsReward;
           const source = scorePercent !== null ? 'quiz' : 'lesson';
@@ -155,6 +160,8 @@ exports.updateProgress = async (req, res) => {
             await awardPoints(req.user._id, pointsToAward, source, reason, topic._id);
           }
         }
+      } else {
+        progress.completedAt = null;
       }
     }
 
@@ -170,7 +177,15 @@ exports.updateProgress = async (req, res) => {
     // Record daily activity for streak tracking
     await recordActivity(req.user._id);
 
-    res.json({ message: 'Progress updated', progress });
+    const reattemptRequired = status === 'completed' && scorePercent !== null && scorePercent < 50;
+    res.json({
+      message: reattemptRequired
+        ? 'Quiz score below 50%. Reattempt required to complete topic.'
+        : 'Progress updated',
+      reattemptRequired,
+      passThreshold: 50,
+      progress
+    });
   } catch (error) {
     console.error('Update progress error:', error);
     res.status(500).json({ message: 'Error updating progress' });

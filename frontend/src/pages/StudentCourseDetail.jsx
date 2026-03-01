@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { useParams, Link } from 'react-router-dom';
+import { useParams, Link, useNavigate } from 'react-router-dom';
 import DashboardLayout from '../components/Layout/DashboardLayout';
-import { coursesAPI, progressAPI, quizAPI } from '../services/api';
+import { coursesAPI, progressAPI } from '../services/api';
 import { ArrowLeft, BookOpen, Clock, CheckCircle, Loader2, FileText, Award, ChevronRight, File, Star, RotateCcw, WifiOff } from 'lucide-react';
 import {
     getCourseOffline,
@@ -23,6 +23,7 @@ const STATUS_STYLES = {
 
 const StudentCourseDetail = () => {
     const { courseId } = useParams();
+    const navigate = useNavigate();
     const [course, setCourse] = useState(null);
     const [topics, setTopics] = useState([]);
     const [progressMap, setProgressMap] = useState({});
@@ -35,13 +36,6 @@ const StudentCourseDetail = () => {
     const [topicContent, setTopicContent] = useState(null);
     const [contentLoading, setContentLoading] = useState(false);
     const [completionSuccess, setCompletionSuccess] = useState(null);
-    const [quizOpen, setQuizOpen] = useState(false);
-    const [quizLoading, setQuizLoading] = useState(false);
-    const [quizError, setQuizError] = useState('');
-    const [quizQuestions, setQuizQuestions] = useState([]);
-    const [quizAnswers, setQuizAnswers] = useState({});
-    const [quizSubmitted, setQuizSubmitted] = useState(false);
-    const [quizScore, setQuizScore] = useState(null);
 
     const loadFromOffline = useCallback(async () => {
         try {
@@ -149,13 +143,6 @@ const StudentCourseDetail = () => {
         setReadingTopic(topic);
         setContentLoading(true);
         setTopicContent(null);
-        setQuizOpen(false);
-        setQuizLoading(false);
-        setQuizError('');
-        setQuizQuestions([]);
-        setQuizAnswers({});
-        setQuizSubmitted(false);
-        setQuizScore(null);
 
         // Try online first, fallback to offline
         if (navigator.onLine) {
@@ -214,37 +201,6 @@ const StudentCourseDetail = () => {
         }
     };
 
-    const handleCompleteTopic = async (topic, lastScore = null) => {
-        setUpdating(topic._id);
-        const data = {
-            status: 'completed',
-            masteryLevel: 0.8,
-            timeSpentMinutes: topic.estimatedMinutes || 15,
-            ...(lastScore !== null ? { lastScore } : {})
-        };
-        try {
-            if (navigator.onLine) {
-                await progressAPI.updateProgress(topic._id, data);
-                await fetchData();
-            } else {
-                await saveProgressItemOffline(topic._id, courseId, data);
-                await queueProgressSync(topic._id, data);
-                setProgressMap(prev => ({ ...prev, [topic._id]: { ...prev[topic._id], topic: topic._id, ...data } }));
-            }
-            setCompletionSuccess(topic);
-            setTimeout(() => setCompletionSuccess(null), 3000);
-        } catch {
-            // Fallback to offline save
-            await saveProgressItemOffline(topic._id, courseId, data);
-            await queueProgressSync(topic._id, data);
-            setProgressMap(prev => ({ ...prev, [topic._id]: { ...prev[topic._id], topic: topic._id, ...data } }));
-            setCompletionSuccess(topic);
-            setTimeout(() => setCompletionSuccess(null), 3000);
-        } finally {
-            setUpdating(null);
-        }
-    };
-
     const handleMasterTopic = async (topic) => {
         setUpdating(topic._id);
         const data = { status: 'mastered', masteryLevel: 1.0 };
@@ -295,65 +251,12 @@ const StudentCourseDetail = () => {
 
     const getProgress = (topicId) => progressMap[topicId] || null;
 
-    const handleAttemptQuiz = async (topic) => {
+    const handleAttemptQuiz = (topic) => {
         if (!navigator.onLine) {
-            setQuizError('Quiz requires an internet connection. Please try again when you are online.');
-            setQuizOpen(true);
+            setError('Quiz requires an internet connection. Please try again when you are online.');
             return;
         }
-
-        setQuizOpen(true);
-        setQuizLoading(true);
-        setQuizError('');
-        setQuizQuestions([]);
-        setQuizAnswers({});
-        setQuizSubmitted(false);
-        setQuizScore(null);
-
-        try {
-            const res = await quizAPI.generateTopicQuiz(topic._id, { questionCount: 10, difficulty: 'moderate' });
-            const questions = res.data?.questions || [];
-            if (!Array.isArray(questions) || questions.length === 0) {
-                throw new Error('Quiz not available');
-            }
-            setQuizQuestions(questions);
-        } catch (err) {
-            setQuizError(err?.response?.data?.message || 'Failed to generate quiz. Please try again.');
-        } finally {
-            setQuizLoading(false);
-        }
-    };
-
-    const handleQuizAnswer = (questionId, answerIndex) => {
-        if (quizSubmitted) return;
-        setQuizAnswers(prev => ({ ...prev, [questionId]: answerIndex }));
-    };
-
-    const handleSubmitQuiz = async () => {
-        if (!readingTopic || quizSubmitted) return;
-        const required = quizQuestions.length;
-        const answered = Object.keys(quizAnswers).length;
-        if (required === 0) {
-            setQuizError('No quiz questions available. Please try again.');
-            return;
-        }
-        if (answered < required) {
-            setQuizError('Please answer all questions before submitting.');
-            return;
-        }
-
-        let correct = 0;
-        quizQuestions.forEach(q => {
-            if (quizAnswers[q.id] === q.answerIndex) {
-                correct += 1;
-            }
-        });
-        const scorePercent = Math.round((correct / required) * 100);
-        setQuizSubmitted(true);
-        setQuizScore(scorePercent);
-        setQuizError('');
-
-        await handleCompleteTopic(readingTopic, scorePercent);
+        navigate(`/student/courses/${courseId}/topics/${topic._id}/quiz`);
     };
 
     const sortedTopics = [...topics].sort((a, b) => a.order - b.order);
@@ -447,13 +350,9 @@ const StudentCourseDetail = () => {
                                 ) : (
                                     <button
                                         onClick={() => handleAttemptQuiz(readingTopic)}
-                                        disabled={updating === readingTopic._id || quizLoading}
+                                        disabled={updating === readingTopic._id}
                                         className="inline-flex items-center gap-2 rounded-full bg-[#4338ca] px-5 py-2 text-sm font-semibold text-white shadow hover:bg-[#312e81] disabled:opacity-50 transition">
-                                        {quizLoading ? (
-                                            <><Loader2 className="h-4 w-4 animate-spin" /> Loading Quiz...</>
-                                        ) : (
-                                            <><Award className="h-4 w-4" /> Attempt Quiz to Complete</>
-                                        )}
+                                        <><Award className="h-4 w-4" /> Attempt Quiz to Complete</>
                                     </button>
                                 )}
                             </div>
@@ -478,9 +377,9 @@ const StudentCourseDetail = () => {
                                 <p className="mt-2 text-sm text-[#94a3b8]">The teacher hasn't uploaded material for this topic yet.</p>
                                 {!isCompleted && (
                                     <button onClick={() => handleAttemptQuiz(readingTopic)}
-                                        disabled={updating === readingTopic._id || quizLoading}
+                                        disabled={updating === readingTopic._id}
                                         className="mt-6 rounded-full bg-[#4338ca] px-6 py-2 text-sm font-semibold text-white hover:bg-[#312e81] disabled:opacity-50">
-                                        {quizLoading ? 'Loading Quiz...' : 'Attempt Quiz to Complete'}
+                                        Attempt Quiz to Complete
                                     </button>
                                 )}
                             </div>
@@ -511,105 +410,15 @@ const StudentCourseDetail = () => {
                                 {!isCompleted && (
                                     <div className="mt-10 flex justify-center border-t border-[#e2e8f0] pt-8">
                                         <button onClick={() => handleAttemptQuiz(readingTopic)}
-                                            disabled={updating === readingTopic._id || quizLoading}
+                                            disabled={updating === readingTopic._id}
                                             className="inline-flex items-center gap-2 rounded-full bg-[#4338ca] px-8 py-3 text-base font-semibold text-white shadow-lg hover:bg-[#312e81] disabled:opacity-50 transition transform hover:scale-105">
-                                            {quizLoading ? (
-                                                <><Loader2 className="h-5 w-5 animate-spin" /> Loading Quiz...</>
-                                            ) : (
-                                                <><Award className="h-5 w-5" /> Attempt Quiz to Complete</>
-                                            )}
+                                            <><Award className="h-5 w-5" /> Attempt Quiz to Complete</>
                                         </button>
                                     </div>
                                 )}
                             </div>
                         )}
                     </div>
-
-                    {quizOpen && (
-                        <div className="rounded-[28px] bg-white p-6 shadow-xl ring-1 ring-[#e2e8f0]">
-                            <div className="flex flex-wrap items-center justify-between gap-3">
-                                <div>
-                                    <h3 className="text-lg font-semibold text-[#0f172a]">Topic Quiz</h3>
-                                    <p className="text-xs text-[#64748b]">Answer all questions to complete this topic.</p>
-                                </div>
-                                <button
-                                    onClick={() => setQuizOpen(false)}
-                                    className="rounded-full border border-[#e2e8f0] px-4 py-1.5 text-xs font-medium text-[#475569] hover:bg-[#f1f5f9]">
-                                    Close
-                                </button>
-                            </div>
-
-                            {quizLoading ? (
-                                <div className="flex items-center gap-3 py-6">
-                                    <Loader2 className="h-5 w-5 animate-spin text-[#4338ca]" />
-                                    <span className="text-sm text-[#475569]">Generating quiz...</span>
-                                </div>
-                            ) : quizError ? (
-                                <div className="mt-4 rounded-xl bg-red-50 p-4 text-sm text-red-700">
-                                    {quizError}
-                                </div>
-                            ) : (
-                                <div className="mt-5 space-y-6">
-                                    {quizQuestions.map((q, index) => (
-                                        <div key={q.id} className="rounded-2xl border border-[#e2e8f0] p-4">
-                                            <p className="text-sm font-semibold text-[#0f172a]">
-                                                {index + 1}. {q.question}
-                                            </p>
-                                            <div className="mt-3 grid gap-2">
-                                                {q.options.map((opt, optIndex) => {
-                                                    const isSelected = quizAnswers[q.id] === optIndex;
-                                                    const isCorrect = quizSubmitted && q.answerIndex === optIndex;
-                                                    const isIncorrect = quizSubmitted && isSelected && q.answerIndex !== optIndex;
-
-                                                    return (
-                                                        <label
-                                                            key={`${q.id}_${optIndex}`}
-                                                            className={`flex cursor-pointer items-center gap-3 rounded-xl border px-3 py-2 text-sm transition ${isCorrect
-                                                                ? 'border-[#16a34a] bg-[#dcfce7]'
-                                                                : isIncorrect
-                                                                    ? 'border-[#ef4444] bg-[#fee2e2]'
-                                                                    : isSelected
-                                                                        ? 'border-[#4338ca] bg-[#ede9fe]'
-                                                                        : 'border-[#e2e8f0] hover:bg-[#f8fafc]'
-                                                                } ${quizSubmitted ? 'cursor-default' : ''}`}
-                                                        >
-                                                            <input
-                                                                type="radio"
-                                                                name={`quiz_${q.id}`}
-                                                                className="h-4 w-4"
-                                                                checked={isSelected}
-                                                                disabled={quizSubmitted}
-                                                                onChange={() => handleQuizAnswer(q.id, optIndex)}
-                                                            />
-                                                            <span>{opt}</span>
-                                                        </label>
-                                                    );
-                                                })}
-                                            </div>
-                                            {quizSubmitted && q.explanation && (
-                                                <p className="mt-3 text-xs text-[#475569]">Explanation: {q.explanation}</p>
-                                            )}
-                                        </div>
-                                    ))}
-
-                                    {quizSubmitted && quizScore !== null && (
-                                        <div className="rounded-xl bg-[#f1f5f9] p-4 text-sm text-[#0f172a]">
-                                            Score: <span className="font-semibold">{quizScore}%</span>
-                                        </div>
-                                    )}
-
-                                    {!quizSubmitted && (
-                                        <button
-                                            onClick={handleSubmitQuiz}
-                                            disabled={updating === readingTopic._id}
-                                            className="rounded-full bg-[#16a34a] px-6 py-2 text-sm font-semibold text-white hover:bg-[#15803d] disabled:opacity-50">
-                                            {updating === readingTopic._id ? 'Submitting...' : 'Submit Quiz'}
-                                        </button>
-                                    )}
-                                </div>
-                            )}
-                        </div>
-                    )}
                 </div>
             </DashboardLayout>
         );

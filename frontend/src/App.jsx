@@ -18,6 +18,7 @@ import StudentDashboard from './pages/StudentDashboard';
 import StudentMaterials from './pages/StudentMaterials';
 import StudentCourses from './pages/StudentCourses';
 import StudentCourseDetail from './pages/StudentCourseDetail';
+import StudentTopicQuiz from './pages/StudentTopicQuiz';
 import StudentKnowledgeMap from './pages/StudentKnowledgeMap';
 import StudentRevisions from './pages/StudentRevisions';
 import StudentProgress from './pages/StudentProgress';
@@ -122,6 +123,14 @@ function App() {
                         element={
                             <ProtectedRoute allowedRoles={['student']}>
                                 <StudentCourseDetail />
+                            </ProtectedRoute>
+                        }
+                    />
+                    <Route
+                        path="/student/courses/:courseId/topics/:topicId/quiz"
+                        element={
+                            <ProtectedRoute allowedRoles={['student']}>
+                                <StudentTopicQuiz />
                             </ProtectedRoute>
                         }
                     />
