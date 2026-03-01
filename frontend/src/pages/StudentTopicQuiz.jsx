@@ -78,6 +78,8 @@ const StudentTopicQuiz = () => {
         setQuizAnswers(prev => ({ ...prev, [questionId]: answerIndex }));
     };
 
+    const allQuestionsAnswered = quizQuestions.length > 0 && Object.keys(quizAnswers).length === quizQuestions.length;
+
     const handleSubmitQuiz = async () => {
         if (quizSubmitted || !topic) return;
 
@@ -229,13 +231,18 @@ const StudentTopicQuiz = () => {
                             )}
 
                             {!quizSubmitted && (
-                                <button
-                                    onClick={handleSubmitQuiz}
-                                    disabled={submitting}
-                                    className="rounded-full bg-[#16a34a] px-6 py-2 text-sm font-semibold text-white hover:bg-[#15803d] disabled:opacity-50"
-                                >
-                                    {submitting ? 'Submitting...' : 'Submit Quiz'}
-                                </button>
+                                <div className="flex flex-col items-start gap-2">
+                                    <button
+                                        onClick={handleSubmitQuiz}
+                                        disabled={submitting || !allQuestionsAnswered}
+                                        className="rounded-full bg-[#16a34a] px-6 py-2 text-sm font-semibold text-white hover:bg-[#15803d] disabled:opacity-50"
+                                    >
+                                        {submitting ? 'Submitting...' : 'Submit Quiz'}
+                                    </button>
+                                    {!allQuestionsAnswered && (
+                                        <p className="text-xs text-[#64748b]">Answer all questions to enable submit.</p>
+                                    )}
+                                </div>
                             )}
 
                             {quizSubmitted && quizScore !== null && quizScore >= 50 && (
