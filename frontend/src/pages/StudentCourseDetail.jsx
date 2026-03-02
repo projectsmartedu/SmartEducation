@@ -254,7 +254,11 @@ const StudentCourseDetail = () => {
     const getProgress = (topicId) => progressMap[topicId] || null;
 
     const handleAttemptQuiz = (topic) => {
-        navigate(`/student/courses/${courseId}/topics/${topic._id}/quiz`);
+        const topicId = topic?._id || topic?.id;
+        if (!topicId) return;
+        navigate(`/student/courses/${courseId}/topics/${topicId}/quiz`, {
+            state: { topic }
+        });
     };
 
     const sortedTopics = [...topics].sort((a, b) => a.order - b.order);

@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useState } from 'react';
-import { Link, useNavigate, useParams } from 'react-router-dom';
+import { Link, useLocation, useNavigate, useParams } from 'react-router-dom';
 import { ArrowLeft, Loader2 } from 'lucide-react';
 import DashboardLayout from '../components/Layout/DashboardLayout';
 import { coursesAPI, progressAPI, quizAPI } from '../services/api';
@@ -7,6 +7,7 @@ import { coursesAPI, progressAPI, quizAPI } from '../services/api';
 const StudentTopicQuiz = () => {
     const { courseId, topicId } = useParams();
     const navigate = useNavigate();
+    const location = useLocation();
 
     const [courseTitle, setCourseTitle] = useState('Course');
     const [topic, setTopic] = useState(null);
@@ -51,7 +52,8 @@ const StudentTopicQuiz = () => {
         try {
             const courseRes = await coursesAPI.getById(courseId);
             const topics = courseRes.data?.topics || [];
-            const currentTopic = topics.find(t => t._id === topicId);
+            const currentTopicFromState = location.state?.topic;
+            const currentTopic = currentTopicFromState || topics.find(t => String(t?._id || t?.id) === String(topicId));
             setCourseTitle(courseRes.data?.course?.title || 'Course');
 
             if (!currentTopic) {
@@ -67,7 +69,7 @@ const StudentTopicQuiz = () => {
         } finally {
             setLoading(false);
         }
-    }, [courseId, topicId, generateQuiz]);
+    }, [courseId, topicId, generateQuiz, location.state]);
 
     useEffect(() => {
         loadTopic();

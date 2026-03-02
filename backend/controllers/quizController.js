@@ -49,6 +49,134 @@ function normalizeQuestions(rawQuestions, topicId, questionCount) {
   return normalized.slice(0, questionCount);
 }
 
+function buildFallbackQuestions(topic, course, questionCount, difficulty, materialSnippet = '') {
+  const baseTopic = String(topic?.title || 'this topic').trim();
+  const baseCourse = String(course?.title || 'this course').trim();
+  const normalizedDifficulty = String(difficulty || 'moderate').trim().toLowerCase();
+  const difficultyLabel = normalizedDifficulty === 'hard'
+    ? 'advanced'
+    : normalizedDifficulty === 'easy'
+      ? 'foundational'
+      : 'intermediate';
+
+  const words = materialSnippet
+    .toLowerCase()
+    .replace(/[^a-z0-9\s]/g, ' ')
+    .split(/\s+/)
+    .filter(w => w.length >= 5);
+
+  const uniqueWords = [...new Set(words)].slice(0, 8);
+
+  const templates = [
+    {
+      question: `What is the primary learning goal of ${baseTopic}?`,
+      options: [
+        `Understand and apply core ${baseTopic} concepts in problems`,
+        `Memorize unrelated definitions only`,
+        `Avoid practical use of ${baseTopic}`,
+        `Replace ${baseCourse} with a different subject`
+      ],
+      answerIndex: 0,
+      explanation: `${baseTopic} is evaluated by applying concepts, not rote memorization.`
+    },
+    {
+      question: `Which technique is best for evaluating understanding in ${baseTopic}?`,
+      options: [
+        'Scenario-based multiple-choice questions with explanations',
+        'Random guessing without review',
+        'Ignoring incorrect responses',
+        'Using only attendance data'
+      ],
+      answerIndex: 0,
+      explanation: 'Scenario-based MCQs test conceptual clarity and application.'
+    },
+    {
+      question: `A student scores below 50% in a ${baseTopic} quiz. What should happen next?`,
+      options: [
+        'Mark topic as in-progress and reattempt the quiz',
+        'Mark topic as completed immediately',
+        'Delete progress data',
+        'Skip the topic permanently'
+      ],
+      answerIndex: 0,
+      explanation: 'Reattempt after feedback is required for low scores.'
+    },
+    {
+      question: `What does a quiz score of 50% or higher indicate in this system?`,
+      options: [
+        'Topic can be marked as completed',
+        'Topic is locked again',
+        'The student is unenrolled',
+        'No progress should be saved'
+      ],
+      answerIndex: 0,
+      explanation: 'A passing score completes the topic and stores progress.'
+    },
+    {
+      question: `Why are explanations shown after quiz submission?`,
+      options: [
+        'To provide feedback and support revision before reattempts',
+        'To hide the correct answers',
+        'To increase loading time',
+        'To prevent scoring'
+      ],
+      answerIndex: 0,
+      explanation: 'Explanations close knowledge gaps and improve the next attempt.'
+    },
+    {
+      question: `Which statement best describes ${difficultyLabel} evaluation for ${baseTopic}?`,
+      options: [
+        'Questions should test both concept recall and application',
+        'Only trivia should be asked',
+        'No topic context should be used',
+        'All answers should be marked correct'
+      ],
+      answerIndex: 0,
+      explanation: `At ${difficultyLabel} level, balanced assessment is most effective.`
+    }
+  ];
+
+  if (uniqueWords.length >= 2) {
+    templates.push({
+      question: `Which keyword pair is most likely relevant to ${baseTopic} from the study material?`,
+      options: [
+        `${uniqueWords[0]} and ${uniqueWords[1]}`,
+        'banana and mountain',
+        'pencil and thunder',
+        'window and galaxy'
+      ],
+      answerIndex: 0,
+      explanation: 'Keywords drawn from study material are usually core to topic understanding.'
+    });
+  }
+
+  const pool = templates.length > 0 ? templates : [{
+    question: `What is a key outcome after studying ${baseTopic}?`,
+    options: [
+      `Ability to apply ${baseTopic} concepts`,
+      'No measurable understanding',
+      'Skipping all practice',
+      'Avoiding revision'
+    ],
+    answerIndex: 0,
+    explanation: 'Learning outcomes focus on usable understanding.'
+  }];
+
+  const questions = [];
+  for (let index = 0; index < questionCount; index += 1) {
+    const selected = pool[index % pool.length];
+    questions.push({
+      id: `${topic._id}_${index + 1}`,
+      question: selected.question,
+      options: selected.options,
+      answerIndex: selected.answerIndex,
+      explanation: selected.explanation
+    });
+  }
+
+  return questions;
+}
+
 // @desc    Generate a quiz for a topic using Gemini
 // @route   POST /api/quiz/topic/:topicId
 // @access  Private (Student)
@@ -64,6 +192,24 @@ exports.generateTopicQuiz = async (req, res) => {
       difficulty: normalizedDifficulty,
       questionCount: count
     });
+
+    const topic = await Topic.findById(topicId)
+      .populate('course', 'title subject')
+      .populate('material', 'content title subject topic');
+
+    if (!topic) {
+      return res.status(404).json({ message: 'Topic not found' });
+    }
+
+    const course = topic.course?._id
+      ? topic.course
+      : await Course.findById(topic.course).select('title subject');
+
+    const materialContent = topic.material?.content || '';
+    const materialSnippet = materialContent
+      .replace(/\s+/g, ' ')
+      .trim()
+      .slice(0, 4000);
 
     if (existingCount >= MAX_LLM_GENERATIONS_PER_TOPIC) {
       const [randomQuiz] = await TopicQuiz.aggregate([
@@ -88,24 +234,6 @@ exports.generateTopicQuiz = async (req, res) => {
       }
     }
 
-    const topic = await Topic.findById(topicId)
-      .populate('course', 'title subject')
-      .populate('material', 'content title subject topic');
-
-    if (!topic) {
-      return res.status(404).json({ message: 'Topic not found' });
-    }
-
-    const course = topic.course?._id
-      ? topic.course
-      : await Course.findById(topic.course).select('title subject');
-
-    const materialContent = topic.material?.content || '';
-    const materialSnippet = materialContent
-      .replace(/\s+/g, ' ')
-      .trim()
-      .slice(0, 4000);
-
     const prompt = [
       'You are an expert educator creating a quiz for students.',
       `Generate ${count} multiple-choice questions at ${normalizedDifficulty} difficulty.`,
@@ -122,12 +250,16 @@ exports.generateTopicQuiz = async (req, res) => {
 
     const apiKey = process.env.GEMINI_API_KEY;
     if (!apiKey) {
-      return res.status(500).json({ message: 'Gemini API key not configured' });
+      const questions = buildFallbackQuestions(topic, course, count, normalizedDifficulty, materialSnippet);
+      return res.json({
+        topicId: topic._id,
+        questions,
+        modelUsed: 'rule-based-fallback',
+        source: 'fallback-no-key'
+      });
     }
 
     const genAI = new GoogleGenerativeAI(apiKey);
-    let lastError = null;
-
     for (const modelName of MODELS) {
       try {
         const model = genAI.getGenerativeModel({ model: modelName });
@@ -156,7 +288,7 @@ exports.generateTopicQuiz = async (req, res) => {
           source: 'llm'
         });
       } catch (err) {
-        lastError = err;
+        console.error(`Quiz generation failed with model ${modelName}:`, err.message);
       }
     }
 
@@ -181,7 +313,13 @@ exports.generateTopicQuiz = async (req, res) => {
       });
     }
 
-    throw lastError || new Error('Failed to generate quiz');
+    const questions = buildFallbackQuestions(topic, course, count, normalizedDifficulty, materialSnippet);
+    return res.json({
+      topicId: topic._id,
+      questions,
+      modelUsed: 'rule-based-fallback',
+      source: 'fallback-on-error'
+    });
   } catch (error) {
     console.error('Generate quiz error:', error);
     res.status(500).json({ message: 'Error generating quiz' });
