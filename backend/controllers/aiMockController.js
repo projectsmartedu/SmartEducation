@@ -1,40 +1,44 @@
-/**
- * AI Mock Controller
- * Placeholder endpoints for future AI/ML features.
- * These return mock data that the frontend can consume.
- * When real ML models are ready, swap out the mock logic.
- *
- * Endpoints:
- * - Mastery prediction (GNN-based)
- * - Forgetting risk prediction (time-series)
- * - Learning pace estimation
- * - Chatbot hint (separate from main chatbot)
- * - Content recommendation
- */
+const StudentProgress = require('../models/StudentProgress');
+const {
+  getAdaptivePlan,
+  scoreTopic,
+  getOrTrainModel,
+  retrainAdaptiveModel,
+  exportModelArtifact,
+  getTrainingDataSnapshot
+} = require('../services/adaptiveLearningService');
 
 // @desc    Predict mastery for a student's topics
 // @route   POST /api/ai/predict-mastery
 // @access  Private (Student)
-// TODO: Replace with actual GNN model inference
 exports.predictMastery = async (req, res) => {
   try {
-    const { topicIds } = req.body;
+    const { topicIds = [] } = req.body;
+    const modelDoc = await getOrTrainModel();
 
-    // Mock: return random mastery predictions with confidence scores
-    const predictions = (topicIds || []).map(id => ({
-      topicId: id,
-      predictedMastery: Math.round((0.3 + Math.random() * 0.7) * 100) / 100,
-      confidence: Math.round((0.6 + Math.random() * 0.4) * 100) / 100,
-      trend: Math.random() > 0.5 ? 'improving' : 'stable',
-      modelVersion: 'mock-v1.0'
+    const progress = await StudentProgress.find({
+      student: req.user._id,
+      ...(topicIds.length ? { topic: { $in: topicIds } } : {})
+    }).select('topic masteryLevel lastScore attempts lastStudied timeSpentMinutes');
+
+    const predictions = await Promise.all(progress.map(async (row) => {
+      const model = await scoreTopic(row, 0, modelDoc);
+      return {
+        topicId: row.topic,
+        predictedMastery: model.predictedMastery,
+        confidence: Number(Math.min(0.95, 0.62 + (row.attempts || 0) * 0.035).toFixed(2)),
+        trend: model.predictedMastery >= row.masteryLevel ? 'improving' : 'declining',
+        modelVersion: modelDoc.version
+      };
     }));
 
     res.json({
       predictions,
       modelInfo: {
-        type: 'Graph Neural Network (Mock)',
-        version: '1.0.0-mock',
-        note: 'This is a placeholder. Replace with trained GNN model.'
+        type: modelDoc.algorithm,
+        version: modelDoc.version,
+        trainedAt: modelDoc.trainedAt,
+        sampleCount: modelDoc.sampleCount
       }
     });
   } catch (error) {
@@ -46,34 +50,34 @@ exports.predictMastery = async (req, res) => {
 // @desc    Predict forgetting risk for topics
 // @route   POST /api/ai/predict-forgetting
 // @access  Private (Student)
-// TODO: Replace with time-series forgetting curve model
 exports.predictForgetting = async (req, res) => {
   try {
-    const { topicIds } = req.body;
+    const { topicIds = [] } = req.body;
+    const modelDoc = await getOrTrainModel();
 
-    const predictions = (topicIds || []).map(id => {
-      const risk = Math.random();
-      let level;
-      if (risk < 0.25) level = 'low';
-      else if (risk < 0.5) level = 'moderate';
-      else if (risk < 0.75) level = 'high';
-      else level = 'critical';
+    const progress = await StudentProgress.find({
+      student: req.user._id,
+      ...(topicIds.length ? { topic: { $in: topicIds } } : {})
+    }).select('topic masteryLevel lastScore attempts lastStudied timeSpentMinutes');
 
+    const predictions = await Promise.all(progress.map(async (row) => {
+      const model = await scoreTopic(row, 0, modelDoc);
       return {
-        topicId: id,
-        forgetRisk: level,
-        riskScore: Math.round(risk * 100) / 100,
-        recommendedRevisionDate: new Date(Date.now() + Math.floor(Math.random() * 7) * 24 * 60 * 60 * 1000),
-        modelVersion: 'mock-v1.0'
+        topicId: row.topic,
+        forgetRisk: model.forgetRisk,
+        riskScore: model.riskScore,
+        recommendedRevisionDate: new Date(Date.now() + Math.max(1, Math.round((1 - model.riskScore) * 7)) * 24 * 60 * 60 * 1000),
+        modelVersion: modelDoc.version
       };
-    });
+    }));
 
     res.json({
       predictions,
       modelInfo: {
-        type: 'Time-Series Forgetting Predictor (Mock)',
-        version: '1.0.0-mock',
-        note: 'This is a placeholder. Replace with trained forgetting curve model.'
+        type: modelDoc.algorithm,
+        version: modelDoc.version,
+        trainedAt: modelDoc.trainedAt,
+        sampleCount: modelDoc.sampleCount
       }
     });
   } catch (error) {
@@ -85,21 +89,24 @@ exports.predictForgetting = async (req, res) => {
 // @desc    Estimate learning pace for a student
 // @route   GET /api/ai/learning-pace
 // @access  Private (Student)
-// TODO: Replace with sequence model that reads clickstream data
 exports.estimateLearningPace = async (req, res) => {
   try {
+    const rows = await StudentProgress.find({ student: req.user._id }).select('timeSpentMinutes attempts lastScore');
+    const totalMinutes = rows.reduce((sum, r) => sum + (r.timeSpentMinutes || 0), 0);
+    const totalAttempts = rows.reduce((sum, r) => sum + (r.attempts || 0), 0);
+    const avgScore = rows.length ? rows.reduce((sum, r) => sum + (r.lastScore || 0), 0) / rows.length : 0;
+
     res.json({
       pace: {
-        wordsPerMinute: 180 + Math.floor(Math.random() * 80),
-        averageSessionMinutes: 25 + Math.floor(Math.random() * 20),
-        optimalDifficulty: 'intermediate',
-        recommendedSessionLength: 30,
-        focusScore: Math.round((0.6 + Math.random() * 0.4) * 100) / 100
+        wordsPerMinute: Math.max(120, Math.round(140 + avgScore * 0.8)),
+        averageSessionMinutes: Math.round(totalMinutes / Math.max(totalAttempts, 1)) || 20,
+        optimalDifficulty: avgScore >= 75 ? 'advanced' : avgScore >= 55 ? 'intermediate' : 'foundational',
+        recommendedSessionLength: Math.min(55, Math.max(20, Math.round((totalMinutes / Math.max(rows.length, 1)) * 0.7 + 20))),
+        focusScore: Number(Math.min(0.98, 0.45 + avgScore / 200).toFixed(2))
       },
       modelInfo: {
-        type: 'Sequence Pace Estimator (Mock)',
-        version: '1.0.0-mock',
-        note: 'This is a placeholder. Replace with trained pace estimation model.'
+        type: 'adaptive pace estimator',
+        version: '2.1.0'
       }
     });
   } catch (error) {
@@ -108,41 +115,75 @@ exports.estimateLearningPace = async (req, res) => {
   }
 };
 
-// @desc    Get content recommendations for a student
+// @desc    Get adaptive recommendations and mind map data for student
 // @route   GET /api/ai/recommendations
 // @access  Private (Student)
-// TODO: Replace with collaborative filtering / content-based recommendation engine
 exports.getRecommendations = async (req, res) => {
   try {
+    const adaptivePlan = await getAdaptivePlan(req.user._id, req.query.courseId);
+
+    const recommendations = adaptivePlan.revisionQueue.slice(0, 3).map((item) => ({
+      type: item.suggestedRevisionType,
+      title: `Revise ${item.concept}`,
+      description: `Predicted mastery ${Math.round(item.predictedMastery * 100)}%, risk ${item.priority}`,
+      priority: item.priority
+    }));
+
     res.json({
-      recommendations: [
-        {
-          type: 'revision',
-          title: 'Review weak concepts',
-          description: 'Focus on topics with mastery below 50%',
-          priority: 'high'
-        },
-        {
-          type: 'practice',
-          title: 'Practice quiz',
-          description: 'Take a quiz to reinforce recent learning',
-          priority: 'medium'
-        },
-        {
-          type: 'explore',
-          title: 'Explore new topic',
-          description: 'Your prerequisites are met for the next topic',
-          priority: 'low'
-        }
-      ],
-      modelInfo: {
-        type: 'Content Recommendation Engine (Mock)',
-        version: '1.0.0-mock',
-        note: 'This is a placeholder. Replace with trained recommendation model.'
-      }
+      recommendations,
+      adaptivePlan,
+      modelInfo: adaptivePlan.modelInfo
     });
   } catch (error) {
     console.error('Recommendations error:', error);
     res.status(500).json({ message: 'Error fetching recommendations' });
+  }
+};
+
+// @desc    Retrain adaptive ML model from current data
+// @route   POST /api/ai/retrain
+// @access  Private (Teacher/Admin)
+exports.retrainModel = async (req, res) => {
+  try {
+    const modelDoc = await retrainAdaptiveModel();
+    res.json({
+      message: 'Adaptive model retrained successfully',
+      modelInfo: {
+        version: modelDoc.version,
+        trainedAt: modelDoc.trainedAt,
+        sampleCount: modelDoc.sampleCount,
+        algorithm: modelDoc.algorithm,
+        metrics: modelDoc.metrics
+      }
+    });
+  } catch (error) {
+    console.error('Retrain model error:', error);
+    res.status(500).json({ message: 'Error retraining model' });
+  }
+};
+
+// @desc    Export trained model artifact
+// @route   GET /api/ai/model/export
+// @access  Private (Teacher/Admin)
+exports.exportModel = async (req, res) => {
+  try {
+    const artifact = await exportModelArtifact();
+    res.json(artifact);
+  } catch (error) {
+    console.error('Export model error:', error);
+    res.status(500).json({ message: 'Error exporting model artifact' });
+  }
+};
+
+// @desc    Get model training data snapshot
+// @route   GET /api/ai/model/training-data
+// @access  Private (Teacher/Admin)
+exports.getTrainingData = async (req, res) => {
+  try {
+    const snapshot = await getTrainingDataSnapshot(req.query.limit);
+    res.json(snapshot);
+  } catch (error) {
+    console.error('Get training data error:', error);
+    res.status(500).json({ message: 'Error getting training data snapshot' });
   }
 };
