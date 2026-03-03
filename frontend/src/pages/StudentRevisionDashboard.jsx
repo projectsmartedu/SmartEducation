@@ -104,6 +104,7 @@ const StudentRevisionDashboard = ({ studentId }) => {
     ];
 
     // Load data and predictions on component mount
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     useEffect(() => {
         const loadData = async () => {
             try {

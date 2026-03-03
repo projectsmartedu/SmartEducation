@@ -184,7 +184,7 @@ export const formatTopicForUrgency = (topicProgress) => {
   };
 };
 
-export default {
+const mlServiceExports = {
   // Risk APIs
   predictStudentRisk,
   batchPredictRisk,
@@ -201,3 +201,5 @@ export default {
   formatStudentForRiskPrediction,
   formatTopicForUrgency
 };
+
+export default mlServiceExports;
