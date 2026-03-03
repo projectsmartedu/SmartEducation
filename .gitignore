@@ -42,3 +42,10 @@ archive/
 
 ml_notebooks/
 ml_server/
+ml_server/.env.example
+
+COMPLETE_DEPLOYMENT_GUIDE.md
+ MIND_MAP_DELIVERABLES.md
+  ML_PIPELINE_IMPLEMENTATION_GUIDE.md
+
+test_pipeline.py/
