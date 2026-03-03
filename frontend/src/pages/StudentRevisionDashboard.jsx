@@ -152,7 +152,7 @@ const StudentRevisionDashboard = ({ studentId }) => {
         };
 
         loadData();
-    }, [studentId]);
+    }, [studentId, getRecommendation, mockStudentData, mockTopicProgress]);
 
     // Helper: Calculate urgency score (simplified - ML service does this)
     const calculateUrgencyScore = (topic) => {

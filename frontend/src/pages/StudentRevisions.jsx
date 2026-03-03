@@ -38,17 +38,16 @@ const StudentRevisions = () => {
         }
     }, []);
 
-    useEffect(() => { 
+    useEffect(() => {
         fetchRevisions();
     }, [fetchRevisions]);
 
     // Load mind map data once revision schedule is populated
-    // eslint-disable-next-line react-hooks/exhaustive-deps
     useEffect(() => {
         if (revisionSchedule.length > 0) {
             loadMindMapData();
         }
-    }, [revisionSchedule]);
+    }, [revisionSchedule, loadMindMapData]);
 
     const loadMindMapData = async () => {
         // Mock student data
@@ -69,7 +68,7 @@ const StudentRevisions = () => {
         };
         setStudentData(mockStudent);
 
-                        // Try to get risk prediction, but continue if it fails
+        // Try to get risk prediction, but continue if it fails
         try {
             // Risk prediction call here if needed
         } catch (err) {
@@ -227,7 +226,7 @@ const StudentRevisions = () => {
                             {showMindMap ? 'Hide' : 'Show'} Mind Map
                         </button>
                     </div>
-                    
+
                     {showMindMap && predictions && predictions.length > 0 && studentData && revisionSchedule.length > 0 && (
                         <div className="mt-6">
                             <TraditionalMindMap
