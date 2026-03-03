@@ -13,8 +13,6 @@ const progressRoutes = require('./routes/progress');
 const revisionRoutes = require('./routes/revisions');
 const gamificationRoutes = require('./routes/gamification');
 const aiRoutes = require('./routes/ai');
-const riskRoutes = require('./routes/risk');
-const mindmapRoutes = require('./routes/mindmap');
 
 const app = express();
 
@@ -37,8 +35,6 @@ app.use('/api/progress', progressRoutes);
 app.use('/api/revisions', revisionRoutes);
 app.use('/api/gamification', gamificationRoutes);
 app.use('/api/ai', aiRoutes);
-app.use('/api/risk', riskRoutes);
-app.use('/api/mindmap', mindmapRoutes);
 
 // ========== ML SERVICE PROXY ENDPOINTS ==========
 

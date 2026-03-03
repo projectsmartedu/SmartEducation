@@ -43,6 +43,7 @@ const StudentRevisions = () => {
     }, [fetchRevisions]);
 
     // Load mind map data once revision schedule is populated
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     useEffect(() => {
         if (revisionSchedule.length > 0) {
             loadMindMapData();

@@ -1,6 +1,6 @@
-import React, { useState, useCallback, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import './RevisionMindMap.css';
-import MindMapAdapter from '../../adapters/mindmapAdapter';
+import MindMapAdapter from '../adapters/mindmapAdapter';
 
 /**
  * Interactive Revision Mind Map Component
