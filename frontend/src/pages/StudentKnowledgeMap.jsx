@@ -1,9 +1,18 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import DashboardLayout from '../components/Layout/DashboardLayout';
-import { progressAPI, coursesAPI } from '../services/api';
+import { progressAPI, coursesAPI, aiAPI } from '../services/api';
+
+const riskBadge = {
+    critical: 'bg-[#fee2e2] text-[#b91c1c]',
+    high: 'bg-[#ffedd5] text-[#9a3412]',
+    moderate: 'bg-[#fef9c3] text-[#92400e]',
+    low: 'bg-[#dcfce7] text-[#166534]'
+};
 
 const StudentKnowledgeMap = () => {
     const [knowledgeConcepts, setKnowledgeConcepts] = useState([]);
+    const [mindMap, setMindMap] = useState({ nodes: [], edges: [] });
+    const [modelInfo, setModelInfo] = useState(null);
     const [courses, setCourses] = useState([]);
     const [selectedCourse, setSelectedCourse] = useState('');
     const [loading, setLoading] = useState(true);
@@ -16,7 +25,7 @@ const StudentKnowledgeMap = () => {
                 const enrolled = res.data?.courses || [];
                 setCourses(enrolled);
                 if (enrolled.length > 0) setSelectedCourse(enrolled[0]._id);
-            } catch (err) {
+            } catch {
                 setError('Failed to load courses.');
             }
         };
@@ -27,24 +36,39 @@ const StudentKnowledgeMap = () => {
         if (!selectedCourse) return;
         const fetchMap = async () => {
             setLoading(true);
+            setError('');
             try {
-                const res = await progressAPI.getKnowledgeMap(selectedCourse);
-                const nodes = res.data?.nodes || [];
+                const [progressRes, adaptiveRes] = await Promise.all([
+                    progressAPI.getKnowledgeMap(selectedCourse),
+                    aiAPI.getRecommendations({ courseId: selectedCourse })
+                ]);
+
+                const nodes = progressRes.data?.nodes || [];
+                const adaptiveNodes = adaptiveRes.data?.adaptivePlan?.mindMap?.nodes || [];
+                const adaptiveById = new Map(adaptiveNodes.map((node) => [String(node.id), node]));
+
                 setKnowledgeConcepts(
-                    nodes.map((n) => ({
-                        name: n.title,
-                        mastery: Math.round((n.mastery ?? 0) * 100),
-                        focus: n.forgetRisk === 'high' || n.forgetRisk === 'critical'
-                            ? 'High forget risk — revision recommended.'
-                            : n.forgetRisk === 'moderate'
-                                ? 'Moderate risk — reinforce soon.'
-                                : n.status === 'mastered'
-                                    ? 'Mastered — keep it up!'
-                                    : 'Continue practicing.',
-                        status: n.status,
-                        forgetRisk: n.forgetRisk
-                    }))
+                    nodes.map((n) => {
+                        const adaptive = adaptiveById.get(String(n.id));
+                        const mastery = Math.round((adaptive?.predictedMastery ?? n.mastery ?? 0) * 100);
+                        const forgetRisk = adaptive?.forgetRisk || n.forgetRisk || 'low';
+                        return {
+                            name: n.title,
+                            mastery,
+                            riskScore: adaptive?.riskScore,
+                            focus: forgetRisk === 'high' || forgetRisk === 'critical'
+                                ? 'High forget risk — revision recommended.'
+                                : forgetRisk === 'moderate'
+                                    ? 'Moderate risk — reinforce soon.'
+                                    : 'Low risk — continue pace.',
+                            status: n.status,
+                            forgetRisk
+                        };
+                    })
                 );
+
+                setMindMap(adaptiveRes.data?.adaptivePlan?.mindMap || { nodes: [], edges: [] });
+                setModelInfo(adaptiveRes.data?.modelInfo || null);
             } catch {
                 setError('Failed to load knowledge map.');
             } finally {
@@ -54,14 +78,35 @@ const StudentKnowledgeMap = () => {
         fetchMap();
     }, [selectedCourse]);
 
+    const mindMapLayout = useMemo(() => {
+        const nodes = mindMap?.nodes || [];
+        const radius = 190;
+        const center = 230;
+        return nodes.map((node, index) => {
+            const angle = (2 * Math.PI * index) / Math.max(nodes.length, 1);
+            return {
+                ...node,
+                x: center + radius * Math.cos(angle),
+                y: center + radius * Math.sin(angle)
+            };
+        });
+    }, [mindMap]);
+
+    const positionById = useMemo(() => {
+        const map = new Map();
+        mindMapLayout.forEach((node) => map.set(String(node.id), node));
+        return map;
+    }, [mindMapLayout]);
+
     return (
         <DashboardLayout>
             <div className="space-y-6">
                 <section className="rounded-[28px] bg-white p-6 shadow-xl ring-1 ring-[#e2e8f0]">
                     <h1 className="text-2xl font-semibold text-[#0f172a]">Knowledge Map Overview</h1>
                     <p className="mt-2 text-sm text-[#475569]">
-                        This page surfaces concept mastery across your personalized graph, powered by live progress data.
+                        Concept links and revision priorities are generated by an adaptive ML scoring model.
                     </p>
+                    {modelInfo && <p className="mt-2 text-xs text-[#64748b]">Model: {modelInfo.name} • v{modelInfo.version}</p>}
                     {courses.length > 1 && (
                         <select
                             className="mt-4 rounded-xl border border-[#e2e8f0] px-4 py-2 text-sm text-[#334155] focus:outline-none focus:ring-2 focus:ring-[#4338ca]"
@@ -84,35 +129,45 @@ const StudentKnowledgeMap = () => {
                         <div className="flex items-center justify-center py-12">
                             <div className="h-8 w-8 animate-spin rounded-full border-4 border-[#e2e8f0] border-t-[#4338ca]" />
                         </div>
-                    ) : knowledgeConcepts.length === 0 ? (
-                        <p className="py-8 text-center text-sm text-[#94a3b8]">No concepts found for this course yet.</p>
                     ) : (
-                        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-                            {knowledgeConcepts.map((concept) => (
-                                <div key={concept.name} className="rounded-3xl bg-[#f8fafc] p-5 shadow transition hover:-translate-y-1">
-                                    <div className="flex items-center justify-between">
-                                        <h2 className="text-lg font-semibold text-[#111827]">{concept.name}</h2>
-                                        <span
-                                            className={`rounded-full px-3 py-1 text-xs font-semibold ${concept.forgetRisk === 'high' || concept.forgetRisk === 'critical'
-                                                ? 'bg-[#fee2e2] text-[#b91c1c]'
-                                                : concept.forgetRisk === 'moderate'
-                                                    ? 'bg-[#fef9c3] text-[#92400e]'
-                                                    : 'bg-[#dcfce7] text-[#166534]'
-                                                }`}
-                                        >
-                                            {concept.forgetRisk || 'low'}
-                                        </span>
+                        <div className="grid gap-6 lg:grid-cols-[1.1fr_1fr]">
+                            <div className="rounded-3xl border border-[#e2e8f0] p-4">
+                                <h2 className="text-sm font-semibold uppercase tracking-[0.2em] text-[#64748b]">Visual Mind Map</h2>
+                                <svg viewBox="0 0 460 460" className="mt-4 h-[420px] w-full rounded-2xl bg-[#f8fafc]">
+                                    {(mindMap?.edges || []).map((edge, index) => {
+                                        const from = positionById.get(String(edge.from));
+                                        const to = positionById.get(String(edge.to));
+                                        if (!from || !to) return null;
+                                        return <line key={`${edge.from}-${edge.to}-${index}`} x1={from.x} y1={from.y} x2={to.x} y2={to.y} stroke="#94a3b8" strokeWidth="2" />;
+                                    })}
+                                    {mindMapLayout.map((node) => (
+                                        <g key={node.id}>
+                                            <circle cx={node.x} cy={node.y} r="28" fill={node.forgetRisk === 'critical' || node.forgetRisk === 'high' ? '#fecaca' : node.forgetRisk === 'moderate' ? '#fef08a' : '#bbf7d0'} />
+                                            <text x={node.x} y={node.y + 4} textAnchor="middle" className="fill-[#0f172a] text-[11px] font-semibold">
+                                                {Math.round((node.predictedMastery || 0) * 100)}%
+                                            </text>
+                                        </g>
+                                    ))}
+                                </svg>
+                            </div>
+
+                            <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-1">
+                                {knowledgeConcepts.map((concept) => (
+                                    <div key={concept.name} className="rounded-3xl bg-[#f8fafc] p-5 shadow transition hover:-translate-y-1">
+                                        <div className="flex items-center justify-between">
+                                            <h2 className="text-lg font-semibold text-[#111827]">{concept.name}</h2>
+                                            <span className={`rounded-full px-3 py-1 text-xs font-semibold ${riskBadge[concept.forgetRisk] || riskBadge.low}`}>
+                                                {concept.forgetRisk}
+                                            </span>
+                                        </div>
+                                        <p className="mt-2 text-sm text-[#475569]">Predicted mastery {concept.mastery}%</p>
+                                        <div className="mt-3 h-2 rounded-full bg-[#e2e8f0]">
+                                            <div className="h-2 rounded-full bg-gradient-to-r from-[#4338ca] to-[#0ea5e9]" style={{ width: `${concept.mastery}%` }} />
+                                        </div>
+                                        <p className="mt-3 text-xs text-[#64748b]">{concept.focus}</p>
                                     </div>
-                                    <p className="mt-2 text-sm text-[#475569]">Mastery {concept.mastery}%</p>
-                                    <div className="mt-3 h-2 rounded-full bg-[#e2e8f0]">
-                                        <div
-                                            className="h-2 rounded-full bg-gradient-to-r from-[#4338ca] to-[#0ea5e9]"
-                                            style={{ width: `${concept.mastery}%` }}
-                                        />
-                                    </div>
-                                    <p className="mt-3 text-xs text-[#64748b]">{concept.focus}</p>
-                                </div>
-                            ))}
+                                ))}
+                            </div>
                         </div>
                     )}
                 </section>
