@@ -38,6 +38,12 @@ npm-debug.log*
 # Lock files
 package-lock.json
 
+# Ignore deployment and documentation guides
+COMPLETE_DEPLOYMENT_GUIDE.md
+MIND_MAP_DELIVERABLES.md
+ML_PIPELINE_IMPLEMENTATION_GUIDE.md
+README.md
+
 archive/
 
 ml_notebooks/
