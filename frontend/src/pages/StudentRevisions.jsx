@@ -43,13 +43,7 @@ const StudentRevisions = () => {
     }, [fetchRevisions]);
 
     // Load mind map data once revision schedule is populated
-    useEffect(() => {
-        if (revisionSchedule.length > 0) {
-            loadMindMapData();
-        }
-    }, [revisionSchedule, loadMindMapData]);
-
-    const loadMindMapData = async () => {
+    const loadMindMapData = React.useCallback(async () => {
         // Mock student data
         const mockStudent = {
             id: 'student-001',
@@ -97,7 +91,13 @@ const StudentRevisions = () => {
             };
         });
         setPredictions(urgencyPredictions);
-    };
+    }, [revisionSchedule]);
+
+    useEffect(() => {
+        if (revisionSchedule.length > 0) {
+            loadMindMapData();
+        }
+    }, [revisionSchedule, loadMindMapData]);
 
     const handleComplete = async (id) => {
         try {
