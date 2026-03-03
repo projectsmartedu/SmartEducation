@@ -31,7 +31,6 @@ const StudentDashboard = () => {
     const [gamification, setGamification] = useState(null);
     const [progressStats, setProgressStats] = useState(null);
     const [loading, setLoading] = useState(true);
-    // ...existing code...
 
     useEffect(() => {
         const fetchAll = async () => {

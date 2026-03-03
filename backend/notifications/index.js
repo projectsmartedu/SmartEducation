@@ -8,6 +8,17 @@ function init(server) {
 
   io.on('connection', (socket) => {
     console.log('Socket connected:', socket.id);
+
+    // client should send register with { userId, role }
+    socket.on('register', ({ userId, role }) => {
+      try {
+        if (userId) socket.join(`user_${userId}`);
+        if (role) socket.join(`role_${role}`);
+      } catch (e) {
+        console.error('Register socket room error', e);
+      }
+    });
+
     socket.on('disconnect', () => {
       console.log('Socket disconnected:', socket.id);
     });
@@ -29,4 +40,33 @@ function emitNewTopic(topic, courseId) {
   io.emit('topicCreated', { topic, courseId });
 }
 
-module.exports = { init, getIO, emitNewCourse, emitNewTopic };
+function emitNewDoubt(doubt) {
+  if (!io) return;
+  // notify all teachers
+  io.to('role_teacher').emit('newDoubt', { doubt });
+}
+
+function emitDoubtAnswered(doubt, studentId) {
+  if (!io) return;
+  if (!studentId) return;
+  io.to(`user_${studentId}`).emit('doubtAnswered', { doubt });
+}
+
+function emitDeadlineAlert(alert, userIds = []) {
+  if (!io) return;
+  if (!Array.isArray(userIds) || userIds.length === 0) {
+    io.emit('deadlineAlert', { alert });
+    return;
+  }
+  userIds.forEach((id) => io.to(`user_${id}`).emit('deadlineAlert', { alert }));
+}
+
+module.exports = {
+  init,
+  getIO,
+  emitNewCourse,
+  emitNewTopic,
+  emitNewDoubt,
+  emitDoubtAnswered,
+  emitDeadlineAlert
+};

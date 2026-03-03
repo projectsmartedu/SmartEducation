@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { useParams, Link } from 'react-router-dom';
+import { useParams, Link, useNavigate } from 'react-router-dom';
 import DashboardLayout from '../components/Layout/DashboardLayout';
 import { coursesAPI, progressAPI } from '../services/api';
 import { ArrowLeft, BookOpen, Clock, CheckCircle, Loader2, FileText, Award, ChevronRight, File, Star, RotateCcw, WifiOff, MessageSquare } from 'lucide-react';
@@ -14,6 +14,7 @@ import {
     clearPendingSyncs
 } from '../services/offlineStorage';
 import CourseChat from '../components/CourseChat';
+import FloatingChatButton from '../components/FloatingChatButton';
 
 const STATUS_STYLES = {
     'mastered': { bg: 'bg-[#dcfce7]', text: 'text-[#166534]', label: 'Mastered' },
@@ -24,6 +25,7 @@ const STATUS_STYLES = {
 
 const StudentCourseDetail = () => {
     const { courseId } = useParams();
+    const navigate = useNavigate();
     const [course, setCourse] = useState(null);
     const [topics, setTopics] = useState([]);
     const [progressMap, setProgressMap] = useState({});
@@ -36,8 +38,6 @@ const StudentCourseDetail = () => {
     const [topicContent, setTopicContent] = useState(null);
     const [contentLoading, setContentLoading] = useState(false);
     const [completionSuccess, setCompletionSuccess] = useState(null);
-    // ...existing code...
-
     const loadFromOffline = useCallback(async () => {
         try {
             const offlineData = await getCourseOffline(courseId);
@@ -203,32 +203,6 @@ const StudentCourseDetail = () => {
         }
     };
 
-    const handleCompleteTopic = async (topic) => {
-        setUpdating(topic._id);
-        const data = { status: 'completed', masteryLevel: 0.8, timeSpentMinutes: topic.estimatedMinutes || 15 };
-        try {
-            if (navigator.onLine) {
-                await progressAPI.updateProgress(topic._id, data);
-                await fetchData();
-            } else {
-                await saveProgressItemOffline(topic._id, courseId, data);
-                await queueProgressSync(topic._id, data);
-                setProgressMap(prev => ({ ...prev, [topic._id]: { ...prev[topic._id], topic: topic._id, ...data } }));
-            }
-            setCompletionSuccess(topic);
-            setTimeout(() => setCompletionSuccess(null), 3000);
-        } catch {
-            // Fallback to offline save
-            await saveProgressItemOffline(topic._id, courseId, data);
-            await queueProgressSync(topic._id, data);
-            setProgressMap(prev => ({ ...prev, [topic._id]: { ...prev[topic._id], topic: topic._id, ...data } }));
-            setCompletionSuccess(topic);
-            setTimeout(() => setCompletionSuccess(null), 3000);
-        } finally {
-            setUpdating(null);
-        }
-    };
-
     const handleMasterTopic = async (topic) => {
         setUpdating(topic._id);
         const data = { status: 'mastered', masteryLevel: 1.0 };
@@ -279,9 +253,37 @@ const StudentCourseDetail = () => {
 
     const getProgress = (topicId) => progressMap[topicId] || null;
 
+    const handleAttemptQuiz = (topic) => {
+        const topicId = topic?._id || topic?.id;
+        if (!topicId) return;
+        navigate(`/student/courses/${courseId}/topics/${topicId}/quiz`, {
+            state: { topic }
+        });
+    };
+
     const sortedTopics = [...topics].sort((a, b) => a.order - b.order);
 
     const [chatOpen, setChatOpen] = useState(false);
+    const chatClickRef = React.useRef(0);
+    const openChatOnce = () => {
+        const now = Date.now();
+        if (now - chatClickRef.current < 300) return; // debounce rapid clicks
+        chatClickRef.current = now;
+        setChatOpen(true);
+    };
+
+    // Auto-open topic chat the first time a topic is opened (per-topic flag in localStorage)
+    useEffect(() => {
+        if (!readingTopic) return;
+        try {
+            const key = `topicChatSeen:${readingTopic._id}`;
+            const seen = localStorage.getItem(key);
+            if (!seen) {
+                setChatOpen(true);
+                localStorage.setItem(key, '1');
+            }
+        } catch (_) {}
+    }, [readingTopic]);
 
     // Check if the previous topic is completed (for sequential unlock)
     // In offline mode, unlock all topics so students can study freely
@@ -298,7 +300,6 @@ const StudentCourseDetail = () => {
             <DashboardLayout>
                 <div className="flex items-center justify-center py-24">
                     <div className="h-10 w-10 animate-spin rounded-full border-4 border-[#e2e8f0] border-t-[#4338ca]" />
-                    <CourseChat courseId={courseId} course={course} topic={readingTopic} visible={chatOpen} onClose={() => setChatOpen(false)} />
                 </div>
             </DashboardLayout>
         );
@@ -372,22 +373,18 @@ const StudentCourseDetail = () => {
                                     </>
                                 ) : (
                                     <button
-                                        onClick={() => handleCompleteTopic(readingTopic)}
+                                        onClick={() => handleAttemptQuiz(readingTopic)}
                                         disabled={updating === readingTopic._id}
-                                        className="inline-flex items-center gap-2 rounded-full bg-[#16a34a] px-5 py-2 text-sm font-semibold text-white shadow hover:bg-[#15803d] disabled:opacity-50 transition">
-                                        {updating === readingTopic._id ? (
-                                            <><Loader2 className="h-4 w-4 animate-spin" /> Completing...</>
-                                        ) : (
-                                            <><CheckCircle className="h-4 w-4" /> Mark as Complete (+{readingTopic.pointsReward} XP)</>
-                                        )}
+                                        className="inline-flex items-center gap-2 rounded-full bg-[#4338ca] px-5 py-2 text-sm font-semibold text-white shadow hover:bg-[#312e81] disabled:opacity-50 transition">
+                                        <><Award className="h-4 w-4" /> Attempt Quiz to Complete</>
                                     </button>
                                 )}
                             </div>
                         </div>
                     </div>
 
-                    {/* Main area with content and a right column for the topic chat */}
-                    <div className="grid grid-cols-1 lg:grid-cols-[1fr_24rem] gap-6">
+                    {/* Main area with full-width content; chat is an overlay */}
+                    <div className="grid grid-cols-1 gap-6">
                         <div className="relative">
                             {/* Content Area */}
                             <div className="rounded-[28px] bg-white shadow-xl ring-1 ring-[#e2e8f0] overflow-hidden">
@@ -406,10 +403,10 @@ const StudentCourseDetail = () => {
                                         <h3 className="mt-4 text-lg font-semibold text-[#475569]">No Content Available</h3>
                                         <p className="mt-2 text-sm text-[#94a3b8]">The teacher hasn't uploaded material for this topic yet.</p>
                                         {!isCompleted && (
-                                            <button onClick={() => handleCompleteTopic(readingTopic)}
+                                            <button onClick={() => handleAttemptQuiz(readingTopic)}
                                                 disabled={updating === readingTopic._id}
-                                                className="mt-6 rounded-full bg-[#16a34a] px-6 py-2 text-sm font-semibold text-white hover:bg-[#15803d] disabled:opacity-50">
-                                                {updating === readingTopic._id ? 'Completing...' : `Mark Complete Anyway (+${readingTopic.pointsReward} XP)`}
+                                                className="mt-6 rounded-full bg-[#4338ca] px-6 py-2 text-sm font-semibold text-white hover:bg-[#312e81] disabled:opacity-50">
+                                                Attempt Quiz to Complete
                                             </button>
                                         )}
                                     </div>
@@ -439,35 +436,23 @@ const StudentCourseDetail = () => {
                                         {/* Bottom completion button */}
                                         {!isCompleted && (
                                             <div className="mt-10 flex justify-center border-t border-[#e2e8f0] pt-8">
-                                                <button onClick={() => handleCompleteTopic(readingTopic)}
+                                                <button onClick={() => handleAttemptQuiz(readingTopic)}
                                                     disabled={updating === readingTopic._id}
-                                                    className="inline-flex items-center gap-2 rounded-full bg-[#16a34a] px-8 py-3 text-base font-semibold text-white shadow-lg hover:bg-[#15803d] disabled:opacity-50 transition transform hover:scale-105">
-                                                    {updating === readingTopic._id ? (
-                                                        <><Loader2 className="h-5 w-5 animate-spin" /> Completing...</>
-                                                    ) : (
-                                                        <><Award className="h-5 w-5" /> I've finished reading — Complete Topic (+{readingTopic.pointsReward} XP)</>
-                                                    )}
+                                                    className="inline-flex items-center gap-2 rounded-full bg-[#4338ca] px-8 py-3 text-base font-semibold text-white shadow-lg hover:bg-[#312e81] disabled:opacity-50 transition transform hover:scale-105">
+                                                    <><Award className="h-5 w-5" /> Attempt Quiz to Complete</>
                                                 </button>
                                             </div>
                                         )}
                                     </div>
                                 )}
                             </div>
-                            {/* Small floating toggle for topic chat (appears inside reader) */}
-                            <button
-                                onClick={() => setChatOpen(prev => !prev)}
-                                aria-label="Toggle topic chat"
-                                className="absolute bottom-6 right-6 z-50 h-12 w-12 rounded-full bg-[#4338ca] text-white flex items-center justify-center shadow-lg hover:scale-105 transition"
-                            >
-                                <MessageSquare className="h-6 w-6" />
-                            </button>
+                            {/* Floating toggle for topic chat (rendered into a top-level portal to avoid overlay capture) */}
+                            <FloatingChatButton onActivate={openChatOnce} />
+
+                            {/* Render the chat panel while in reader mode so side panel is available */}
+                            <CourseChat side={true} courseId={courseId} course={course} topic={readingTopic} visible={chatOpen} onClose={() => setChatOpen(false)} />
 
                         </div>
-
-                        {/* Chat panel: open side overlay when toggled */}
-                        {chatOpen && (
-                            <CourseChat side={true} courseId={courseId} course={course} topic={readingTopic} visible={chatOpen} onClose={() => setChatOpen(false)} />
-                        )}
                     </div>
                 </div>
             </DashboardLayout>
@@ -517,18 +502,18 @@ const StudentCourseDetail = () => {
                 </div>
             </section>
             {/* Floating AI actions: open in-course chat or open doubt-support page */}
-            <div className="fixed bottom-6 right-6 z-50">
-                <button
-                    onClick={() => setChatOpen(true)}
-                    className="inline-flex items-center gap-2 rounded-full bg-[#16a34a] px-4 py-3 text-white shadow-lg hover:bg-[#15803d]">
-                    <MessageSquare className="h-5 w-5" /> Ask AI (Chat)
-                </button>
-            </div>
-
-            {/* Global modal chat when not in reader; side panel chat when reading a topic */}
             {!readingTopic && (
-                <CourseChat courseId={courseId} course={course} topic={readingTopic} visible={chatOpen} onClose={() => setChatOpen(false)} />
+                <div className="fixed bottom-6 right-6 z-50">
+                    <button
+                        onClick={() => { openChatOnce(); }}
+                        className="inline-flex items-center gap-2 rounded-full bg-[#16a34a] px-4 py-3 text-white shadow-lg hover:bg-[#15803d]">
+                        <MessageSquare className="h-5 w-5" /> Ask AI (Chat)
+                    </button>
+                </div>
             )}
+
+            {/* Single global chat component (side when reading a topic, modal otherwise) */}
+            <CourseChat side={!!readingTopic} courseId={courseId} course={course} topic={readingTopic} visible={chatOpen} onClose={() => setChatOpen(false)} />
             {/* readingTopic chat rendered inside the reader as a right column */}
 
             {error && <div className="rounded-2xl bg-red-50 p-4 text-sm text-red-700">{error}</div>}

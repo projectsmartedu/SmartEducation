@@ -143,7 +143,8 @@ const gamificationSchema = new mongoose.Schema({
   timestamps: true
 });
 
-gamificationSchema.index({ student: 1 });
+// `student` field is declared with `unique: true` which already creates an index.
+// Avoid adding a duplicate index here.
 gamificationSchema.index({ totalPoints: -1 }); // For global leaderboard
 gamificationSchema.index({ weeklyPoints: -1 }); // For weekly leaderboard
 gamificationSchema.index({ currentStreak: -1 }); // For streak leaderboard
