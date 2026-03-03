@@ -13,8 +13,13 @@ const progressRoutes = require('./routes/progress');
 const revisionRoutes = require('./routes/revisions');
 const gamificationRoutes = require('./routes/gamification');
 const aiRoutes = require('./routes/ai');
+const riskRoutes = require('./routes/risk');
+const mindmapRoutes = require('./routes/mindmap');
 
 const app = express();
+
+// ML Service Configuration
+const ML_SERVICE_URL = process.env.ML_SERVICE_URL || 'http://localhost:5001';
 
 // Middleware
 app.use(cors());
@@ -32,6 +37,72 @@ app.use('/api/progress', progressRoutes);
 app.use('/api/revisions', revisionRoutes);
 app.use('/api/gamification', gamificationRoutes);
 app.use('/api/ai', aiRoutes);
+app.use('/api/risk', riskRoutes);
+app.use('/api/mindmap', mindmapRoutes);
+
+// ========== ML SERVICE PROXY ENDPOINTS ==========
+
+// Proxy: Risk Prediction
+app.post('/api/ml/risk/predict', async (req, res) => {
+  try {
+    const response = await fetch(`${ML_SERVICE_URL}/api/risk/predict`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(req.body)
+    });
+    const data = await response.json();
+    res.json(data);
+  } catch (error) {
+    console.error('ML Service error:', error);
+    res.status(503).json({ error: 'ML Service unavailable', details: error.message });
+  }
+});
+
+// Proxy: Batch Risk Prediction
+app.post('/api/ml/risk/batch-predict', async (req, res) => {
+  try {
+    const response = await fetch(`${ML_SERVICE_URL}/api/risk/batch-predict`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(req.body)
+    });
+    const data = await response.json();
+    res.json(data);
+  } catch (error) {
+    res.status(503).json({ error: 'ML Service unavailable' });
+  }
+});
+
+// Proxy: Revision Mind Map
+app.post('/api/ml/revision/mindmap', async (req, res) => {
+  try {
+    const response = await fetch(`${ML_SERVICE_URL}/api/revision/mindmap`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(req.body)
+    });
+    const data = await response.json();
+    res.json(data);
+  } catch (error) {
+    console.error('ML Service error:', error);
+    res.status(503).json({ error: 'ML Service unavailable' });
+  }
+});
+
+// Proxy: Topic Urgency
+app.post('/api/ml/revision/topic-urgency', async (req, res) => {
+  try {
+    const response = await fetch(`${ML_SERVICE_URL}/api/revision/topic-urgency`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(req.body)
+    });
+    const data = await response.json();
+    res.json(data);
+  } catch (error) {
+    res.status(503).json({ error: 'ML Service unavailable' });
+  }
+});
 
 // Root route (for Render health checks)
 app.get('/', (req, res) => {

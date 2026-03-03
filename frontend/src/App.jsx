@@ -26,6 +26,7 @@ import StudentProfile from './pages/StudentProfile';
 import Chatbot from './pages/Chatbot';
 import StudentOfflineDownloads from './pages/StudentOfflineDownloads';
 import OfflineIndicator from './components/OfflineIndicator';
+import StudentMindMap from './pages/StudentMindMap';
 
 function App() {
     return (
@@ -148,7 +149,6 @@ function App() {
                             </ProtectedRoute>
                         }
                     />
-                    
                     <Route
                         path="/student/chatbot"
                         element={
@@ -178,6 +178,14 @@ function App() {
                         element={
                             <ProtectedRoute allowedRoles={['student']}>
                                 <StudentOfflineDownloads />
+                            </ProtectedRoute>
+                        }
+                    />
+                    <Route
+                        path="/student/mindmap"
+                        element={
+                            <ProtectedRoute allowedRoles={["student"]}>
+                                <StudentMindMap />
                             </ProtectedRoute>
                         }
                     />
