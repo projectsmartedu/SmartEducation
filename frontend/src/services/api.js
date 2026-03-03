@@ -176,12 +176,15 @@ export const notificationsAPI = {
   markAsRead: (id) => api.post(`/notifications/${id}/read`)
 };
 
-// AI Mock API
+// AI API
 export const aiAPI = {
   predictMastery: (data) => api.post('/ai/predict-mastery', data),
   predictForgetting: (data) => api.post('/ai/predict-forgetting', data),
   getLearningPace: () => api.get('/ai/learning-pace'),
-  getRecommendations: () => api.get('/ai/recommendations')
+  getRecommendations: (params = {}) => api.get('/ai/recommendations', { params }),
+  retrainModel: () => api.post('/ai/retrain'),
+  exportModel: () => api.get('/ai/model/export'),
+  getTrainingData: (params = {}) => api.get('/ai/model/training-data', { params })
 };
 
 // Quiz API
