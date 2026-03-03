@@ -114,7 +114,7 @@ const TeacherManageStudents = () => {
 
                 {/* Stats Card */}
                 <div className="bg-gradient-to-br from-gray-800 via-gray-700 to-gray-900 rounded-2xl p-6 text-white">
-                    <div className="flex items-center justify-between">
+                    <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
                         <div>
                             <p className="text-gray-300 text-sm font-medium">Total Students</p>
                             <p className="text-4xl font-bold mt-1">{stats.totalStudents}</p>
@@ -136,6 +136,7 @@ const TeacherManageStudents = () => {
                         </button>
                     </div>
                 )}
+
                 {success && (
                     <div className="p-4 bg-gray-100 border border-gray-300 rounded-xl flex items-center gap-3 text-gray-700 animate-fade-in-up">
                         <CheckCircle className="w-5 h-5 flex-shrink-0" />
@@ -208,7 +209,7 @@ const TeacherManageStudents = () => {
                                     <div className="relative">
                                         <button
                                             onClick={() => handleDeleteStudent(student._id, student.name)}
-                                            className="p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-lg opacity-0 group-hover:opacity-100 transition-all"
+                                            className="p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-lg opacity-100 sm:opacity-0 group-hover:opacity-100 transition-all"
                                             title="Remove student"
                                         >
                                             <Trash2 className="w-4 h-4" />

@@ -3,6 +3,7 @@ import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import { useOnlineStatus } from '../../hooks/useOffline';
 import Navbar from './Navbar';
+import Footer from './Footer';
 import {
     LayoutDashboard,
     Map,
@@ -150,7 +151,7 @@ const DashboardLayout = ({ children }) => {
     );
 
     return (
-        <div className="min-h-screen bg-[#f6f1eb]">
+        <div className="min-h-screen bg-brand-50">
             {/* Desktop sidebar */}
             <aside className="fixed inset-y-0 left-0 z-40 hidden w-64 border-r border-[#e2e8f0] bg-white lg:block">
                 {sidebarContent}
@@ -181,8 +182,11 @@ const DashboardLayout = ({ children }) => {
             <div className="lg:ml-64">
                 <Navbar />
                 <main className="min-h-screen pt-20">
-                    <div className="px-4 pb-10 sm:px-6 xl:px-12">{children}</div>
+                    <div className="px-4 sm:px-6 lg:px-8 pb-10 xl:px-12">
+                        <div className="mx-auto max-w-6xl">{children}</div>
+                    </div>
                 </main>
+                <Footer />
             </div>
         </div>
     );

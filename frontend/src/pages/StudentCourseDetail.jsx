@@ -141,7 +141,6 @@ const StudentCourseDetail = () => {
 
     const openTopicReader = async (topic) => {
         setReadingTopic(topic);
-        setChatOpen(true);
         setContentLoading(true);
         setTopicContent(null);
 
@@ -289,16 +288,14 @@ const StudentCourseDetail = () => {
         setChatOpen(true);
     };
 
-    // Auto-open topic chat the first time a topic is opened (per-topic flag in localStorage)
+    // Previously we auto-opened the chat when a topic was opened for the first time.
+    // Change: do NOT auto-open. Users must explicitly open the chat.
     useEffect(() => {
+        // mark topic chat as seen without opening it (no-op if no topic)
         if (!readingTopic) return;
         try {
             const key = `topicChatSeen:${readingTopic._id}`;
-            const seen = localStorage.getItem(key);
-            if (!seen) {
-                setChatOpen(true);
-                localStorage.setItem(key, '1');
-            }
+            if (!localStorage.getItem(key)) localStorage.setItem(key, '1');
         } catch (_) {}
     }, [readingTopic]);
 
@@ -475,7 +472,7 @@ const StudentCourseDetail = () => {
                             <FloatingChatButton onActivate={openChatOnce} />
 
                             {/* Render the chat panel while in reader mode so side panel is available */}
-                            <CourseChat side={true} courseId={courseId} course={course} topic={readingTopic} visible={chatOpen} onClose={() => setChatOpen(false)} />
+                            <CourseChat side={true} courseId={courseId} course={course} topic={readingTopic} topicContent={topicContent} visible={chatOpen} onClose={() => setChatOpen(false)} />
 
                         </div>
 
@@ -540,7 +537,7 @@ const StudentCourseDetail = () => {
             )}
 
             {/* Single global chat component (side when reading a topic, modal otherwise) */}
-            <CourseChat side={!!readingTopic} courseId={courseId} course={course} topic={readingTopic} visible={chatOpen} onClose={() => setChatOpen(false)} />
+            <CourseChat side={!!readingTopic} courseId={courseId} course={course} topic={readingTopic} topicContent={topicContent} visible={chatOpen} onClose={() => setChatOpen(false)} />
             {/* readingTopic chat rendered inside the reader as a right column */}
 
             {error && <div className="rounded-2xl bg-red-50 p-4 text-sm text-red-700">{error}</div>}

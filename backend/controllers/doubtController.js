@@ -15,7 +15,7 @@ const User = require('../models/User');
 // @access  Private (Student)
 exports.submitDoubt = async (req, res) => {
   try {
-    const { question, subject, topic } = req.body;
+    const { question, subject, topic, topicContent } = req.body;
 
     if (!question || question.trim().length < 10) {
       return res.status(400).json({
@@ -23,9 +23,9 @@ exports.submitDoubt = async (req, res) => {
       });
     }
 
-    // Create and resolve doubt
+    // Create and resolve doubt (include optional topicContent for RAG)
     const doubt = await doubtResolutionService.createAndResolve(
-      { question, subject, topic },
+      { question, subject, topic, topicContent },
       req.user._id
     );
 
@@ -69,12 +69,20 @@ exports.submitDoubt = async (req, res) => {
     console.error('Error submitting doubt:', error);
     
     // Check for quota exceeded error
+    if (error.status === 401 || (error.message && error.message.toLowerCase().includes('authentication'))) {
+      return res.status(401).json({
+        message: 'AI authentication failed: invalid or revoked API key. Please check your GEMINI_API_KEY.'
+      });
+    }
+
+    // Check for quota exceeded error
     if (error.message?.includes('quota') || error.status === 429) {
       return res.status(429).json({ 
         message: 'AI service is temporarily unavailable due to high usage. Please try again in a minute.' 
       });
     }
-    
+
+    // Generic error
     res.status(500).json({ message: 'Error processing your doubt. Please try again.' });
   }
 };

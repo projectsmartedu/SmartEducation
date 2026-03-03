@@ -11,6 +11,22 @@
 body {
   font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
   background-color: #f3f4f6;
+  /* Brand palette variables */
+  --brand-50: #f5f7fb;
+  --brand-100: #e6eef9;
+  --brand-200: #cfe0f5;
+  --brand-300: #9fc1ee;
+  --brand-400: #66a6e6;
+  --brand-500: #3378d6;
+  --brand-600: #2b63b8;
+  --brand-700: #234a8a;
+  --brand-800: #172b4d;
+  --brand-900: #0b1424;
+  --accent: #06b6d4;
+  --surface: #0f172a;
+  --muted: #6b7280;
+
+  background-image: linear-gradient(180deg, var(--brand-50) 0%, #f8fafc 45%);
   min-height: 100vh;
 }
 
@@ -75,3 +91,52 @@ body {
 .loading-dot:nth-child(3) {
   animation-delay: 0.4s;
 }
+
+/* Button utilities */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.5rem 0.75rem;
+  border-radius: 0.5rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.btn-primary {
+  background: var(--accent);
+  color: white;
+  box-shadow: 0 6px 18px rgba(3, 105, 139, 0.08);
+}
+
+.btn-ghost {
+  background: transparent;
+  color: var(--brand-700);
+}
+
+/* Small role badge */
+.role-badge {
+  background: var(--brand-100);
+  color: var(--brand-700);
+  padding: 0.25rem 0.6rem;
+  border-radius: 9999px;
+  font-size: 0.75rem;
+  font-weight: 600;
+}
+
+/* Global overrides to apply brand palette to common Tailwind utility classes
+   These use !important to ensure the theme takes effect without editing every component. */
+.bg-white { background-color: var(--brand-50) !important; }
+.text-gray-800 { color: var(--brand-800) !important; }
+.text-gray-700 { color: var(--brand-700) !important; }
+.text-gray-500 { color: var(--muted) !important; }
+.border-gray-200 { border-color: var(--brand-200) !important; }
+.border-gray-100 { border-color: var(--brand-100) !important; }
+.bg-slate-900 { background-color: var(--brand-800) !important; }
+.text-slate-200 { color: var(--brand-100) !important; }
+.bg-slate-950 { background-color: var(--brand-950) !important; }
+.bg-slate-50 { background-color: var(--brand-50) !important; }
+.hover\:bg-gray-50:hover { background-color: var(--brand-50) !important; }
+.text-blue-600 { color: var(--accent) !important; }
+.text-white { color: white !important; }
+.bg-white\/95 { background-color: rgba(255,255,255,0.95) !important; }
