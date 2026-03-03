@@ -1,5 +1,6 @@
 import React, { useEffect } from 'react';
 import { Link } from 'react-router-dom';
+import Footer from '../components/Layout/Footer';
 
 const heroMetrics = [
     { value: '18K+', label: 'Learners onboarded' },
@@ -244,12 +245,12 @@ const Landing = () => {
                         <div className="flex items-center gap-3 text-sm font-semibold text-slate-700">
                             <Link to="/about" className="hidden rounded-full px-4 py-2 transition hover:bg-white lg:inline-flex">About</Link>
                             <Link to="/contact" className="hidden rounded-full px-4 py-2 transition hover:bg-white lg:inline-flex">Contact</Link>
-                            <Link
-                                to="/login"
-                                className="rounded-full bg-slate-900 px-5 py-2 text-white shadow-lg shadow-slate-900/20 transition hover:-translate-y-0.5 hover:bg-slate-800"
-                            >
-                                Sign in
-                            </Link>
+                                <Link
+                                    to="/login"
+                                    className="rounded-full bg-slate-900 px-2 py-1 text-xs sm:px-4 sm:py-1.5 text-white shadow-lg shadow-slate-900/20 transition hover:-translate-y-0.5 hover:bg-slate-800"
+                                >
+                                    Sign in
+                                </Link>
                         </div>
                     </nav>
 
@@ -501,51 +502,7 @@ const Landing = () => {
                     </section>
                 </main>
 
-                <footer className="bg-slate-900 text-slate-200">
-                    <div className="mx-auto grid max-w-6xl gap-10 px-6 py-12 md:grid-cols-4">
-                        <div className="space-y-3">
-                            <h3 className="text-lg font-semibold text-white">Smart Education</h3>
-                            <p className="text-sm text-slate-300">
-                                Adaptive knowledge mapping and revision intelligence for institutions that demand accountable learning outcomes.
-                            </p>
-                        </div>
-                        <div>
-                            <h4 className="text-sm font-semibold uppercase tracking-[0.28em] text-white">Product</h4>
-                            <ul className="mt-4 space-y-2 text-sm text-slate-300">
-                                <li><Link to="/" className="hover:text-white">Knowledge graph</Link></li>
-                                <li><Link to="/" className="hover:text-white">Revision engine</Link></li>
-                                <li><Link to="/" className="hover:text-white">Reporting suite</Link></li>
-                            </ul>
-                        </div>
-                        <div>
-                            <h4 className="text-sm font-semibold uppercase tracking-[0.28em] text-white">Company</h4>
-                            <ul className="mt-4 space-y-2 text-sm text-slate-300">
-                                <li><Link to="/about" className="hover:text-white">About</Link></li>
-                                <li><Link to="/contact" className="hover:text-white">Contact</Link></li>
-                                <li><a href="https://www.linkedin.com" target="_blank" rel="noreferrer" className="hover:text-white">Careers</a></li>
-                            </ul>
-                        </div>
-                        <div>
-                            <h4 className="text-sm font-semibold uppercase tracking-[0.28em] text-white">Connect</h4>
-                            <div className="mt-4 flex gap-3">
-                                {['https://twitter.com', 'https://www.linkedin.com', 'mailto:hello@smarteducation.ai'].map((link) => (
-                                    <a
-                                        key={link}
-                                        href={link}
-                                        target={link.startsWith('mailto:') ? undefined : '_blank'}
-                                        rel={link.startsWith('mailto:') ? undefined : 'noreferrer'}
-                                        className="flex h-9 w-9 items-center justify-center rounded-full bg-white/10 text-white transition hover:-translate-y-1 hover:bg-white/20"
-                                    >
-                                        *
-                                    </a>
-                                ))}
-                            </div>
-                        </div>
-                    </div>
-                    <div className="border-t border-white/10 bg-slate-950 py-4 text-center text-xs uppercase tracking-[0.3em] text-slate-500">
-                        (c) {new Date().getFullYear()} Smart Education. All rights reserved.
-                    </div>
-                </footer>
+                <Footer />
             </div>
         </>
     );

@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { chatAPI, doubtsAPI } from '../services/api';
 import { X, Send, MessageSquare } from 'lucide-react';
 
-export default function CourseChat({ courseId, course = null, topic = null, visible = false, onClose, inline = false, side = false }) {
+export default function CourseChat({ courseId, course = null, topic = null, topicContent = null, visible = false, onClose, inline = false, side = false }) {
   // Controlled component: visibility is driven by the `visible` prop
   const visibleProp = !!visible;
   const [messages, setMessages] = useState([]);
@@ -18,9 +18,11 @@ export default function CourseChat({ courseId, course = null, topic = null, visi
   useEffect(() => {
     // Load history when opened or when topic changes
     if (visibleProp) {
-      // If a topic is provided, load doubts history scoped to that topic
-      if (topic && topic.title) {
-        doubtsAPI.getMyDoubts({ topic: topic.title }).then(res => {
+      // If a topic is provided, load doubts history scoped to that topic (prefer id)
+      if (topic && (topic._id || topic.title)) {
+        const q = {};
+        if (topic._id) q.topic = topic._id; else q.topic = topic.title;
+        doubtsAPI.getMyDoubts(q).then(res => {
           const doubts = res.data.doubts || [];
           const msgs = [];
           // Map doubts for this topic into chat messages (ordered oldest->newest)
@@ -77,9 +79,15 @@ export default function CourseChat({ courseId, course = null, topic = null, visi
 
       // If we have course/topic context, use doubts RAG endpoint to get material-backed answers
       if (course || topic || courseId) {
+        // Prefer sending topic id and also include topic content when available
         const payload = { question: text };
         if (course?.subject) payload.subject = course.subject;
-        if (topic?.title) payload.topic = topic.title;
+        if (topic?._id) payload.topic = topic._id;
+        else if (topic?.title) payload.topic = topic.title;
+        // Provide topicContent (material text) to backend when available to improve RAG
+        if (topicContent && topicContent.material && topicContent.material.content) {
+          payload.topicContent = topicContent.material.content;
+        }
         const res = await doubtsAPI.submit(payload);
         const d = res.data.doubt;
         const ans = d?.answer || 'No answer received.';
@@ -100,8 +108,8 @@ export default function CourseChat({ courseId, course = null, topic = null, visi
     }
   };
 
-  // For side panel we render the container so we can animate open/close.
-  if (!visibleProp && !side) return null;
+  // Do not render anything when not visible to avoid invisible backdrops
+  if (!visibleProp) return null;
 
   // Choose layout: modal (default) or inline panel
   if (inline) {

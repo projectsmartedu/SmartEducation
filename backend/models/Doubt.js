@@ -29,6 +29,10 @@ const doubtSchema = new mongoose.Schema({
     type: String,
     trim: true
   },
+  // Optional preview of topic material provided by client to improve RAG
+  topicContent: {
+    type: String
+  },
   askedBy: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'User',

@@ -42,7 +42,7 @@ class DoubtResolutionService {
         // Proceed without storing an embedding; semantic search has its own fallback
       }
 
-      // Search for relevant materials
+      // Search for relevant materials (use subject/topic hints)
       const relevantChunks = await semanticSearchService.search(doubt.question, {
         subject: doubt.subject,
         topic: doubt.topic,
@@ -59,7 +59,11 @@ class DoubtResolutionService {
       }));
 
       // Generate answer using LLM with context
-      const context = semanticSearchService.formatContext(relevantChunks);
+      let context = semanticSearchService.formatContext(relevantChunks);
+      // If the doubt included topicContent (topic's material), include it to improve relevance
+      if (doubt.topicContent) {
+        context = `${context}\n\nTOPIC MATERIAL:\n${doubt.topicContent.substring(0, 5000)}`;
+      }
       const answer = await this.generateAnswer(doubt.question, context);
 
       doubt.answer = answer;
@@ -112,8 +116,21 @@ Please provide a helpful, accurate, and educational answer:`;
         console.log(`✅ Doubt resolution success with ${modelName}`);
         return result.response.text();
       } catch (error) {
-        console.warn(`⚠️ Model ${modelName} failed:`, error.message);
-        // Continue to next model
+        // Inspect common error cases to provide clearer diagnostics
+        console.warn(`⚠️ Model ${modelName} failed:`, error && (error.message || error));
+        const msg = (error && (error.message || '')).toString().toLowerCase();
+        if (msg.includes('quota') || msg.includes('rate limit') || msg.includes('429')) {
+          // Propagate a quota error so controller can return 429
+          const err = new Error('quota');
+          err.status = 429;
+          throw err;
+        }
+        if (msg.includes('unauthorized') || (msg.includes('invalid') && msg.includes('key')) || msg.includes('401') || msg.includes('leaked')) {
+          const err = new Error('AI service authentication failed: invalid or misconfigured API key');
+          err.status = 401;
+          throw err;
+        }
+        // Non-fatal: try next model
         continue;
       }
     }
@@ -146,6 +163,8 @@ Please provide a helpful, accurate, and educational answer:`;
       question: doubtData.question,
       subject: doubtData.subject,
       topic: doubtData.topic,
+      // store a preview of the provided topic material if present
+      topicContent: doubtData.topicContent ? (typeof doubtData.topicContent === 'string' ? doubtData.topicContent.substring(0, 5000) : '') : undefined,
       askedBy: userId,
       status: 'pending'
     });

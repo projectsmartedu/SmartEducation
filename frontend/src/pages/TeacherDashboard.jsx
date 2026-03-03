@@ -142,13 +142,13 @@ const TeacherDashboard = () => {
         <DashboardLayout>
             <div className="space-y-6">
                 {/* Hero */}
-                <section className="rounded-[28px] bg-gradient-to-br from-[#f0f9ff] via-[#fef3c7] to-[#ede9fe] p-6 shadow-xl">
+                <section className="rounded-[28px] bg-gradient-to-br from-[#f0f9ff] via-[#fef3c7] to-[#ede9fe] p-4 sm:p-6 shadow-xl">
                     <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
                         <div>
                             <p className="text-xs font-semibold uppercase tracking-[0.32em] text-[#4338ca]">
                                 Student Analytics Hub
                             </p>
-                            <h1 className="mt-2 text-3xl font-semibold text-[#0f172a]">
+                            <h1 className="mt-2 text-xl sm:text-2xl md:text-3xl font-semibold text-[#0f172a] truncate">
                                 Welcome back, {user?.name ?? 'Teacher'}
                             </h1>
                             <p className="mt-1 text-sm text-[#475569]">
@@ -156,7 +156,7 @@ const TeacherDashboard = () => {
                             </p>
                         </div>
                         {topPerformers.length > 0 && (
-                            <div className="flex items-center gap-3 rounded-3xl bg-white/80 px-5 py-4 shadow-lg">
+                            <div className="hidden lg:flex items-center gap-3 rounded-3xl bg-white/80 px-5 py-4 shadow-lg">
                                 <Trophy className="h-8 w-8 text-[#f59e0b]" />
                                 <div>
                                     <p className="text-xs text-[#94a3b8]">Top performer</p>
@@ -177,7 +177,7 @@ const TeacherDashboard = () => {
                         { label: 'Avg Streak', value: `${aggregate.averageStreak || 0}d`, icon: Flame, accent: 'bg-[#fee2e2] text-[#dc2626]', detail: 'Activity streak' },
                         { label: 'At Risk', value: atRiskStudents.length, icon: AlertTriangle, accent: 'bg-[#fff7ed] text-[#ea580c]', detail: 'Need attention' }
                     ].map(card => (
-                        <div key={card.label} className="flex flex-col rounded-[22px] bg-white p-5 shadow-lg ring-1 ring-[#e2e8f0] transition hover:-translate-y-1">
+                        <div key={card.label} className="flex flex-col rounded-[22px] bg-white p-4 sm:p-5 shadow-lg ring-1 ring-[#e2e8f0] transition hover:-translate-y-1">
                             <div className={`mb-3 flex h-10 w-10 items-center justify-center rounded-xl ${card.accent}`}>
                                 <card.icon className="h-5 w-5" />
                             </div>
