@@ -10,8 +10,8 @@ root.render(
   </React.StrictMode>
 );
 
-// Register Service Worker for offline support
-if ('serviceWorker' in navigator) {
+// Register Service Worker for offline support (production only)
+if (process.env.NODE_ENV === 'production' && 'serviceWorker' in navigator) {
   window.addEventListener('load', () => {
     if (typeof process !== 'undefined' && process.env && process.env.NODE_ENV === 'production') {
       navigator.serviceWorker

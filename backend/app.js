@@ -14,15 +14,11 @@ const revisionRoutes = require('./routes/revisions');
 const gamificationRoutes = require('./routes/gamification');
 const aiRoutes = require('./routes/ai');
 const notificationRoutes = require('./routes/notifications');
-// debug routes (development only)
-let debugRoutes;
-try {
-  debugRoutes = require('./routes/debug');
-} catch (e) {
-  debugRoutes = null;
-}
 
 const app = express();
+
+// ML Service Configuration
+const ML_SERVICE_URL = process.env.ML_SERVICE_URL || 'http://localhost:5001';
 
 // Middleware
 app.use(cors());
@@ -41,10 +37,6 @@ app.use('/api/revisions', revisionRoutes);
 app.use('/api/gamification', gamificationRoutes);
 app.use('/api/ai', aiRoutes);
 app.use('/api/notifications', notificationRoutes);
-// Mount debug routes only in non-production or when explicitly enabled
-if (process.env.NODE_ENV !== 'production' || process.env.ENABLE_DEBUG_TEST_ROUTE === 'true') {
-  if (debugRoutes) app.use('/api/debug', debugRoutes);
-}
 
 // Root route (for Render health checks)
 app.get('/', (req, res) => {

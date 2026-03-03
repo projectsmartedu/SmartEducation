@@ -29,3 +29,8 @@ npm-debug.log*
 
 # Lock files
 package-lock.json
+
+archive/
+
+ml_notebooks/
+ml_server/
