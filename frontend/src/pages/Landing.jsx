@@ -90,12 +90,6 @@ const testimonials = [
     }
 ];
 
-const ctaHighlights = [
-    'Live visibility into cohort health and at-risk learners',
-    'White-glove onboarding, training and success support',
-    'Secure, compliant architecture hosted on your preferred cloud'
-];
-
 const Landing = () => {
     useEffect(() => {
         // Skip effect on server-side rendering
@@ -445,40 +439,6 @@ const Landing = () => {
                         </div>
                     </section>
 
-                    <section className="mx-auto max-w-6xl px-6">
-                        <div className="rounded-[32px] bg-indigo-700 p-10 text-white shadow-lg">
-                            <div className="flex flex-col gap-6 md:flex-row md:items-center md:justify-between">
-                                <div className="max-w-2xl space-y-3">
-                                    <h2 className="text-2xl font-semibold sm:text-3xl">Ready to improve your learner experience?</h2>
-                                    <p className="text-sm text-white/80">
-                                        Start with Smart Education to run learning, revisions, and progress tracking in one place.
-                                    </p>
-                                    <ul className="space-y-2 text-sm text-white/80">
-                                        {ctaHighlights.map((highlight) => (
-                                            <li key={highlight} className="flex items-start gap-3">
-                                                <span className="mt-1 h-2.5 w-2.5 rounded-full bg-indigo-300" />
-                                                <span>{highlight}</span>
-                                            </li>
-                                        ))}
-                                    </ul>
-                                </div>
-                                <div className="flex flex-col gap-3 text-sm font-semibold">
-                                    <Link
-                                        to="/login"
-                                        className="inline-flex items-center justify-center rounded-full bg-white px-6 py-3 text-indigo-800 shadow-md transition hover:-translate-y-0.5"
-                                    >
-                                        Talk to our team
-                                    </Link>
-                                    <a
-                                        href="mailto:partnerships@smarteducation.ai"
-                                        className="inline-flex items-center justify-center rounded-full border border-white/40 px-6 py-3 text-white transition hover:bg-white/10"
-                                    >
-                                        partnerships@smarteducation.ai
-                                    </a>
-                                </div>
-                            </div>
-                        </div>
-                    </section>
                 </main>
 
                 <Footer />
