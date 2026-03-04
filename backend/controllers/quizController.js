@@ -4,28 +4,50 @@ const Topic = require('../models/Topic');
 const Course = require('../models/Course');
 const TopicQuiz = require('../models/TopicQuiz');
 
+// Available Gemini AI models in priority order
 const MODELS = ['gemini-2.0-flash-lite', 'gemini-2.5-flash', 'gemini-2.0-flash'];
+// Rate limiting: maximum quiz generations per topic to prevent API overuse
 const MAX_LLM_GENERATIONS_PER_TOPIC = 5;
 
+/**
+ * Extract JSON object from AI-generated text response
+ * @param {String} text - Raw text response from LLM
+ * @returns {Object} Parsed JSON object
+ * @throws {Error} If no valid JSON found in text
+ */
 function extractJson(text) {
   const start = text.indexOf('{');
   const end = text.lastIndexOf('}');
   if (start === -1 || end === -1 || end <= start) {
-    throw new Error('Invalid JSON response');
+    throw new Error('Invalid JSON response from AI model');
   }
   const jsonStr = text.slice(start, end + 1);
-  return JSON.parse(jsonStr);
+  try {
+    return JSON.parse(jsonStr);
+  } catch (e) {
+    throw new Error('Failed to parse AI response as JSON: ' + e.message);
+  }
 }
 
+/**
+ * Normalize and validate quiz questions from raw LLM output
+ * Ensures all questions have proper format with 4 options and clear answers
+ * @param {Array} rawQuestions - Raw questions from AI generation
+ * @param {String} topicId - Topic identifier for question ID generation
+ * @param {Number} questionCount - Target number of normalized questions
+ * @returns {Array} Validated and formatted question objects
+ */
 function normalizeQuestions(rawQuestions, topicId, questionCount) {
   if (!Array.isArray(rawQuestions)) return [];
 
+  // Process each question and apply validation rules
   const normalized = rawQuestions.map((q, index) => {
     const question = typeof q.question === 'string' ? q.question.trim() : '';
     const options = Array.isArray(q.options)
       ? q.options.map(opt => String(opt).trim()).filter(Boolean).slice(0, 4)
       : [];
 
+    // Determine correct answer index with fallback logic
     let answerIndex = Number.isInteger(q.answerIndex) ? q.answerIndex : null;
     if ((answerIndex === null || answerIndex < 0 || answerIndex >= options.length) && q.answer) {
       const answerText = String(q.answer).trim().toLowerCase();
@@ -33,6 +55,7 @@ function normalizeQuestions(rawQuestions, topicId, questionCount) {
       if (idx >= 0) answerIndex = idx;
     }
 
+    // Filter: only return valid questions with 4 options and clear answer
     if (!question || options.length !== 4 || answerIndex === null || answerIndex < 0 || answerIndex >= 4) {
       return null;
     }
