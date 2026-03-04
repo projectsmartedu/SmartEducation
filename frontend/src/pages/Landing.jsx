@@ -1,5 +1,6 @@
 import React, { useEffect } from 'react';
 import { Link } from 'react-router-dom';
+import { BookOpen } from 'lucide-react';
 import Footer from '../components/Layout/Footer';
 
 const heroMetrics = [
@@ -12,72 +13,36 @@ const features = [
     {
         title: 'Unified learning intelligence',
         copy: 'Bring content analytics, quiz outcomes and behavioural signals into a single, explainable profile for every learner.',
-        image: 'https://images.unsplash.com/photo-1521737604893-d14cc237f11d?auto=format&fit=crop&w=900&q=80',
-        imageAlt: 'Mentor reviewing learning analytics with a student.',
         badge: 'Data fabric'
     },
     {
         title: 'Adaptive revision engine',
         copy: 'Predict forgetting risk, auto-build revision queues and deliver nudges before performance slips.',
-        image: 'https://images.unsplash.com/photo-1529101091764-c3526daf38fe?auto=format&fit=crop&w=900&q=80',
-        imageAlt: 'Student revising on a tablet with digital notes.',
         badge: 'Personalised plans'
     },
     {
         title: 'Institution-ready reporting',
         copy: 'Give leadership a real-time view of cohorts, subjects and mentor performance without drowning in spreadsheets.',
-        image: 'https://images.unsplash.com/photo-1517430816045-df4b7de711b4?auto=format&fit=crop&w=900&q=80',
-        imageAlt: 'Faculty team discussing performance dashboards in a meeting room.',
         badge: 'Executive insight'
     }
 ];
 
 const partnerNames = ['Northbridge Academy', 'BrightPath Schools', 'SkillForge Labs', 'Quantum Future Prep'];
 
-const heroMedia = {
-    dashboard: 'https://images.unsplash.com/photo-1531482615713-2afd69097998?auto=format&fit=crop&w=1200&q=80',
-    dashboardAlt: 'Education analytics dashboard displayed on a laptop screen in a modern workspace.'
-};
-
-const brandLogo = {
-    primary: 'https://images.unsplash.com/photo-1545239351-1141bd82e8a6?auto=format&fit=crop&w=256&q=80',
-    fallback: 'https://images.pexels.com/photos/3183165/pexels-photo-3183165.jpeg?auto=compress&cs=tinysrgb&w=256'
-};
-
 const galleryShots = [
     {
-        image: 'https://images.unsplash.com/photo-1523580846011-d3a5bc25702b?auto=format&fit=crop&w=900&q=80',
-        alt: 'Students collaborating in a technology-enabled classroom.',
         title: 'Collaborative classrooms',
         copy: 'Connect mentors and learners through shared progress tiles and AI-curated tasks.'
     },
     {
-        image: 'https://images.unsplash.com/photo-1588072432836-e10032774350?auto=format&fit=crop&w=900&q=80',
-        alt: 'Teacher hosting a blended learning session with multiple devices.',
         title: 'Blended learning at scale',
         copy: 'Synchronise remote and in-person cohorts with nudges that keep progress aligned.'
     },
     {
-        image: 'https://images.unsplash.com/photo-1522202176988-66273c2fd55f?auto=format&fit=crop&w=900&q=80',
-        alt: 'LMS dashboards showing colourful charts and metrics.',
         title: 'Insights that drive action',
         copy: 'Surface risk, mastery and engagement signals in one command centre for leadership.'
     }
 ];
-
-const featureFallbackImage = 'https://images.pexels.com/photos/3184292/pexels-photo-3184292.jpeg?auto=compress&cs=tinysrgb&w=900';
-const galleryFallbackImage = 'https://images.pexels.com/photos/1181359/pexels-photo-1181359.jpeg?auto=compress&cs=tinysrgb&w=900';
-const heroFallbackImage = 'https://images.pexels.com/photos/3861957/pexels-photo-3861957.jpeg?auto=compress&cs=tinysrgb&w=1200';
-
-const handleImageError = (event) => {
-    const img = event.currentTarget;
-    const fallbackSrc = img.dataset.fallbacksrc;
-    if (fallbackSrc && img.src !== fallbackSrc) {
-        img.src = fallbackSrc;
-    } else {
-        img.classList.add('landing-image-hidden');
-    }
-};
 
 const floatDelayClasses = ['landing-float-delay-0', 'landing-float-delay-1', 'landing-float-delay-2'];
 
@@ -198,10 +163,6 @@ const Landing = () => {
                 .landing-float-delay-1 { animation-delay: -4s; transition-delay: 0.12s; }
                 .landing-float-delay-2 { animation-delay: -8s; transition-delay: 0.24s; }
 
-                .landing-image-hidden {
-                    display: none;
-                }
-
                 .landing-tilt-card {
                     --landing-tilt-rotateX: 0deg;
                     --landing-tilt-rotateY: 0deg;
@@ -227,16 +188,8 @@ const Landing = () => {
                     <div className="absolute inset-y-0 right-0 hidden w-1/3 translate-x-1/4 rounded-full bg-indigo-200/30 blur-3xl lg:block" />
                     <nav className="relative z-10 mx-auto flex w-full max-w-6xl items-center justify-between px-6 py-6">
                         <Link to="/" className="flex items-center gap-3">
-                            <div className="relative h-12 w-12 overflow-hidden rounded-3xl bg-gradient-to-br from-indigo-900 via-slate-900 to-slate-700 shadow-lg ring-4 ring-white/40">
-                                <img
-                                    src={brandLogo.primary}
-                                    alt="Smart Education monogram"
-                                    className="h-full w-full object-cover"
-                                    loading="lazy"
-                                    onError={handleImageError}
-                                    data-fallbacksrc={brandLogo.fallback}
-                                />
-                                <span className="pointer-events-none absolute inset-0 rounded-3xl border border-white/15" aria-hidden="true" />
+                            <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-slate-900 text-white shadow-lg ring-4 ring-white/40">
+                                <BookOpen className="h-6 w-6" />
                             </div>
                             <div>
                                 <p className="text-xl font-semibold tracking-tight text-slate-900">Smart Education</p>
@@ -302,36 +255,32 @@ const Landing = () => {
                         </div>
 
                         <div className="w-full max-w-md pt-4 pb-20 md:pt-8">
-                            <div className="landing-float-card landing-float-delay-0 relative rounded-[38px] border border-slate-300 bg-slate-100 p-2 shadow-lg">
-                                <div className="overflow-hidden rounded-[32px] border border-white/10 bg-slate-900/20">
-                                    <img
-                                        src={heroMedia.dashboard}
-                                        alt={heroMedia.dashboardAlt}
-                                        className="h-80 w-full object-cover"
-                                        loading="lazy"
-                                        onError={handleImageError}
-                                        data-fallbacksrc={heroFallbackImage}
-                                    />
-                                </div>
-                                <div className="absolute -bottom-12 left-8 right-8 rounded-[28px] border border-slate-200 bg-white p-6 text-slate-900 shadow-lg">
-                                    <p className="text-[11px] font-semibold tracking-[0.2em] text-slate-400">Live cohort overview</p>
-                                    <div className="mt-5 grid gap-3 text-sm">
-                                        <div className="flex items-center justify-between">
-                                            <span className="font-semibold text-slate-800">Average mastery</span>
-                                            <span className="rounded-full bg-emerald-50 px-3 py-1 text-xs font-semibold text-emerald-600 shadow-inner shadow-emerald-100">68% → 74%</span>
-                                        </div>
-                                        <div className="flex items-center justify-between">
-                                            <span className="font-semibold text-slate-800">At-risk learners</span>
-                                            <span className="rounded-full bg-amber-50 px-3 py-1 text-xs font-semibold text-amber-600 shadow-inner shadow-amber-100">12 flagged</span>
-                                        </div>
-                                        <div className="flex items-center justify-between">
-                                            <span className="font-semibold text-slate-800">Weekly logins</span>
-                                            <span className="rounded-full bg-indigo-50 px-3 py-1 text-xs font-semibold text-indigo-600 shadow-inner shadow-indigo-100">83% engaged</span>
-                                        </div>
+                            <div className="landing-float-card landing-float-delay-0 relative rounded-[38px] border border-slate-200 bg-white p-8 shadow-lg">
+                                <p className="text-[11px] font-semibold tracking-[0.2em] text-slate-400">Live cohort overview</p>
+                                <div className="mt-5 grid gap-3 text-sm">
+                                    <div className="flex items-center justify-between">
+                                        <span className="font-semibold text-slate-800">Average mastery</span>
+                                        <span className="rounded-full bg-emerald-50 px-3 py-1 text-xs font-semibold text-emerald-600">68% → 74%</span>
                                     </div>
-                                    <p className="mt-5 text-xs leading-relaxed text-slate-500">
-                                        Securely unify LMS, assessment and attendance data into one actionable workspace.
-                                    </p>
+                                    <div className="flex items-center justify-between">
+                                        <span className="font-semibold text-slate-800">At-risk learners</span>
+                                        <span className="rounded-full bg-amber-50 px-3 py-1 text-xs font-semibold text-amber-600">12 flagged</span>
+                                    </div>
+                                    <div className="flex items-center justify-between">
+                                        <span className="font-semibold text-slate-800">Weekly logins</span>
+                                        <span className="rounded-full bg-indigo-50 px-3 py-1 text-xs font-semibold text-indigo-600">83% engaged</span>
+                                    </div>
+                                </div>
+                                <p className="mt-5 text-xs leading-relaxed text-slate-500">
+                                    Securely unify LMS, assessment and attendance data into one actionable workspace.
+                                </p>
+                                <div className="mt-6 h-28 rounded-2xl border border-slate-200 bg-slate-50 p-4">
+                                    <div className="flex h-full items-end gap-2">
+                                        <div className="w-1/4 rounded-md bg-indigo-200" style={{ height: '35%' }} />
+                                        <div className="w-1/4 rounded-md bg-indigo-300" style={{ height: '55%' }} />
+                                        <div className="w-1/4 rounded-md bg-indigo-400" style={{ height: '75%' }} />
+                                        <div className="w-1/4 rounded-md bg-indigo-500" style={{ height: '92%' }} />
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -354,15 +303,8 @@ const Landing = () => {
                                         key={feature.title}
                                         className={`landing-tilt-card ${delayClass} flex h-full flex-col rounded-[24px] border border-slate-200 bg-white p-6 shadow-sm transition hover:shadow-md`}
                                     >
-                                        <div className="overflow-hidden rounded-2xl border border-slate-200 bg-slate-100">
-                                            <img
-                                                src={feature.image}
-                                                alt={feature.imageAlt}
-                                                className="h-40 w-full object-cover"
-                                                loading="lazy"
-                                                onError={handleImageError}
-                                                data-fallbacksrc={featureFallbackImage}
-                                            />
+                                        <div className="flex h-12 w-12 items-center justify-center rounded-xl border border-indigo-100 bg-indigo-50 text-indigo-600">
+                                            <BookOpen className="h-5 w-5" />
                                         </div>
                                         <span className="mt-4 inline-flex w-fit items-center rounded-full bg-indigo-50 px-3 py-1 text-xs font-semibold tracking-wide text-indigo-600">
                                             {feature.badge}
@@ -380,7 +322,7 @@ const Landing = () => {
                             <div className="mx-auto max-w-2xl text-center">
                                 <h2 className="text-2xl font-semibold text-slate-900 sm:text-3xl">See Smart Education in action</h2>
                                 <p className="mt-3 text-base text-slate-600">
-                                    Blend the right imagery, guidance and analytics to deliver consistent learning experiences across campuses.
+                                    Explore capability snapshots designed for consistent learning outcomes across campuses.
                                 </p>
                             </div>
                             <div className="mt-10 grid gap-6 md:grid-cols-3">
@@ -391,15 +333,8 @@ const Landing = () => {
                                             key={shot.title}
                                             className={`landing-tilt-card ${delayClass} flex h-full flex-col rounded-[24px] border border-slate-200 bg-white p-4 shadow-sm backdrop-blur transition hover:shadow-md`}
                                         >
-                                            <div className="overflow-hidden rounded-2xl">
-                                                <img
-                                                    src={shot.image}
-                                                    alt={shot.alt}
-                                                    className="h-44 w-full object-cover"
-                                                    loading="lazy"
-                                                    onError={handleImageError}
-                                                    data-fallbacksrc={galleryFallbackImage}
-                                                />
+                                            <div className="flex h-44 items-center justify-center rounded-2xl border border-slate-200 bg-slate-50">
+                                                <BookOpen className="h-10 w-10 text-slate-400" />
                                             </div>
                                             <h3 className="mt-4 text-lg font-semibold text-slate-900">{shot.title}</h3>
                                             <p className="mt-2 text-sm leading-relaxed text-slate-600">{shot.copy}</p>

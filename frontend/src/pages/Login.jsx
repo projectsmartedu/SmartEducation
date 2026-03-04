@@ -55,112 +55,90 @@ const Login = () => {
     };
 
     return (
-        <div className="min-h-screen bg-[#f6f1eb]">
-            <div className="mx-auto flex min-h-screen max-w-6xl flex-col-reverse overflow-hidden rounded-none bg-transparent lg:flex-row lg:rounded-[36px] lg:border lg:border-[#e2d7cb] lg:shadow-[0_30px_80px_rgba(15,23,42,0.15)]">
-                {/* Form side */}
-                <div className="flex w-full items-center justify-center bg-white px-5 py-12 sm:px-10 lg:w-[46%] lg:rounded-l-[36px]">
-                    <div className="w-full max-w-md">
-                        <div className="mb-8 text-center lg:text-left">
-                            <span className="inline-flex items-center gap-2 rounded-full bg-[#ebe4ff] px-4 py-1 text-xs font-semibold uppercase tracking-[0.3em] text-[#4338ca]">
-                                Personalized Login
-                            </span>
-                            <h2 className="mt-4 text-2xl font-semibold text-[#0f172a] sm:text-3xl">Welcome back to your adaptive hub</h2>
-                            <p className="mt-2 text-sm text-[#475569] sm:text-base">
-                                Sign in to continue growing your knowledge map and stay ahead of every revision window.
-                            </p>
-                        </div>
-
-                        <div className="mb-6">
-                            <p className="text-xs font-semibold uppercase tracking-[0.28em] text-[#64748b] text-center lg:text-left">
-                                Quick demo roles
-                            </p>
-                            <div className="mt-3 grid grid-cols-1 gap-3 sm:grid-cols-3">
-                                {[
-                                    { role: 'admin', label: 'Admin' },
-                                    { role: 'teacher', label: 'Teacher' },
-                                    { role: 'student', label: 'Student' }
-                                ].map((item) => (
-                                    <button
-                                        key={item.role}
-                                        onClick={() => quickLogin(item.role)}
-                                        className={`rounded-2xl border px-3 py-2 text-sm font-semibold transition ${selectedRole === item.role
-                                                ? 'border-[#4338ca] bg-[#ece7ff] text-[#312e81] shadow-sm'
-                                                : 'border-[#e2e8f0] bg-[#f8fafc] text-[#475569] hover:border-[#cbd5f5]'
-                                            }`}
-                                    >
-                                        {item.label}
-                                    </button>
-                                ))}
+        <div className="min-h-screen bg-[radial-gradient(circle_at_top_right,#eef2ff_0%,#f8fafc_45%,#f8fafc_100%)] px-4 py-8 sm:px-6 lg:px-8">
+            <div className="mx-auto flex min-h-[calc(100vh-4rem)] max-w-5xl items-center">
+                <div className="grid w-full overflow-hidden rounded-3xl border border-[#e2e8f0] bg-white shadow-[0_18px_40px_rgba(15,23,42,0.08)] lg:grid-cols-2">
+                    <div className="flex items-center justify-center px-6 py-10 sm:px-10 lg:px-12">
+                        <div className="w-full max-w-md">
+                            <div className="mb-8">
+                                <p className="text-xs font-semibold uppercase tracking-[0.24em] text-[#64748b]">Smart Education Platform</p>
+                                <h1 className="mt-3 text-3xl font-semibold text-[#0f172a]">Sign in</h1>
+                                <p className="mt-2 text-sm text-[#64748b]">Access your dashboard using your institutional account.</p>
                             </div>
-                        </div>
 
-                        <div className="relative mb-6">
-                            <div className="absolute inset-0 flex items-center">
-                                <div className="w-full border-t border-[#e2e8f0]"></div>
+                            <div className="mb-6">
+                                <p className="text-xs font-semibold uppercase tracking-[0.2em] text-[#64748b]">Quick demo roles</p>
+                                <div className="mt-3 grid grid-cols-1 gap-3 sm:grid-cols-3">
+                                    {[
+                                        { role: 'admin', label: 'Admin' },
+                                        { role: 'teacher', label: 'Teacher' },
+                                        { role: 'student', label: 'Student' }
+                                    ].map((item) => (
+                                        <button
+                                            key={item.role}
+                                            onClick={() => quickLogin(item.role)}
+                                            className={`rounded-xl border px-3 py-2 text-sm font-semibold transition ${selectedRole === item.role
+                                                ? 'border-[#4338ca] bg-[#eef2ff] text-[#312e81]'
+                                                : 'border-[#e2e8f0] bg-white text-[#334155] hover:bg-[#f8fafc]'
+                                                }`}
+                                        >
+                                            {item.label}
+                                        </button>
+                                    ))}
+                                </div>
                             </div>
-                            <div className="relative flex justify-center">
-                                <span className="bg-white px-4 text-xs font-semibold uppercase tracking-[0.32em] text-[#94a3b8]">
-                                    Or continue with email
-                                </span>
-                            </div>
-                        </div>
 
-                        <div className="rounded-[28px] border border-[#e2e8f0] bg-white p-8 shadow-[0_20px_40px_rgba(15,23,42,0.08)]">
                             {error && (
-                                <div className="mb-6 flex items-center gap-3 rounded-2xl bg-[#fef2f2] p-4 text-[#b91c1c]">
+                                <div className="mb-5 flex items-center gap-3 rounded-xl border border-[#fecaca] bg-[#fef2f2] p-3 text-[#b91c1c]">
                                     <AlertCircle className="h-5 w-5" />
                                     <span className="text-sm">{error}</span>
                                 </div>
                             )}
 
-                            <form onSubmit={handleSubmit} className="space-y-5">
+                            <form onSubmit={handleSubmit} className="space-y-4 rounded-2xl border border-[#e2e8f0] bg-white p-5">
                                 <div className="space-y-2">
-                                    <label className="text-xs font-semibold uppercase tracking-[0.3em] text-[#64748b]">
-                                        Email address
-                                    </label>
+                                    <label className="text-sm font-medium text-[#334155]">Email address</label>
                                     <div className="relative">
-                                        <Mail className="pointer-events-none absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-[#a5b4fc]" />
+                                        <Mail className="pointer-events-none absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-[#94a3b8]" />
                                         <input
                                             type="email"
                                             value={email}
                                             onChange={(e) => setEmail(e.target.value)}
                                             placeholder="name@education.com"
                                             required
-                                            className="w-full rounded-2xl border border-[#e2e8f0] bg-[#f8fafc] px-12 py-3 text-sm font-medium text-[#0f172a] shadow-inner focus:border-[#4338ca] focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#c7d2fe]"
+                                            className="w-full rounded-xl border border-[#e2e8f0] bg-white px-11 py-3 text-sm text-[#0f172a] focus:border-[#4338ca] focus:outline-none focus:ring-2 focus:ring-[#c7d2fe]"
                                         />
                                     </div>
                                 </div>
 
                                 <div className="space-y-2">
-                                    <label className="text-xs font-semibold uppercase tracking-[0.3em] text-[#64748b]">
-                                        Password
-                                    </label>
+                                    <label className="text-sm font-medium text-[#334155]">Password</label>
                                     <div className="relative">
-                                        <Lock className="pointer-events-none absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-[#a5b4fc]" />
+                                        <Lock className="pointer-events-none absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-[#94a3b8]" />
                                         <input
                                             type={showPassword ? 'text' : 'password'}
                                             value={password}
                                             onChange={(e) => setPassword(e.target.value)}
                                             placeholder="Enter your password"
                                             required
-                                            className="w-full rounded-2xl border border-[#e2e8f0] bg-[#f8fafc] px-12 py-3 text-sm font-medium text-[#0f172a] shadow-inner focus:border-[#4338ca] focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#c7d2fe]"
+                                            className="w-full rounded-xl border border-[#e2e8f0] bg-white px-11 py-3 text-sm text-[#0f172a] focus:border-[#4338ca] focus:outline-none focus:ring-2 focus:ring-[#c7d2fe]"
                                         />
                                         <button
                                             type="button"
                                             onClick={() => setShowPassword(!showPassword)}
-                                            className="absolute right-4 top-1/2 -translate-y-1/2 text-[#94a3b8] transition hover:text-[#4338ca]"
+                                            className="absolute right-4 top-1/2 -translate-y-1/2 text-[#94a3b8] transition hover:text-[#475569]"
                                         >
-                                            {showPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
+                                            {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                                         </button>
                                     </div>
                                 </div>
 
-                                <div className="flex items-center justify-between text-xs text-[#475569]">
+                                <div className="flex items-center justify-between text-xs text-[#64748b]">
                                     <label className="flex items-center gap-2">
-                                        <input type="checkbox" className="h-4 w-4 rounded border-[#cbd5f5] text-[#4338ca] focus:ring-[#4338ca]" />
+                                        <input type="checkbox" className="h-4 w-4 rounded border-[#cbd5e1] text-[#4338ca] focus:ring-[#4338ca]" />
                                         <span>Remember me</span>
                                     </label>
-                                    <button type="button" className="font-semibold text-[#4338ca] hover:text-[#312e81]">
+                                    <button type="button" className="font-medium text-[#475569] hover:text-[#0f172a]">
                                         Forgot password?
                                     </button>
                                 </div>
@@ -168,7 +146,7 @@ const Login = () => {
                                 <button
                                     type="submit"
                                     disabled={loading}
-                                    className="flex w-full items-center justify-center gap-2 rounded-full bg-[#4338ca] py-3 text-sm font-semibold text-white shadow-lg shadow-[#4338ca]/35 transition hover:-translate-y-0.5 hover:bg-[#312e81] disabled:cursor-not-allowed disabled:opacity-70"
+                                    className="flex w-full items-center justify-center gap-2 rounded-xl bg-[#4338ca] py-3 text-sm font-semibold text-white transition hover:bg-[#312e81] disabled:cursor-not-allowed disabled:opacity-70"
                                 >
                                     {loading ? (
                                         <>
@@ -183,55 +161,35 @@ const Login = () => {
                                     )}
                                 </button>
                             </form>
-                        </div>
 
-                        <div className="mt-8 text-center text-xs text-[#94a3b8]">
-                            Need access?{' '}
-                            <button type="button" className="font-semibold text-[#4338ca] hover:text-[#312e81]">
-                                Contact the admin team
-                            </button>
+                            <p className="mt-6 text-center text-xs text-[#94a3b8]">
+                                Need access?{' '}
+                                <button type="button" className="font-semibold text-[#4338ca] hover:text-[#312e81]">
+                                    Contact admin
+                                </button>
+                            </p>
                         </div>
                     </div>
-                </div>
 
-                {/* Visual side */}
-                <div className="relative flex w-full items-center justify-center bg-[#f1e9ff] px-6 py-16 lg:w-[54%] lg:rounded-r-[36px]">
-                    <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(67,56,202,0.25),transparent_55%),radial-gradient(circle_at_bottom_left,rgba(14,165,233,0.35),transparent_50%)]" />
-                    <div className="relative z-10 max-w-xl space-y-10 px-2 text-[#0f172a] sm:px-0">
-                        <div className="inline-flex items-center gap-3 rounded-full bg-white/80 px-4 py-2 text-[10px] font-semibold uppercase tracking-[0.28em] text-[#4338ca] shadow sm:px-5 sm:text-xs">
-                            <span className="h-2 w-2 rounded-full bg-[#10b981]" />
-                            Live knowledge map in action
-                        </div>
-                        <h1 className="text-3xl font-semibold leading-tight sm:text-4xl">
-                            Personalized Knowledge Mapping & Adaptive Revision Engine
-                        </h1>
-                        <p className="text-sm leading-relaxed text-[#475569] sm:text-base">
-                            Watch every quiz attempt, reflection and study sprint update the learner’s map, predict forgetting, and schedule targeted revision moments. This is how mastery feels effortless.
+                    <div className="hidden border-l border-[#e2e8f0] bg-[#f8fafc] p-10 lg:flex lg:flex-col lg:justify-center">
+                        <h2 className="text-2xl font-semibold text-[#0f172a]">Smart Education</h2>
+                        <p className="mt-3 text-sm leading-relaxed text-[#64748b]">
+                            A focused platform for courses, materials, revisions, and progress tracking in one workspace.
                         </p>
-                        <div className="grid gap-4 sm:grid-cols-2">
-                            <div className="rounded-[28px] bg-white/90 p-6 shadow-lg">
-                                <p className="text-xs uppercase tracking-[0.3em] text-[#6366f1]">Knowledge graph</p>
-                                <p className="mt-3 text-2xl font-semibold text-[#1e293b]">92% mastery</p>
-                                <p className="mt-2 text-xs text-[#475569]">3 concepts require spaced repetition this week.</p>
+                        <div className="mt-6 grid grid-cols-2 gap-3 text-xs">
+                            <div className="rounded-xl border border-[#e2e8f0] bg-white px-3 py-2">
+                                <p className="text-[#64748b]">Active users</p>
+                                <p className="mt-1 text-lg font-semibold text-[#0f172a]">24/7</p>
                             </div>
-                            <div className="rounded-[28px] bg-white/90 p-6 shadow-lg">
-                                <p className="text-xs uppercase tracking-[0.3em] text-[#0f766e]">Revision queue</p>
-                                <p className="mt-3 text-2xl font-semibold text-[#1e293b]">Next up: Calculus</p>
-                                <p className="mt-2 text-xs text-[#475569]">AI predicts a 64% forgetting risk in 36 hours.</p>
+                            <div className="rounded-xl border border-[#e2e8f0] bg-white px-3 py-2">
+                                <p className="text-[#64748b]">Platform status</p>
+                                <p className="mt-1 text-lg font-semibold text-[#16a34a]">Online</p>
                             </div>
                         </div>
-                        <div className="rounded-[32px] border border-white/60 bg-white/90 p-6 shadow-lg">
-                            <div className="flex items-center gap-4">
-                                <img
-                                    src="https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&w=120&q=80"
-                                    alt="Student testimonial"
-                                    className="h-12 w-12 rounded-full object-cover"
-                                />
-                                <div>
-                                    <p className="text-sm font-semibold text-[#1f2937]">“I never guess what to revise next anymore.”</p>
-                                    <p className="text-xs text-[#64748b]">Natasha, Grade 12 — 94% board improvement</p>
-                                </div>
-                            </div>
+                        <div className="mt-8 space-y-3 text-sm text-[#334155]">
+                            <div className="rounded-xl border border-[#e2e8f0] bg-white px-4 py-3">Centralized course and material access</div>
+                            <div className="rounded-xl border border-[#e2e8f0] bg-white px-4 py-3">Structured revision and knowledge mapping</div>
+                            <div className="rounded-xl border border-[#e2e8f0] bg-white px-4 py-3">Progress visibility for students and faculty</div>
                         </div>
                     </div>
                 </div>
