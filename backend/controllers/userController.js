@@ -1,60 +1,75 @@
 const User = require('../models/User');
 
-// @desc    Get all users
-// @route   GET /api/users
-// @access  Private/Admin
+/**
+ * @desc    Retrieve all users from the system
+ * @route   GET /api/users
+ * @access  Private/Admin
+ * @returns {Array} Array of user objects (password excluded)
+ */
 const getUsers = async (req, res) => {
   try {
     const users = await User.find().select('-password').sort({ createdAt: -1 });
     res.json(users);
   } catch (error) {
     console.error('Get users error:', error);
-    res.status(500).json({ message: 'Server error' });
+    res.status(500).json({ message: 'Server error retrieving users' });
   }
 };
 
-// @desc    Get users by role
-// @route   GET /api/users/role/:role
-// @access  Private/Admin or Teacher (for students only)
+/**
+ * @desc    Get users filtered by their role
+ * @route   GET /api/users/role/:role
+ * @access  Private/Admin or Teacher (for students only)
+ * @param   {String} role - The user role filter (admin, teacher, student)
+ * @returns {Array} Filtered array of users
+ */
 const getUsersByRole = async (req, res) => {
   try {
     const { role } = req.params;
     
+    // Validate role parameter
     if (!['admin', 'teacher', 'student'].includes(role)) {
-      return res.status(400).json({ message: 'Invalid role' });
+      return res.status(400).json({ message: 'Invalid role parameter provided' });
     }
 
-    // Teachers can only view students
+    // Apply role-based access control
     if (req.user.role === 'teacher' && role !== 'student') {
-      return res.status(403).json({ message: 'Teachers can only view students' });
+      return res.status(403).json({ message: 'Teachers can only view student accounts' });
     }
     
     const users = await User.find({ role }).select('-password').sort({ createdAt: -1 });
     res.json(users);
   } catch (error) {
     console.error('Get users by role error:', error);
-    res.status(500).json({ message: 'Server error' });
+    res.status(500).json({ message: 'Server error filtering users by role' });
   }
 };
 
-// @desc    Create user (Admin or Teacher)
-// @route   POST /api/users
-// @access  Private/Admin (all roles) or Teacher (students only)
+/**
+ * @desc    Create a new user account
+ * @route   POST /api/users
+ * @access  Private/Admin (all roles) or Teacher (students only)
+ * @body    {String} name - User's full name
+ * @body    {String} email - User's email address
+ * @body    {String} password - User's account password
+ * @body    {String} role - User's role (admin, teacher, student)
+ * @returns {Object} Created user object (password excluded)
+ */
 const createUser = async (req, res) => {
   try {
     const { name, email, password, role } = req.body;
 
-    // Validate input
+    // Validate all required input fields
     if (!name || !email || !password || !role) {
-      return res.status(400).json({ message: 'Please provide all required fields' });
+      return res.status(400).json({ message: 'Missing required fields: name, email, password, role' });
     }
 
-    // Validate role
+    // Validate role value
     if (!['admin', 'teacher', 'student'].includes(role)) {
-      return res.status(400).json({ message: 'Invalid role' });
+      return res.status(400).json({ message: 'Invalid role provided. Must be: admin, teacher, or student' });
     }
 
-    // Teachers can only create students
+    // Apply role-based access control for user creation
     if (req.user.role === 'teacher' && role !== 'student') {
       return res.status(403).json({ message: 'Teachers can only create student accounts' });
     }

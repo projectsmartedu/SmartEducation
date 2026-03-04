@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import { BookOpen } from 'lucide-react';
 import Footer from '../components/Layout/Footer';
 
+// Hero metrics displaying key platform statistics
 const heroMetrics = [
     { value: '18K+', label: 'Learners onboarded' },
     { value: '92%', label: 'Average retention lift' },
@@ -72,6 +73,7 @@ const ctaHighlights = [
 
 const Landing = () => {
     useEffect(() => {
+        // Skip effect on server-side rendering
         if (typeof window === 'undefined') {
             return undefined;
         }
@@ -81,9 +83,11 @@ const Landing = () => {
             return undefined;
         }
 
+        // Check feature support for progressive enhancement
         const supportsFinePointer = window.matchMedia('(pointer: fine)').matches;
         const supportsIntersectionObserver = 'IntersectionObserver' in window;
 
+        // Apply card tilt effect based on mouse position
         const handleMove = (event) => {
             const card = event.currentTarget;
             const rect = card.getBoundingClientRect();
@@ -96,6 +100,7 @@ const Landing = () => {
             card.classList.add('landing-card-active');
         };
 
+        // Reset card tilt on mouse leave
         const handleLeave = (event) => {
             const card = event.currentTarget;
             card.style.setProperty('--landing-tilt-rotateX', '0deg');
@@ -103,6 +108,7 @@ const Landing = () => {
             card.classList.remove('landing-card-active');
         };
 
+        // Initialize intersection observer for lazy animation triggers
         let observer;
         if (supportsIntersectionObserver) {
             observer = new IntersectionObserver(
@@ -132,6 +138,7 @@ const Landing = () => {
             }
         });
 
+        // Cleanup event listeners and observers
         return () => {
             if (observer) {
                 observer.disconnect();

@@ -1,7 +1,8 @@
 /**
  * Semantic Search Service
- * Performs similarity search across material embeddings
- * Modular component for retrieval
+ * Performs similarity search across material embeddings using vector similarity
+ * Supports both semantic (embedding-based) and lexical (keyword-based) search fallback
+ * Modular component for intelligent content retrieval
  */
 
 const Material = require('../models/Material');
@@ -10,9 +11,16 @@ const embeddingService = require('./embeddingService');
 class SemanticSearchService {
   /**
    * Search for relevant material chunks based on query
-   * @param {string} query - Search query
-   * @param {Object} options - Search options
-   * @returns {Promise<Object[]>} - Relevant chunks with similarity scores
+   * Uses vector embeddings for semantic similarity when available
+   * Falls back to keyword matching if embedding service is unavailable
+   * 
+   * @param {string} query - User search query text
+   * @param {Object} options - Search configuration options
+   * @param {string} [options.subject] - Filter by subject area
+   * @param {string} [options.topic] - Filter by specific topic
+   * @param {number} [options.topK=5] - Maximum number of results to return
+   * @param {number} [options.minSimilarity=0.3] - Minimum similarity threshold
+   * @returns {Promise<Object[]>} - Ranked array of relevant chunks with similarity scores
    */
   async search(query, options = {}) {
     const {
@@ -23,25 +31,26 @@ class SemanticSearchService {
     } = options;
 
     try {
-      // Try to generate embedding for the query, fall back to lexical similarity
+      // Attempt to generate semantic embedding for the query
+      // Graceful degradation: fall back to lexical search if embedding fails
       let queryEmbedding = null;
       try {
         queryEmbedding = await embeddingService.generateEmbedding(query);
       } catch (e) {
-        console.warn('Embedding unavailable; using lexical similarity fallback:', e.message);
+        console.warn('Embedding service unavailable; using lexical fallback:', e.message);
       }
 
-      // Build filter query
+      // Construct database filter with optional subject/topic constraints
       const filter = { isProcessed: true };
       if (subject) filter.subject = subject;
       if (topic) filter.topic = topic;
 
-      // Get all processed materials matching filter
+      // Fetch all processed materials matching filter criteria
       const materials = await Material.find(filter)
         .select('title subject topic chunks')
         .lean();
 
-      // Calculate similarities for all chunks
+      // Calculate similarity scores for all material chunks
       const results = [];
 
       for (const material of materials) {

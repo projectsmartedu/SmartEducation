@@ -13,9 +13,12 @@ const Topic = require('../models/Topic');
 const Course = require('../models/Course');
 const Gamification = require('../models/Gamification');
 
-// @desc    Get student's progress across all enrolled courses
-// @route   GET /api/progress
-// @access  Private (Student)
+/**
+ * @desc    Retrieve student's progress across all enrolled courses
+ * @route   GET /api/progress
+ * @access  Private (Student)
+ * @returns {Object} Progress data grouped by course with mastery metrics
+ */
 exports.getMyProgress = async (req, res) => {
   try {
     const progress = await StudentProgress.find({ student: req.user._id })
@@ -23,7 +26,7 @@ exports.getMyProgress = async (req, res) => {
       .populate('course', 'title subject')
       .sort({ 'course': 1, 'topic.order': 1 });
 
-    // Group by course
+    // Group progress by course for organized response
     const grouped = {};
     progress.forEach(p => {
       const courseId = p.course?._id?.toString();
@@ -45,9 +48,10 @@ exports.getMyProgress = async (req, res) => {
       }
     });
 
-    // Calculate averages
+    // Calculate weighted mastery averages
     Object.values(grouped).forEach(g => {
       g.averageMastery = g.totalCount > 0 ? Math.round((g.averageMastery / g.totalCount) * 100) : 0;
+
       g.completionRate = g.totalCount > 0 ? Math.round((g.completedCount / g.totalCount) * 100) : 0;
     });
 
