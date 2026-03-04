@@ -40,7 +40,7 @@ const studentSections = [
         ]
     },
     {
-        title: 'AI/ML Insights',
+        title: 'Learning Insights',
         links: [
             { label: 'Knowledge Map', href: '/student/knowledge-map', icon: Map, needsOnline: true },
             { label: 'Revisions', href: '/student/revisions', icon: CalendarClock, needsOnline: true }
