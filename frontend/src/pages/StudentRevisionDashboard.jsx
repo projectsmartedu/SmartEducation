@@ -27,17 +27,17 @@ const StudentRevisionDashboard = ({ studentId }) => {
     const getRecommendation = React.useCallback((topic) => {
         const urgency = calculateUrgencyScore(topic);
         if (urgency > 0.66) {
-            return `🚨 Start revision immediately. ${topic.name} hasn't been studied in ${topic.last_studied} days and mastery is only ${Math.round(topic.mastery * 100)}%.`;
+            return `Start revision immediately. ${topic.name} hasn't been studied in ${topic.last_studied} days and mastery is only ${Math.round(topic.mastery * 100)}%.`;
         } else if (urgency > 0.33) {
-            return `⚠️ Schedule revision soon. Review ${topic.name} this week to maintain skills.`;
+            return `Schedule revision soon. Review ${topic.name} this week to maintain skills.`;
         } else {
-            return `✅ Continue current pace. ${topic.name} is well-maintained at ${Math.round(topic.mastery * 100)}% mastery.`;
+            return `Continue current pace. ${topic.name} is well-maintained at ${Math.round(topic.mastery * 100)}% mastery.`;
         }
     }, [calculateUrgencyScore]);
 
     // Handle topic update from mind map
     const handleTopicUpdate = (updatedTopic) => {
-        console.log('📝 Topic updated:', updatedTopic);
+        console.log('Topic updated:', updatedTopic);
     };
 
     // Load data and predictions on component mount
@@ -105,10 +105,10 @@ const StudentRevisionDashboard = ({ studentId }) => {
                 }));
 
                 setPredictions(revisionPredictions);
-                console.log('✅ Revision predictions:', revisionPredictions);
+                console.log('Revision predictions:', revisionPredictions);
                 setLoading(false);
             } catch (err) {
-                console.error('❌ Error loading data:', err);
+                console.error('Error loading data:', err);
                 setError(err.message);
                 setLoading(false);
             }

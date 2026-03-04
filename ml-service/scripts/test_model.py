@@ -12,18 +12,18 @@ from pathlib import Path
 MODELS_DIR = Path(__file__).parent.parent / 'models'
 
 print("\n" + "="*70)
-print("🚀 TESTING ML MODELS")
+print("TESTING ML MODELS")
 print("="*70)
 
 # Load models
-print("\n📦 Loading models...")
+print("\nLoading models...")
 risk_model = joblib.load(MODELS_DIR / 'risk_pipeline_v2.pkl')
 risk_features = joblib.load(MODELS_DIR / 'risk_features_v2.pkl')
 revision_model = joblib.load(MODELS_DIR / 'revision_planner_model.pkl')
 revision_features = joblib.load(MODELS_DIR / 'revision_features.pkl')
 metadata = joblib.load(MODELS_DIR / 'model_metadata.pkl')
 
-print("✅ Models loaded successfully!")
+print("Models loaded successfully!")
 
 # TEST 1: At-Risk Student
 print("\n" + "-"*70)
@@ -49,11 +49,11 @@ risk_score = pred_at_risk[1]
 
 print(f"Risk Score: {risk_score:.4f}")
 if risk_score > 0.66:
-    print(f"Status: 🔴 HIGH RISK")
+    print(f"Status: HIGH RISK")
 elif risk_score > 0.33:
-    print(f"Status: 🟡 MEDIUM RISK")
+    print(f"Status: MEDIUM RISK")
 else:
-    print(f"Status: 🟢 LOW RISK")
+    print(f"Status: LOW RISK")
 
 # TEST 2: Topic Urgency
 print("\n" + "-"*70)
@@ -73,11 +73,11 @@ urgency_score = pred_rev_urgent[1]
 
 print(f"Urgency Score: {urgency_score:.4f}")
 if urgency_score > 0.66:
-    print(f"Status: 🔴 URGENT REVISION")
+    print(f"Status: URGENT REVISION")
 elif urgency_score > 0.33:
-    print(f"Status: 🟡 MODERATE REVISION")
+    print(f"Status: MODERATE REVISION")
 else:
-    print(f"Status: 🟢 NO URGENT REVISION")
+    print(f"Status: NO URGENT REVISION")
 
 # TEST 3: Batch Prediction
 print("\n" + "-"*70)
@@ -104,15 +104,15 @@ print(f"\n{'ID':<6} {'Risk Score':<15} {'Category':<15}")
 print("-" * 40)
 for i, score in enumerate(batch_preds):
     if score > 0.66:
-        category = "🔴 HIGH"
+        category = "HIGH"
     elif score > 0.33:
-        category = "🟡 MEDIUM"
+        category = "MEDIUM"
     else:
-        category = "🟢 LOW"
+        category = "LOW"
     print(f"STU-{i+1:<2d} {score:<15.4f} {category:<15}")
 
 print("\n" + "="*70)
-print("✅ TEST COMPLETE!")
+print("TEST COMPLETE!")
 print("="*70)
 print(f"\nRisk Model Test AUC: {metadata['risk_model']['test_auc']:.4f}")
 print(f"Revision Model Test AUC: {metadata['revision_model']['test_auc']:.4f}")

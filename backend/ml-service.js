@@ -258,7 +258,7 @@ app.use((err, req, res, next) => {
 });
 
 app.listen(PORT, () => {
-  console.log(`✅ ML Service running on port ${PORT}`);
-  console.log(`📊 Risk API: POST /api/risk/predict`);
-  console.log(`🧠 Revision API: POST /api/revision/mindmap`);
+  console.log(`ML Service running on port ${PORT}`);
+  console.log(`Risk API: POST /api/risk/predict`);
+  console.log(`Revision API: POST /api/revision/mindmap`);
 });

@@ -2,10 +2,26 @@ import React, { useState, useEffect } from 'react';
 import DashboardLayout from '../components/Layout/DashboardLayout';
 import { gamificationAPI } from '../services/api';
 import { useAuth } from '../context/AuthContext';
-import { Trophy, Medal, Flame, Crown, Star } from 'lucide-react';
+import { Trophy, Medal, Flame, Crown, Star, Rocket, Sparkles, Award, Gem, BookOpen, GraduationCap, Zap, Target, Check, Lock } from 'lucide-react';
 
 const RANK_ICONS = [Crown, Trophy, Medal];
 const RANK_COLORS = ['text-[#f59e0b]', 'text-[#6b7280]', 'text-[#b45309]'];
+const BADGE_ICON_MAP = {
+    sword: Rocket,
+    medal: Award,
+    crown: Crown,
+    flame: Flame,
+    biceps: Target,
+    star: Star,
+    sparkles: Sparkles,
+    gem: Gem,
+    trophy: Trophy,
+    rocket: Rocket,
+    book: BookOpen,
+    graduation: GraduationCap,
+    bolt: Zap,
+    brain: Sparkles
+};
 
 const StudentLeaderboard = () => {
     const { user } = useAuth();
@@ -146,7 +162,7 @@ const StudentLeaderboard = () => {
                     {/* Badges */}
                     <section className="space-y-6">
                         <div className="rounded-[28px] bg-white p-6 shadow-xl ring-1 ring-[#e2e8f0]">
-                            <h2 className="text-lg font-semibold text-[#0f172a] mb-4">🎖️ Earned Badges</h2>
+                            <h2 className="mb-4 flex items-center gap-2 text-lg font-semibold text-[#0f172a]"><Award className="h-5 w-5 text-[#4338ca]" /> Earned Badges</h2>
                             {badgesLoading ? (
                                 <div className="flex justify-center py-8">
                                     <div className="h-6 w-6 animate-spin rounded-full border-3 border-[#e2e8f0] border-t-[#4338ca]" />
@@ -167,11 +183,12 @@ const StudentLeaderboard = () => {
                                         const gradient = gradients[i % gradients.length];
                                         const rotations = ['-rotate-2', 'rotate-1', '-rotate-1', 'rotate-2', 'rotate-0', '-rotate-3'];
                                         const rotation = rotations[i % rotations.length];
+                                        const BadgeIcon = BADGE_ICON_MAP[badge.icon] || Trophy;
                                         return (
                                             <div key={badge.badgeId}
                                                 className={`group relative ${rotation} rounded-3xl bg-gradient-to-br ${gradient} p-4 text-center shadow-lg transition-all duration-300 hover:rotate-0 hover:scale-110 hover:shadow-2xl cursor-default`}>
-                                                <div className="absolute -right-1 -top-1 flex h-5 w-5 items-center justify-center rounded-full bg-[#22c55e] text-[8px] font-bold text-white shadow-md">✓</div>
-                                                <span className="block text-4xl drop-shadow-lg transition-transform duration-300 group-hover:scale-125 group-hover:drop-shadow-2xl">{badge.icon}</span>
+                                                <div className="absolute -right-1 -top-1 flex h-5 w-5 items-center justify-center rounded-full bg-[#22c55e] text-white shadow-md"><Check className="h-3 w-3" /></div>
+                                                <span className="flex justify-center drop-shadow-lg transition-transform duration-300 group-hover:scale-125 group-hover:drop-shadow-2xl"><BadgeIcon className="h-9 w-9 text-[#0f172a]" /></span>
                                                 <p className="mt-2 text-sm font-extrabold text-[#0f172a] drop-shadow-sm">{badge.name}</p>
                                                 <p className="mt-0.5 text-[10px] font-medium text-[#475569]">{badge.description}</p>
                                                 <div className="mt-2 inline-block rounded-full bg-white/60 px-2 py-0.5 text-[9px] font-bold text-[#4338ca] backdrop-blur-sm">
@@ -185,15 +202,18 @@ const StudentLeaderboard = () => {
                         </div>
 
                         <div className="rounded-[28px] bg-white p-6 shadow-xl ring-1 ring-[#e2e8f0]">
-                            <h2 className="text-lg font-semibold text-[#0f172a] mb-4">🔒 Locked Badges</h2>
+                            <h2 className="mb-4 flex items-center gap-2 text-lg font-semibold text-[#0f172a]"><Lock className="h-5 w-5 text-[#64748b]" /> Locked Badges</h2>
                             {badges.available.length === 0 ? (
-                                <p className="py-4 text-center text-sm text-[#94a3b8]">You've earned all badges! 🎉</p>
+                                <p className="py-4 text-center text-sm text-[#94a3b8]">You've earned all badges.</p>
                             ) : (
                                 <div className="grid grid-cols-2 gap-3">
                                     {badges.available.map(badge => (
                                         <div key={badge.id || badge.badgeId}
                                             className="group relative rounded-3xl bg-gradient-to-br from-[#f1f5f9] to-[#e2e8f0] p-4 text-center shadow-sm transition hover:shadow-md cursor-default">
-                                            <span className="block text-3xl grayscale opacity-50 transition-all group-hover:grayscale-0 group-hover:opacity-80">{badge.icon}</span>
+                                            {(() => {
+                                                const LockedBadgeIcon = BADGE_ICON_MAP[badge.icon] || Trophy;
+                                                return <span className="flex justify-center"><LockedBadgeIcon className="h-8 w-8 text-[#94a3b8] opacity-60 transition-all group-hover:opacity-90" /></span>;
+                                            })()}
                                             <p className="mt-2 text-xs font-bold text-[#94a3b8] group-hover:text-[#64748b]">{badge.name}</p>
                                             <p className="mt-0.5 text-[10px] text-[#cbd5e1]">{badge.description}</p>
                                         </div>

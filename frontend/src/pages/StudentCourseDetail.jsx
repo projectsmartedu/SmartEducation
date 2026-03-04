@@ -2,7 +2,7 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import DashboardLayout from '../components/Layout/DashboardLayout';
 import { coursesAPI, progressAPI } from '../services/api';
-import { ArrowLeft, BookOpen, Clock, CheckCircle, Loader2, FileText, Award, ChevronRight, File, Star, RotateCcw, WifiOff, MessageSquare } from 'lucide-react';
+import { ArrowLeft, BookOpen, Clock, CheckCircle, Loader2, FileText, Award, ChevronRight, File, Star, RotateCcw, WifiOff, MessageSquare, Sparkles, Lock, GraduationCap } from 'lucide-react';
 import {
     getCourseOffline,
     getTopicContentOffline,
@@ -461,7 +461,7 @@ const StudentCourseDetail = () => {
             {completionSuccess && (
                 <div className="fixed top-4 right-4 z-50 animate-bounce rounded-2xl bg-[#16a34a] px-6 py-4 text-white shadow-2xl">
                     <div className="flex items-center gap-3">
-                        <span className="text-2xl">{completionSuccess.mastered ? '⭐' : '🎉'}</span>
+                        {completionSuccess.mastered ? <Star className="h-6 w-6" /> : <Sparkles className="h-6 w-6" />}
                         <div>
                             <p className="font-semibold">{completionSuccess.mastered ? 'Topic Mastered!' : 'Topic Completed!'}</p>
                             <p className="text-sm opacity-90">
@@ -566,11 +566,11 @@ const StudentCourseDetail = () => {
                                                 {isCompleted ? (
                                                     <CheckCircle className="h-5 w-5 text-[#16a34a]" />
                                                 ) : status === 'in-progress' ? (
-                                                    <span className="text-lg">📖</span>
+                                                    <BookOpen className="h-5 w-5 text-[#4338ca]" />
                                                 ) : unlocked ? (
                                                     <span className="text-sm font-bold text-[#4338ca]">{index + 1}</span>
                                                 ) : (
-                                                    <span className="text-lg">🔒</span>
+                                                    <Lock className="h-4 w-4 text-[#94a3b8]" />
                                                 )}
                                             </div>
 
@@ -605,7 +605,7 @@ const StudentCourseDetail = () => {
                                                 <Loader2 className="h-5 w-5 animate-spin text-[#4338ca]" />
                                             ) : status === 'mastered' ? (
                                                 <div className="flex items-center gap-2">
-                                                    <span className="text-2xl">⭐</span>
+                                                    <Star className="h-5 w-5 text-[#f59e0b]" />
                                                     <button onClick={() => handleRestartTopic(topic)}
                                                         className="inline-flex items-center gap-1 rounded-full border border-[#e2e8f0] px-3 py-1 text-xs font-medium text-[#475569] hover:bg-[#f1f5f9] transition">
                                                         <RotateCcw className="h-3 w-3" /> Revise
@@ -646,7 +646,7 @@ const StudentCourseDetail = () => {
                 {/* Course completion message */}
                 {completedCount === topics.length && topics.length > 0 && (
                     <div className="mt-8 rounded-2xl bg-gradient-to-r from-[#dcfce7] via-[#fef9c3] to-[#ede9fe] p-6 text-center">
-                        <span className="text-4xl">🎓</span>
+                        <GraduationCap className="mx-auto h-10 w-10 text-[#4338ca]" />
                         <h3 className="mt-2 text-xl font-bold text-[#0f172a]">Course Completed!</h3>
                         <p className="mt-1 text-sm text-[#475569]">
                             Congratulations! You've completed all {topics.length} topics in {course?.title}.

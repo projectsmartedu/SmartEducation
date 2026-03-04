@@ -5,14 +5,14 @@ require('dotenv').config();
 const { GoogleGenerativeAI } = require('@google/generative-ai');
 
 async function listModels() {
-  console.log('\n📋 Checking available models...\n');
+  console.log('\nChecking available models...\n');
   
   const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
   
   try {
     const models = await genAI.listModels();
     
-    console.log('✅ Available models:\n');
+    console.log('Available models:\n');
     let count = 0;
     for await (const model of models) {
       count++;
@@ -20,12 +20,12 @@ async function listModels() {
     }
     
     if (count === 0) {
-      console.log('❌ No models found');
+      console.log('No models found');
     } else {
-      console.log(`\n✅ Total: ${count} models available`);
+      console.log(`\nTotal: ${count} models available`);
     }
   } catch (error) {
-    console.error('❌ Error listing models:', error.message);
+    console.error('Error listing models:', error.message);
   }
 }
 

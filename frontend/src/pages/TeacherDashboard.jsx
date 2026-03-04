@@ -343,7 +343,7 @@ const TeacherDashboard = () => {
                                 <h2 className="text-lg font-semibold text-[#0f172a]">At-Risk Students</h2>
                             </div>
                             {atRiskStudents.length === 0 ? (
-                                <p className="py-4 text-center text-sm text-[#94a3b8]">All students are on track! 🎉</p>
+                                <p className="py-4 text-center text-sm text-[#94a3b8]">All students are on track.</p>
                             ) : (
                                 <div className="space-y-2">
                                     {atRiskStudents.map(s => (
@@ -388,12 +388,12 @@ const TeacherDashboard = () => {
 
                         {/* Top 3 */}
                         <section className="rounded-[28px] bg-gradient-to-br from-[#ede9fe] to-[#fef9c3] p-5 shadow-xl">
-                            <h2 className="text-lg font-semibold text-[#0f172a] mb-3">🏆 Top Performers</h2>
+                            <h2 className="mb-3 flex items-center gap-2 text-lg font-semibold text-[#0f172a]"><Trophy className="h-5 w-5 text-[#4338ca]" /> Top Performers</h2>
                             <div className="space-y-2">
                                 {topPerformers.map((s, i) => (
                                     <div key={s.student?._id} className="flex items-center justify-between rounded-2xl bg-white/80 p-3 shadow-sm">
                                         <div className="flex items-center gap-2">
-                                            <span className="text-lg">{['🥇', '🥈', '🥉'][i]}</span>
+                                            <span className="flex h-7 w-7 items-center justify-center rounded-full bg-[#ede9fe] text-xs font-bold text-[#4338ca]">#{i + 1}</span>
                                             <div>
                                                 <p className="text-sm font-semibold text-[#0f172a]">{s.student?.name}</p>
                                                 <p className="text-[10px] text-[#94a3b8]">Lv {s.level} • {s.badgeCount} badges</p>

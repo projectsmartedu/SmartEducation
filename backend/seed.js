@@ -387,15 +387,15 @@ const seedDB = async () => {
     // 5. Create Gamification profiles
     console.log('\n--- Creating Gamification Profiles ---');
     const badgePool = [
-      { badgeId: 'first_revision', name: 'First Revision', description: 'Completed your first revision', icon: '⚔️', category: 'milestone' },
-      { badgeId: 'revision_10', name: 'Revision Pro', description: 'Completed 10 revisions', icon: '🏅', category: 'milestone' },
-      { badgeId: 'streak_7', name: 'Week Warrior', description: '7-day activity streak', icon: '🔥', category: 'streak' },
-      { badgeId: 'level_5', name: 'Rising Star', description: 'Reached level 5', icon: '⭐', category: 'milestone' },
-      { badgeId: 'points_5000', name: 'Point Collector', description: 'Earned 5,000 XP', icon: '💎', category: 'milestone' },
-      { badgeId: 'lessons_5', name: 'Getting Started', description: 'Completed 5 lessons', icon: '🚀', category: 'mastery' },
-      { badgeId: 'lessons_10', name: 'Lesson Learner', description: 'Completed 10 lessons', icon: '📚', category: 'mastery' },
-      { badgeId: 'lessons_25', name: 'Knowledge Builder', description: 'Completed 25 lessons', icon: '🎓', category: 'mastery' },
-      { badgeId: 'fast_learner', name: 'Fast Learner', description: 'Complete 5 lessons in one day', icon: '⚡', category: 'speed' }
+      { badgeId: 'first_revision', name: 'First Revision', description: 'Completed your first revision', icon: 'sword', category: 'milestone' },
+      { badgeId: 'revision_10', name: 'Revision Pro', description: 'Completed 10 revisions', icon: 'medal', category: 'milestone' },
+      { badgeId: 'streak_7', name: 'Week Warrior', description: '7-day activity streak', icon: 'flame', category: 'streak' },
+      { badgeId: 'level_5', name: 'Rising Star', description: 'Reached level 5', icon: 'star', category: 'milestone' },
+      { badgeId: 'points_5000', name: 'Point Collector', description: 'Earned 5,000 XP', icon: 'gem', category: 'milestone' },
+      { badgeId: 'lessons_5', name: 'Getting Started', description: 'Completed 5 lessons', icon: 'rocket', category: 'mastery' },
+      { badgeId: 'lessons_10', name: 'Lesson Learner', description: 'Completed 10 lessons', icon: 'book', category: 'mastery' },
+      { badgeId: 'lessons_25', name: 'Knowledge Builder', description: 'Completed 25 lessons', icon: 'graduation', category: 'mastery' },
+      { badgeId: 'fast_learner', name: 'Fast Learner', description: 'Complete 5 lessons in one day', icon: 'bolt', category: 'speed' }
     ];
 
     const studentProfiles = [

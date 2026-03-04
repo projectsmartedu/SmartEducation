@@ -5,15 +5,15 @@ require('dotenv').config();
 const { GoogleGenerativeAI } = require('@google/generative-ai');
 
 async function testModel() {
-  console.log('\n🧪 Testing Google Gemini Model (gemini-2.0-flash)...\n');
+  console.log('\nTesting Google Gemini Model (gemini-2.0-flash)...\n');
   
   const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
   
   const testPrompt = 'What is photosynthesis? Explain in 2-3 sentences.';
   
   try {
-    console.log(`📌 Testing model: gemini-2.0-flash`);
-    console.log(`📝 Prompt: "${testPrompt}"\n`);
+    console.log(`Testing model: gemini-2.0-flash`);
+    console.log(`Prompt: "${testPrompt}"\n`);
     
     const model = genAI.getGenerativeModel({ model: 'gemini-2.0-flash' });
     
@@ -23,19 +23,19 @@ async function testModel() {
     
     const answer = result.response.text();
     
-    console.log(`✅ SUCCESS! Model is working!\n`);
-    console.log(`⏱️  Response time: ${endTime - startTime}ms\n`);
-    console.log(`📢 ANSWER:\n${answer}\n`);
+    console.log(`SUCCESS! Model is working!\n`);
+    console.log(`Response time: ${endTime - startTime}ms\n`);
+    console.log(`ANSWER:\n${answer}\n`);
     console.log('═'.repeat(60));
     
     process.exit(0);
       
   } catch (error) {
     const msg = error.message || '';
-    console.error(`❌ Model failed: ${msg}`);
+    console.error(`Model failed: ${msg}`);
     
     if (msg.includes('429')) {
-      console.log('\n⚠️  Rate limit exceeded - quota renewed tomorrow');
+      console.log('\nRate limit exceeded - quota renewed tomorrow');
     }
     process.exit(1);
   }

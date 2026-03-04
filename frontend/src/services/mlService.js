@@ -127,11 +127,11 @@ export const getRevisionModelInfo = async () => {
  */
 export const getRiskCategory = (riskScore) => {
   if (riskScore > 0.66) {
-    return { category: 'HIGH RISK', color: 'bg-red-500', icon: '🔴' };
+    return { category: 'HIGH RISK', color: 'bg-red-500', icon: 'high' };
   } else if (riskScore > 0.33) {
-    return { category: 'MEDIUM RISK', color: 'bg-yellow-500', icon: '🟡' };
+    return { category: 'MEDIUM RISK', color: 'bg-yellow-500', icon: 'medium' };
   }
-  return { category: 'LOW RISK', color: 'bg-green-500', icon: '🟢' };
+  return { category: 'LOW RISK', color: 'bg-green-500', icon: 'low' };
 };
 
 /**
@@ -141,11 +141,11 @@ export const getRiskCategory = (riskScore) => {
  */
 export const getUrgencyCategory = (urgencyScore) => {
   if (urgencyScore > 0.66) {
-    return { urgency: 'URGENT', color: 'bg-red-500', icon: '🔴' };
+    return { urgency: 'URGENT', color: 'bg-red-500', icon: 'high' };
   } else if (urgencyScore > 0.33) {
-    return { urgency: 'MODERATE', color: 'bg-yellow-500', icon: '🟡' };
+    return { urgency: 'MODERATE', color: 'bg-yellow-500', icon: 'medium' };
   }
-  return { urgency: 'LOW', color: 'bg-green-500', icon: '🟢' };
+  return { urgency: 'LOW', color: 'bg-green-500', icon: 'low' };
 };
 
 /**

@@ -24,7 +24,7 @@ export class MindMapAdapter {
     const rootId = `student-${studentData.id || 'root'}`;
     nodes.push({
       id: rootId,
-      label: `📚 ${studentData.name || 'Study Plan'}`,
+      label: `${studentData.name || 'Study Plan'}`,
       data: {
         type: 'root',
         studentId: studentData.id,
@@ -52,23 +52,23 @@ export class MindMapAdapter {
 
       // Determine color and styling based on urgency
       let nodeColor, borderColor, textColor;
-      let urgencyIcon = '🟡';
+      let urgencyPrefix = 'MOD';
 
       if (urgencyScore > 0.66) {
         nodeColor = '#fef3c7'; // Light amber
         borderColor = '#f59e0b'; // Orange
         textColor = '#92400e';
-        urgencyIcon = '🔴';
+        urgencyPrefix = 'HIGH';
       } else if (urgencyScore > 0.33) {
         nodeColor = '#fef3c7';
         borderColor = '#eab308';
         textColor = '#713f12';
-        urgencyIcon = '🟡';
+        urgencyPrefix = 'MOD';
       } else {
         nodeColor = '#dcfce7';
         borderColor = '#22c55e';
         textColor = '#166534';
-        urgencyIcon = '🟢';
+        urgencyPrefix = 'LOW';
       }
 
       // Calculate node position in circular layout
@@ -79,7 +79,7 @@ export class MindMapAdapter {
 
       nodes.push({
         id: topicId,
-        label: `${urgencyIcon} ${topic.name || `Topic ${index + 1}`}`,
+        label: `[${urgencyPrefix}] ${topic.name || `Topic ${index + 1}`}`,
         data: {
           type: 'topic',
           topicName: topic.name,
@@ -213,7 +213,7 @@ export class MindMapAdapter {
       moderate,
       low,
       total: mlPredictions.length,
-      summary: `🔴 ${urgent} urgent • 🟡 ${moderate} moderate • 🟢 ${low} on track`,
+      summary: `${urgent} urgent • ${moderate} moderate • ${low} on track`,
     };
   }
 

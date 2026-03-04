@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
-import { Bell } from 'lucide-react';
+import { Bell, Moon } from 'lucide-react';
 import { notificationsAPI } from '../../services/api';
 import { formatDistanceToNow } from 'date-fns';
 
@@ -17,69 +17,81 @@ const Navbar = () => {
     }, [showNotifications]);
 
     return (
-        <header className="fixed top-0 left-0 right-0 z-10 h-16 border-b border-brand-200 bg-white/95 backdrop-blur-sm shadow-sm lg:left-64">
+        <header className="fixed left-0 right-0 top-0 z-10 h-16 border-b border-[#e2e8f0] bg-white/95 backdrop-blur-sm lg:left-72">
             <div className="flex h-full items-center justify-between pl-12 pr-4 sm:pl-6 sm:pr-6 lg:px-8">
                 {/* Page Title */}
                 <div className="min-w-0">
-                    <h2 className="text-lg font-semibold text-brand-800 sm:text-xl truncate">
+                    <h2 className="truncate text-lg font-semibold text-[#0f172a] sm:text-xl">
                         Welcome back, {user?.name?.split(' ')[0]}!
                     </h2>
                 </div>
 
                 {/* Right Section */}
-                <div className="flex items-center gap-2 sm:gap-4">
+                <div className="flex items-center gap-2 sm:gap-3">
                     {/* Role Badge */}
-                    <span className="role-badge">
+                    <span className="hidden rounded-full border border-[#e2e8f0] bg-[#f8fafc] px-2.5 py-1 text-xs font-semibold text-[#475569] sm:inline-flex">
                         {user?.role}
                     </span>
+
+                    <button
+                        className="rounded-full border border-[#e2e8f0] bg-white p-2 text-[#334155] transition hover:bg-[#f8fafc]"
+                        type="button"
+                        aria-label="Theme"
+                    >
+                        <Moon className="h-4 w-4" />
+                    </button>
 
                     {/* Notifications */}
                     <div className="relative">
                         <button
                             onClick={() => setShowNotifications(!showNotifications)}
-                            className="p-2 text-brand-600 hover:text-brand-800 relative"
+                            className="relative rounded-full border border-[#e2e8f0] bg-white p-2 text-[#334155] transition hover:bg-[#f8fafc]"
                         >
                             <Bell className="w-5 h-5" />
                             {(notifications.length > 0 ? notifications : ctxNotifs).filter(n => !n.read).length > 0 && (
-                                <span className="absolute top-0 right-0 -mt-0.5 -mr-0.5 inline-flex items-center justify-center px-1.5 py-0.5 text-xs font-bold leading-none text-white bg-accent rounded-full">
+                                <span className="absolute right-0 top-0 -mr-0.5 -mt-0.5 inline-flex items-center justify-center rounded-full bg-[#4338ca] px-1.5 py-0.5 text-xs font-bold leading-none text-white">
                                     {(notifications.length > 0 ? notifications : ctxNotifs).filter(n => !n.read).length}
                                 </span>
                             )}
                         </button>
 
                         {showNotifications && (
-                            <div className="absolute right-0 mt-2 w-80 max-h-96 overflow-auto bg-white rounded-lg shadow-lg border border-brand-200">
-                                <div className="px-4 py-2 border-b border-brand-100 flex items-center justify-between">
-                                    <h3 className="font-semibold text-brand-800">Notifications</h3>
-                                    <button className="text-xs text-accent" onClick={() => fetchNotifications()}>Refresh</button>
+                            <div className="absolute right-0 mt-2 max-h-96 w-80 overflow-auto rounded-2xl border border-[#e2e8f0] bg-white shadow-xl">
+                                <div className="flex items-center justify-between border-b border-[#e2e8f0] px-4 py-2.5">
+                                    <h3 className="font-semibold text-[#0f172a]">Notifications</h3>
+                                    <button className="text-xs font-semibold text-[#4338ca]" onClick={() => fetchNotifications()}>Refresh</button>
                                 </div>
                                 <div>
                                     {loadingNotifs && (
-                                        <div className="px-4 py-3 text-sm text-gray-500">Loading...</div>
+                                        <div className="px-4 py-3 text-sm text-[#64748b]">Loading...</div>
                                     )}
                                     {!loadingNotifs && (notifications.length === 0 && ctxNotifs.length === 0) && (
-                                        <div className="px-4 py-3 text-sm text-muted">No notifications</div>
+                                        <div className="px-4 py-3 text-sm text-[#64748b]">No notifications</div>
                                     )}
                                     {!loadingNotifs && (notifications.length > 0 ? notifications : ctxNotifs).map((n) => (
-                                        <div key={n._id} className={`px-4 py-3 border-b border-brand-100 hover:bg-brand-50 flex justify-between items-start ${!n.read ? 'bg-white' : 'bg-brand-50'}`}>
+                                        <div key={n._id} className={`flex items-start justify-between border-b border-[#f1f5f9] px-4 py-3 ${!n.read ? 'bg-white' : 'bg-[#f8fafc]'}`}>
                                             <div>
-                                                <div className={`text-sm ${!n.read ? 'font-medium text-brand-800' : 'text-brand-700'}`}>{n.message}</div>
-                                                <div className="text-xs text-muted mt-1">{n.data?.topicId ? 'Topic update' : n.type} • {formatDistanceToNow(new Date(n.createdAt), { addSuffix: true })}</div>
+                                                <div className={`text-sm ${!n.read ? 'font-medium text-[#0f172a]' : 'text-[#334155]'}`}>{n.message}</div>
+                                                <div className="mt-1 text-xs text-[#64748b]">{n.data?.topicId ? 'Topic update' : n.type} • {formatDistanceToNow(new Date(n.createdAt), { addSuffix: true })}</div>
                                             </div>
                                             <div className="ml-2">
                                                 {!n.read && (
-                                                    <button className="text-xs text-accent" onClick={async (e) => { e.stopPropagation(); await markRead(n._id); }}>Mark</button>
+                                                    <button className="text-xs font-semibold text-[#4338ca]" onClick={async (e) => { e.stopPropagation(); await markRead(n._id); }}>Mark</button>
                                                 )}
                                             </div>
                                         </div>
                                     ))}
                                 </div>
                                 <div className="px-4 py-2 text-center">
-                                    <Link to="/notifications" className="text-sm text-accent">View all</Link>
+                                    <Link to="/notifications" className="text-sm font-semibold text-[#4338ca]">View all</Link>
                                 </div>
                             </div>
                         )}
                     </div>
+
+                    <span className="flex h-10 w-10 items-center justify-center rounded-full bg-[#3b82f6] text-sm font-bold text-white">
+                        {user?.name?.charAt(0)?.toUpperCase() ?? 'U'}
+                    </span>
                 </div>
             </div>
         </header>

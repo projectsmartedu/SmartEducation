@@ -212,7 +212,7 @@ const TopicFormModal = ({ courseId, topic, onSave, onClose }) => {
                             </div>
                         )}
                         {topic?.material && (
-                            <p className="mt-2 text-xs text-[#16a34a]">✓ This topic already has material attached ({topic.material.type === 'pdf' ? topic.material.originalFilename : 'text notes'}). Uploading new content will replace it.</p>
+                            <p className="mt-2 text-xs text-[#16a34a]">This topic already has material attached ({topic.material.type === 'pdf' ? topic.material.originalFilename : 'text notes'}). Uploading new content will replace it.</p>
                         )}
                     </div>
 
@@ -410,7 +410,7 @@ const TeacherCourses = () => {
                                                                 </div>
                                                                 <p className="text-xs text-[#94a3b8]">
                                                                     {topic.contentType} • {topic.estimatedMinutes} min • {topic.pointsReward} XP
-                                                                    {topic.material && <span className="ml-1 text-[#16a34a]">• 📄 {topic.material.type === 'pdf' ? topic.material.originalFilename : 'Text'}</span>}
+                                                                    {topic.material && <span className="ml-1 inline-flex items-center gap-1 text-[#16a34a]"><FileText className="h-3 w-3" /> {topic.material.type === 'pdf' ? topic.material.originalFilename : 'Text'}</span>}
                                                                     {!topic.material && <span className="ml-1 text-[#f59e0b]">• No material</span>}
                                                                 </p>
                                                             </div>

@@ -476,18 +476,18 @@ async function awardPoints(studentId, amount, source, reason, referenceId = null
  */
 function checkAndAwardBadges(gamification) {
   const badgeDefs = [
-    { id: 'first_revision', name: 'First Revision', desc: 'Completed your first revision', icon: '⚔️', category: 'revision', condition: () => gamification.revisionsCompleted >= 1 },
-    { id: 'revision_10', name: 'Revision Pro', desc: 'Completed 10 revisions', icon: '🏆', category: 'revision', condition: () => gamification.revisionsCompleted >= 10 },
-    { id: 'revision_50', name: 'Revision Master', desc: 'Completed 50 revisions', icon: '🏆', category: 'revision', condition: () => gamification.revisionsCompleted >= 50 },
-    { id: 'streak_7', name: 'Week Warrior', desc: '7-day activity streak', icon: '🔥', category: 'streak', condition: () => gamification.currentStreak >= 7 },
-    { id: 'streak_30', name: 'Monthly Champion', desc: '30-day activity streak', icon: '🔥', category: 'streak', condition: () => gamification.currentStreak >= 30 },
-    { id: 'level_5', name: 'Rising Star', desc: 'Reached level 5', icon: '✨', category: 'special', condition: () => gamification.level >= 5 },
-    { id: 'level_10', name: 'Knowledge Seeker', desc: 'Reached level 10', icon: '✨', category: 'special', condition: () => gamification.level >= 10 },
-    { id: 'points_5000', name: 'Point Collector', desc: 'Earned 5,000 XP', icon: '🏆', category: 'special', condition: () => gamification.totalPoints >= 5000 },
-    { id: 'points_10000', name: 'XP Legend', desc: 'Earned 10,000 XP', icon: '🏆', category: 'special', condition: () => gamification.totalPoints >= 10000 },
-    { id: 'lessons_5', name: 'Getting Started', desc: 'Completed 5 lessons', icon: '🚀', category: 'mastery', condition: () => gamification.lessonsCompleted >= 5 },
-    { id: 'lessons_10', name: 'Lesson Learner', desc: 'Completed 10 lessons', icon: '🧠', category: 'mastery', condition: () => gamification.lessonsCompleted >= 10 },
-    { id: 'lessons_25', name: 'Knowledge Builder', desc: 'Completed 25 lessons', icon: '🧠', category: 'mastery', condition: () => gamification.lessonsCompleted >= 25 }
+    { id: 'first_revision', name: 'First Revision', desc: 'Completed your first revision', icon: 'sword', category: 'revision', condition: () => gamification.revisionsCompleted >= 1 },
+    { id: 'revision_10', name: 'Revision Pro', desc: 'Completed 10 revisions', icon: 'trophy', category: 'revision', condition: () => gamification.revisionsCompleted >= 10 },
+    { id: 'revision_50', name: 'Revision Master', desc: 'Completed 50 revisions', icon: 'trophy', category: 'revision', condition: () => gamification.revisionsCompleted >= 50 },
+    { id: 'streak_7', name: 'Week Warrior', desc: '7-day activity streak', icon: 'flame', category: 'streak', condition: () => gamification.currentStreak >= 7 },
+    { id: 'streak_30', name: 'Monthly Champion', desc: '30-day activity streak', icon: 'flame', category: 'streak', condition: () => gamification.currentStreak >= 30 },
+    { id: 'level_5', name: 'Rising Star', desc: 'Reached level 5', icon: 'sparkles', category: 'special', condition: () => gamification.level >= 5 },
+    { id: 'level_10', name: 'Knowledge Seeker', desc: 'Reached level 10', icon: 'sparkles', category: 'special', condition: () => gamification.level >= 10 },
+    { id: 'points_5000', name: 'Point Collector', desc: 'Earned 5,000 XP', icon: 'trophy', category: 'special', condition: () => gamification.totalPoints >= 5000 },
+    { id: 'points_10000', name: 'XP Legend', desc: 'Earned 10,000 XP', icon: 'trophy', category: 'special', condition: () => gamification.totalPoints >= 10000 },
+    { id: 'lessons_5', name: 'Getting Started', desc: 'Completed 5 lessons', icon: 'rocket', category: 'mastery', condition: () => gamification.lessonsCompleted >= 5 },
+    { id: 'lessons_10', name: 'Lesson Learner', desc: 'Completed 10 lessons', icon: 'brain', category: 'mastery', condition: () => gamification.lessonsCompleted >= 10 },
+    { id: 'lessons_25', name: 'Knowledge Builder', desc: 'Completed 25 lessons', icon: 'brain', category: 'mastery', condition: () => gamification.lessonsCompleted >= 25 }
   ];
 
   const existingIds = gamification.badges.map(b => b.badgeId);

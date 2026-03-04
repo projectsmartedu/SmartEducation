@@ -89,7 +89,7 @@ class DoubtResolutionService {
   async generateAnswer(question, context) {
     // Mock mode for testing when API quota is exhausted
     if (process.env.MOCK_AI_RESPONSES === 'true') {
-      console.log('🎭 MOCK MODE: Returning simulated answer');
+      console.log('MOCK MODE: Returning simulated answer');
       const mockAnswers = {
         'photosynthesis': 'Photosynthesis is the process by which plants convert light energy from the sun into chemical energy stored in glucose. This occurs in the chloroplasts using chlorophyll, water, and carbon dioxide, producing oxygen as a byproduct. The process has two main stages: the light-dependent reactions (which occur in the thylakoids) and the light-independent reactions or Calvin cycle (which occur in the stroma).',
         'mitochondria': 'Mitochondria are membrane-bound organelles found in eukaryotic cells that serve as the powerhouse of the cell. They generate ATP (adenosine triphosphate) through cellular respiration, primarily through the electron transport chain. The mitochondria has an outer membrane, inner membrane, and matrix. They contain their own DNA and ribosomes, suggesting they originated from ancient bacteria through endosymbiotism.',
@@ -133,20 +133,20 @@ Please provide a helpful, accurate, and educational answer:`;
     let quotaExceeded = false;
     for (const modelName of this.models) {
       try {
-        console.log(`🤖 Trying model: ${modelName} for doubt resolution...`);
+        console.log(`Trying model: ${modelName} for doubt resolution...`);
         const model = this.genAI.getGenerativeModel({ model: modelName });
         const result = await model.generateContent(systemPrompt);
-        console.log(`✅ Doubt resolution success with ${modelName}`);
+        console.log(`Doubt resolution success with ${modelName}`);
         return result.response.text();
       } catch (error) {
         // Inspect common error cases to provide clearer diagnostics
-        console.warn(`⚠️ Model ${modelName} failed:`, error && (error.message || error));
+        console.warn(`Model ${modelName} failed:`, error && (error.message || error));
         const msg = (error && (error.message || '')).toString().toLowerCase();
         
         if (msg.includes('quota') || msg.includes('rate limit') || msg.includes('429')) {
           // Mark that quota was exceeded but don't throw - provide fallback instead
           quotaExceeded = true;
-          console.warn('⚠️ API quota exceeded - using fallback response');
+          console.warn('API quota exceeded - using fallback response');
           continue;
         }
         
@@ -163,8 +163,8 @@ Please provide a helpful, accurate, and educational answer:`;
     // All models failed — provide a graceful fallback answer
     const fallback = [
       quotaExceeded 
-        ? '⚠️ AI service is temporarily rate-limited. Here\'s context from your course materials:'
-        : '📚 AI service is temporarily unavailable. Here\'s relevant context from your course materials:',
+        ? 'AI service is temporarily rate-limited. Here\'s context from your course materials:'
+        : 'AI service is temporarily unavailable. Here\'s relevant context from your course materials:',
       '',
       '• Context from materials:',
       context ? context.split('\n').slice(0, 10).join('\n') : 'No relevant context available.',

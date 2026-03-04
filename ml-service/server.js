@@ -15,7 +15,7 @@ const PORT = process.env.PORT || 5001;
 app.use(cors());
 app.use(express.json({ limit: '50mb' }));
 
-console.log('🚀 ML Service starting...');
+console.log('ML Service starting...');
 console.log(`   Models directory: ${path.join(__dirname, 'models')}`);
 console.log(`   Inference script: ${path.join(__dirname, 'ml_inference.py')}`);
 
@@ -265,8 +265,8 @@ app.use((err, req, res, next) => {
 });
 
 app.listen(PORT, () => {
-  console.log(`✅ ML Service running on port ${PORT}`);
-  console.log(`📊 Risk API: POST /api/risk/predict`);
-  console.log(`🧠 Revision API: POST /api/revision/mindmap`);
-  console.log(`❤️  Health: GET /api/health`);
+  console.log(`ML Service running on port ${PORT}`);
+  console.log(`Risk API: POST /api/risk/predict`);
+  console.log(`Revision API: POST /api/revision/mindmap`);
+  console.log(`Health: GET /api/health`);
 });

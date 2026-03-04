@@ -25,14 +25,14 @@ MODELS_DIR.mkdir(exist_ok=True)
 np.random.seed(42)
 
 print("=" * 70)
-print("🚀 SMART ACADEMIC RISK ENGINE - MODEL TRAINING")
+print("SMART ACADEMIC RISK ENGINE - MODEL TRAINING")
 print("=" * 70)
 
 # ============================================================================
 # 1. RISK PREDICTION MODEL TRAINING
 # ============================================================================
 
-print("\n📊 PHASE 1: Risk Prediction Model Training")
+print("\nPHASE 1: Risk Prediction Model Training")
 print("-" * 70)
 
 # Generate realistic risk dataset (5000 students)
@@ -64,7 +64,7 @@ risk_data['at_risk'] = at_risk_prob.astype(int)
 noise_mask = np.random.random(n_students) < 0.10
 risk_data.loc[noise_mask, 'at_risk'] = 1 - risk_data.loc[noise_mask, 'at_risk']
 
-print(f"✓ Generated {n_students} student records")
+print(f"Generated {n_students} student records")
 print(f"  At-risk students: {risk_data['at_risk'].sum()} ({risk_data['at_risk'].mean()*100:.1f}%)")
 
 # Split and train
@@ -74,7 +74,7 @@ X_risk_train, X_risk_test, y_risk_train, y_risk_test = train_test_split(
     X_risk, y_risk, test_size=0.2, random_state=42
 )
 
-print("\n🎯 Training Risk Model (XGBoost)...")
+print("\nTraining Risk Model (XGBoost)...")
 risk_model = XGBClassifier(
     max_depth=4, learning_rate=0.05, n_estimators=100,
     reg_alpha=1.0, reg_lambda=1.0, subsample=0.8,
@@ -89,7 +89,7 @@ train_auc = roc_auc_score(y_risk_train, y_risk_pred_train)
 test_auc = roc_auc_score(y_risk_test, y_risk_pred_test)
 cv_scores = cross_val_score(risk_model, X_risk_train, y_risk_train, cv=5, scoring='roc_auc')
 
-print(f"\n✅ Risk Model Performance:")
+print(f"\nRisk Model Performance:")
 print(f"  Train AUC: {train_auc:.4f}")
 print(f"  Test AUC:  {test_auc:.4f}")
 print(f"  CV AUC:    {cv_scores.mean():.4f} (+/- {cv_scores.std():.4f})")
@@ -97,13 +97,13 @@ print(f"  CV AUC:    {cv_scores.mean():.4f} (+/- {cv_scores.std():.4f})")
 # Save
 joblib.dump(risk_model, MODELS_DIR / 'risk_pipeline_v2.pkl')
 joblib.dump(X_risk.columns.tolist(), MODELS_DIR / 'risk_features_v2.pkl')
-print(f"✓ Risk model saved")
+print(f"Risk model saved")
 
 # ============================================================================
 # 2. REVISION URGENCY MODEL TRAINING
 # ============================================================================
 
-print("\n📚 PHASE 2: Revision Urgency Model Training")
+print("\nPHASE 2: Revision Urgency Model Training")
 print("-" * 70)
 
 # Generate revision dataset
@@ -137,7 +137,7 @@ revision_data['needs_revision'] = needs_revision_prob.astype(int)
 noise_mask = np.random.random(n_records) < 0.08
 revision_data.loc[noise_mask, 'needs_revision'] = 1 - revision_data.loc[noise_mask, 'needs_revision']
 
-print(f"✓ Generated {n_records} topic records ({n_students_rev} students × {n_topics} topics)")
+print(f"Generated {n_records} topic records ({n_students_rev} students x {n_topics} topics)")
 print(f"  Needs revision: {revision_data['needs_revision'].sum()} ({revision_data['needs_revision'].mean()*100:.1f}%)")
 
 # Split and train
@@ -147,7 +147,7 @@ X_rev_train, X_rev_test, y_rev_train, y_rev_test = train_test_split(
     X_rev, y_rev, test_size=0.2, random_state=42
 )
 
-print("\n🎯 Training Revision Urgency Model (XGBoost)...")
+print("\nTraining Revision Urgency Model (XGBoost)...")
 revision_model = XGBClassifier(
     max_depth=3, learning_rate=0.05, n_estimators=80,
     reg_alpha=1.5, reg_lambda=1.5, subsample=0.7,
@@ -162,7 +162,7 @@ train_auc_rev = roc_auc_score(y_rev_train, y_rev_pred_train)
 test_auc_rev = roc_auc_score(y_rev_test, y_rev_pred_test)
 cv_scores_rev = cross_val_score(revision_model, X_rev_train, y_rev_train, cv=5, scoring='roc_auc')
 
-print(f"\n✅ Revision Model Performance:")
+print(f"\nRevision Model Performance:")
 print(f"  Train AUC: {train_auc_rev:.4f}")
 print(f"  Test AUC:  {test_auc_rev:.4f}")
 print(f"  CV AUC:    {cv_scores_rev.mean():.4f} (+/- {cv_scores_rev.std():.4f})")
@@ -170,13 +170,13 @@ print(f"  CV AUC:    {cv_scores_rev.mean():.4f} (+/- {cv_scores_rev.std():.4f})"
 # Save
 joblib.dump(revision_model, MODELS_DIR / 'revision_planner_model.pkl')
 joblib.dump(X_rev.columns.tolist(), MODELS_DIR / 'revision_features.pkl')
-print(f"✓ Revision model saved")
+print(f"Revision model saved")
 
 # ============================================================================
 # 3. SAVE METADATA
 # ============================================================================
 
-print("\n💾 PHASE 3: Saving Metadata")
+print("\nPHASE 3: Saving Metadata")
 print("-" * 70)
 
 metadata = {
@@ -201,24 +201,24 @@ metadata = {
 }
 
 joblib.dump(metadata, MODELS_DIR / 'model_metadata.pkl')
-print(f"✓ Metadata saved")
+print(f"Metadata saved")
 
 print("\n" + "=" * 70)
-print("✅ MODEL TRAINING COMPLETE!")
+print("MODEL TRAINING COMPLETE!")
 print("=" * 70)
 
-print("\n📦 Generated Files:")
+print("\nGenerated Files:")
 print(f"  • ml-service/models/risk_pipeline_v2.pkl")
 print(f"  • ml-service/models/risk_features_v2.pkl")
 print(f"  • ml-service/models/revision_planner_model.pkl")
 print(f"  • ml-service/models/revision_features.pkl")
 print(f"  • ml-service/models/model_metadata.pkl")
 
-print("\n📊 Model Performance Summary:")
+print("\nModel Performance Summary:")
 print(f"  Risk Model      - Test AUC: {test_auc:.4f}")
 print(f"  Revision Model  - Test AUC: {test_auc_rev:.4f}")
 
-print("\n🚀 Next Steps:")
+print("\nNext Steps:")
 print(f"  1. Commit to GitHub: git add . && git commit -m 'Add trained ML models'")
 print(f"  2. Create Render service: Name 'smart-education-ml'")
 print(f"  3. Start command: node ml-service/server.js")

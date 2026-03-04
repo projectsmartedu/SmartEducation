@@ -94,11 +94,11 @@ const getGeminiResponse = async (messages) => {
         });
 
         if (response?.candidates?.[0]?.content?.parts?.[0]?.text) {
-          console.log(`✅ Gemini API success with ${model}`);
+          console.log(`Gemini API success with ${model}`);
           return response.candidates[0].content.parts[0].text;
         }
       } catch (err) {
-        console.log(`❌ ${model} failed: ${err.message}`);
+        console.log(`${model} failed: ${err.message}`);
         lastError = err;
       }
     }
@@ -116,7 +116,7 @@ const generateMockResponse = (message) => {
   
   // Math-related responses
   if (lowerMessage.includes('pythagoras') || lowerMessage.includes('pythagorean')) {
-    return `**The Pythagorean Theorem** 📐
+    return `**The Pythagorean Theorem**
 
 The Pythagorean theorem states that in a right-angled triangle:
 
@@ -135,7 +135,7 @@ This theorem is fundamental in geometry, construction, navigation, and many real
   }
   
   if (lowerMessage.includes('quadratic') || lowerMessage.includes('equation')) {
-    return `**Quadratic Equations** 📊
+    return `**Quadratic Equations**
 
 A quadratic equation has the form: **ax² + bx + c = 0**
 
@@ -156,7 +156,7 @@ x = (-b ± √(b² - 4ac)) / 2a
   
   // Science responses
   if (lowerMessage.includes('photosynthesis')) {
-    return `**Photosynthesis** 🌱
+    return `**Photosynthesis**
 
 Photosynthesis is the process by which plants convert light energy into chemical energy.
 
@@ -175,7 +175,7 @@ This process is essential for life on Earth as it produces oxygen and forms the 
   }
   
   if (lowerMessage.includes('newton') || lowerMessage.includes('motion') || lowerMessage.includes('law')) {
-    return `**Newton's Laws of Motion** 🍎
+    return `**Newton's Laws of Motion**
 
 **First Law (Inertia):**
 An object at rest stays at rest, and an object in motion stays in motion, unless acted upon by an external force.
@@ -193,7 +193,7 @@ For every action, there is an equal and opposite reaction.
   }
   
   if (lowerMessage.includes('gravity') || lowerMessage.includes('gravitational')) {
-    return `**Gravity** 🌍
+    return `**Gravity**
 
 Gravity is a fundamental force that attracts objects with mass toward each other.
 
@@ -212,7 +212,7 @@ Einstein later explained gravity through General Relativity as the curvature of 
   
   // History
   if (lowerMessage.includes('world war') || lowerMessage.includes('ww')) {
-    return `**World Wars Overview** 🌍
+    return `**World Wars Overview**
 
 **World War I (1914-1918):**
 - Also called "The Great War"
@@ -233,7 +233,7 @@ Both wars reshaped global politics and led to the creation of the United Nations
   
   // Programming
   if (lowerMessage.includes('programming') || lowerMessage.includes('code') || lowerMessage.includes('python') || lowerMessage.includes('javascript')) {
-    return `**Programming Basics** 💻
+    return `**Programming Basics**
 
 Programming is giving instructions to computers using special languages.
 
@@ -253,24 +253,24 @@ Start with Python - it's beginner-friendly and powerful!`;
   }
   
   // Default helpful response
-  return `Thank you for your question! 📚
+  return `Thank you for your question!
 
 **Your question:** "${message.substring(0, 80)}${message.length > 80 ? '...' : ''}"
 
 I'm currently operating in offline mode, but here's how you can find answers:
 
 **Study Tips:**
-1. 📖 Review your textbook or class notes
-2. 🔍 Search for tutorials on Khan Academy or YouTube
-3. 👥 Form a study group with classmates
-4. 👨‍🏫 Ask your teacher during office hours
+1. Review your textbook or class notes
+2. Search for tutorials on Khan Academy or YouTube
+3. Form a study group with classmates
+4. Ask your teacher during office hours
 
 **Online Resources:**
 - Khan Academy (khanacademy.org)
 - Coursera (coursera.org)
 - Wikipedia for quick overviews
 
-I'll be back to full capacity soon. Keep learning! 🌟`;
+I'll be back to full capacity soon. Keep learning!`;
 };
 
 // @desc    Send message and get AI response

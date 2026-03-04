@@ -5,12 +5,20 @@ import { useAuth } from '../context/AuthContext';
 import {
     BookOpen,
     CheckCircle,
+    CheckCircle2,
     Clock,
     ArrowRight,
     Award,
     Sparkles,
     Zap,
-    Target
+    Target,
+    Trophy,
+    Brain,
+    Flame,
+    GraduationCap,
+    AlertTriangle,
+    BookText,
+    Rocket
 } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { progressAPI, revisionsAPI, gamificationAPI, coursesAPI } from '../services/api';
@@ -22,6 +30,23 @@ const BADGE_ACCENT_MAP = {
     milestone: 'from-[#dcfce7] via-[#86efac] to-[#22c55e]',
     special: 'from-[#fce7f3] via-[#f9a8d4] to-[#ec4899]',
     speed: 'from-[#fff7ed] via-[#fed7aa] to-[#f97316]'
+};
+
+const BADGE_ICON_MAP = {
+    sword: Rocket,
+    medal: Award,
+    crown: Trophy,
+    flame: Flame,
+    biceps: Target,
+    star: Sparkles,
+    sparkles: Sparkles,
+    gem: Award,
+    trophy: Trophy,
+    rocket: Rocket,
+    book: BookOpen,
+    graduation: GraduationCap,
+    bolt: Zap,
+    brain: Brain
 };
 
 const StudentDashboard = () => {
@@ -110,7 +135,7 @@ const StudentDashboard = () => {
         return gamification.badges.map((b) => ({
             title: b.name,
             description: b.description,
-            icon: b.icon || '🏆',
+            icon: b.icon || 'trophy',
             gradient: BADGE_ACCENT_MAP[b.category] || BADGE_ACCENT_MAP.milestone
         }));
     }, [gamification]);
@@ -129,7 +154,7 @@ const StudentDashboard = () => {
         <DashboardLayout>
             <div className="space-y-6">
                 {/* Welcome Header */}
-                <section className="relative overflow-hidden rounded-[32px] bg-gradient-to-br from-[#0f172a] via-[#1e3a8a] to-[#312e81] p-6 text-white shadow-2xl sm:p-7">
+                <section className="relative overflow-hidden rounded-[28px] border border-[#dbe4ff] bg-gradient-to-r from-[#3b82f6] to-[#7c3aed] p-6 text-white shadow-sm sm:p-7">
                     <div className="pointer-events-none absolute -left-24 top-1/2 h-64 w-64 -translate-y-1/2 rounded-full bg-white/10 blur-3xl" />
                     <div className="flex flex-col gap-6 md:flex-row md:items-center md:justify-between">
                         <div className="flex items-start gap-4">
@@ -137,9 +162,9 @@ const StudentDashboard = () => {
                                 {initial}
                             </div>
                             <div className="space-y-1">
-                                <p className="text-xs uppercase tracking-[0.28em] text-white/70">Student Portal</p>
-                                <h1 className="text-2xl font-semibold sm:text-3xl">{user?.name ?? 'Learner'}</h1>
-                                <p className="text-sm text-white/70">{user?.email}</p>
+                                <p className="text-xs uppercase tracking-[0.28em] text-white/75">Student Portal</p>
+                                <h1 className="text-2xl font-semibold sm:text-3xl">Welcome back, {user?.name ?? 'Learner'}!</h1>
+                                <p className="text-sm text-white/80">Your learning progress is moving forward.</p>
                             </div>
                         </div>
                         <div className="grid w-full grid-cols-1 gap-3 sm:w-auto sm:grid-cols-3">
@@ -165,12 +190,12 @@ const StudentDashboard = () => {
                         </p>
                         <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
                             <Link to="/student/courses"
-                                className="inline-flex items-center justify-center gap-2 rounded-full bg-white px-4 py-2 text-sm font-semibold text-[#1e3a8a] shadow transition hover:bg-[#e8edff]">
+                                className="inline-flex items-center justify-center gap-2 rounded-xl bg-white px-4 py-2 text-sm font-semibold text-[#1e3a8a] transition hover:bg-[#eef2ff]">
                                 <BookOpen className="h-4 w-4" /> <span>Browse Courses</span>
                             </Link>
                             <Link to="/student/leaderboard"
-                                className="inline-flex items-center justify-center gap-2 rounded-full border border-white/60 px-4 py-2 text-sm font-semibold text-white transition hover:bg-white/10">
-                                🏆 <span>Leaderboard</span>
+                                className="inline-flex items-center justify-center gap-2 rounded-xl border border-white/60 px-4 py-2 text-sm font-semibold text-white transition hover:bg-white/10">
+                                <Trophy className="h-4 w-4" /> <span>Leaderboard</span>
                             </Link>
                         </div>
                     </div>
@@ -178,46 +203,46 @@ const StudentDashboard = () => {
 
                 {/* Stats Cards */}
                 <section className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
-                    <div className="rounded-[22px] bg-white p-5 shadow-lg ring-1 ring-[#e2e8f0]">
+                    <div className="rounded-[20px] border border-[#e2e8f0] bg-white p-5 shadow-sm">
                         <div className="flex items-center justify-between">
                             <div>
                                 <p className="text-xs uppercase tracking-widest text-[#64748b]">Total XP</p>
                                 <p className="mt-1 text-2xl font-bold text-[#0f172a]">{xp.toLocaleString()}</p>
                             </div>
-                            <span className="text-3xl">⚡</span>
+                            <Zap className="h-7 w-7 text-[#f59e0b]" />
                         </div>
                     </div>
-                    <div className="rounded-[22px] bg-white p-5 shadow-lg ring-1 ring-[#e2e8f0]">
+                    <div className="rounded-[20px] border border-[#e2e8f0] bg-white p-5 shadow-sm">
                         <div className="flex items-center justify-between">
                             <div>
                                 <p className="text-xs uppercase tracking-widest text-[#64748b]">Level</p>
                                 <p className="mt-1 text-2xl font-bold text-[#4338ca]">{level}</p>
                             </div>
-                            <span className="text-3xl">🧠</span>
+                            <Brain className="h-7 w-7 text-[#4338ca]" />
                         </div>
                     </div>
-                    <div className="rounded-[22px] bg-white p-5 shadow-lg ring-1 ring-[#e2e8f0]">
+                    <div className="rounded-[20px] border border-[#e2e8f0] bg-white p-5 shadow-sm">
                         <div className="flex items-center justify-between">
                             <div>
                                 <p className="text-xs uppercase tracking-widest text-[#64748b]">Streak</p>
                                 <p className="mt-1 text-2xl font-bold text-[#f59e0b]">{streakDays} days</p>
                             </div>
-                            <span className="text-3xl">🔥</span>
+                            <Flame className="h-7 w-7 text-[#f97316]" />
                         </div>
                     </div>
-                    <div className="rounded-[22px] bg-white p-5 shadow-lg ring-1 ring-[#e2e8f0]">
+                    <div className="rounded-[20px] border border-[#e2e8f0] bg-white p-5 shadow-sm">
                         <div className="flex items-center justify-between">
                             <div>
                                 <p className="text-xs uppercase tracking-widest text-[#64748b]">Completed</p>
                                 <p className="mt-1 text-2xl font-bold text-[#16a34a]">{lessonsCompleted}</p>
                             </div>
-                            <span className="text-3xl">✅</span>
+                            <CheckCircle2 className="h-7 w-7 text-[#16a34a]" />
                         </div>
                     </div>
                 </section>
 
                 {/* My Courses Progress */}
-                <section className="rounded-[28px] bg-white p-5 shadow-xl ring-1 ring-[#e2e8f0] sm:p-6">
+                <section className="rounded-[24px] border border-[#e2e8f0] bg-white p-5 shadow-sm sm:p-6">
                     <div className="mb-5 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
                         <div>
                             <h2 className="text-lg font-semibold text-[#0f172a]">My Courses</h2>
@@ -229,11 +254,11 @@ const StudentDashboard = () => {
                     </div>
 
                     {myCourses.length === 0 ? (
-                        <div className="rounded-3xl bg-[#f8fafc] p-10 text-center">
+                        <div className="rounded-2xl border border-[#e2e8f0] bg-[#f8fafc] p-10 text-center">
                             <BookOpen className="mx-auto h-12 w-12 text-[#cbd5e1]" />
                             <h3 className="mt-4 font-semibold text-[#475569]">No courses yet</h3>
                             <p className="mt-1 text-sm text-[#94a3b8]">Explore available courses and enroll to start learning.</p>
-                            <Link to="/student/courses" className="mt-4 inline-flex items-center gap-2 rounded-full bg-[#4338ca] px-5 py-2 text-sm font-semibold text-white hover:bg-[#312e81]">
+                            <Link to="/student/courses" className="mt-4 inline-flex items-center gap-2 rounded-xl bg-[#4338ca] px-5 py-2 text-sm font-semibold text-white hover:bg-[#312e81]">
                                 Browse Courses
                             </Link>
                         </div>
@@ -244,13 +269,13 @@ const StudentDashboard = () => {
                                 const isComplete = prog.percent === 100 && prog.totalTopics > 0;
                                 return (
                                     <Link key={course._id} to={`/student/courses/${course._id}`}
-                                        className="group rounded-3xl border border-[#e2e8f0] bg-[#f8fafc] p-5 transition hover:-translate-y-1 hover:shadow-xl">
+                                        className="group rounded-2xl border border-[#e2e8f0] bg-[#f8fafc] p-5 transition hover:-translate-y-0.5 hover:shadow-md">
                                         <div className="flex items-start justify-between">
                                             <div>
                                                 <h3 className="text-sm font-semibold text-[#0f172a] group-hover:text-[#4338ca]">{course.title}</h3>
                                                 <p className="mt-0.5 text-xs text-[#64748b]">{course.subject}</p>
                                             </div>
-                                            {isComplete && <span className="text-lg">🎓</span>}
+                                            {isComplete && <GraduationCap className="h-4 w-4 text-[#16a34a]" />}
                                         </div>
                                         <div className="mt-4 flex items-center gap-3 text-xs text-[#94a3b8]">
                                             <span className="flex items-center gap-1"><BookOpen className="h-3 w-3" /> {course.topicCount ?? prog.totalTopics} topics</span>
@@ -279,7 +304,7 @@ const StudentDashboard = () => {
 
                 <section className="grid gap-6 lg:grid-cols-[1.1fr,0.9fr]">
                     {/* Overall Progress */}
-                    <div className="rounded-[28px] bg-white p-6 shadow-xl ring-1 ring-[#e2e8f0]">
+                    <div className="rounded-[24px] border border-[#e2e8f0] bg-white p-6 shadow-sm">
                         <h2 className="text-lg font-semibold text-[#0f172a]">Overall Progress</h2>
                         <div className="mt-5 space-y-4">
                             <div className="rounded-2xl bg-[#f8fafc] p-4">
@@ -327,7 +352,7 @@ const StudentDashboard = () => {
                     </div>
 
                     {/* Badge Cabinet */}
-                    <div className="rounded-[28px] bg-white p-6 shadow-xl ring-1 ring-[#e2e8f0]">
+                    <div className="rounded-[24px] border border-[#e2e8f0] bg-white p-6 shadow-sm">
                         <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
                             <h2 className="text-lg font-semibold text-[#0f172a]">Badge Cabinet</h2>
                             <Link to="/student/leaderboard" className="text-sm font-semibold text-[#4338ca] hover:text-[#312e81]">
@@ -345,10 +370,13 @@ const StudentDashboard = () => {
                                 {badges.slice(0, 6).map((badge, i) => {
                                     const rotations = ['-rotate-2', 'rotate-1', '-rotate-1', 'rotate-2'];
                                     const rotation = rotations[i % rotations.length];
+                                    const BadgeIcon = BADGE_ICON_MAP[badge.icon] || Trophy;
                                     return (
                                         <div key={badge.title}
                                             className={`group ${rotation} rounded-3xl bg-gradient-to-br ${badge.gradient} p-4 text-center shadow-lg transition-all duration-300 hover:rotate-0 hover:scale-110 hover:shadow-2xl cursor-default`}>
-                                            <span className="block text-3xl drop-shadow-lg transition-transform duration-300 group-hover:scale-125">{badge.icon}</span>
+                                            <span className="flex justify-center drop-shadow-lg transition-transform duration-300 group-hover:scale-125">
+                                                <BadgeIcon className="h-8 w-8 text-[#0f172a]" />
+                                            </span>
                                             <p className="mt-1.5 text-xs font-extrabold text-[#0f172a] drop-shadow-sm">{badge.title}</p>
                                             <p className="text-[10px] text-[#475569]">{badge.description}</p>
                                         </div>
@@ -373,7 +401,7 @@ const StudentDashboard = () => {
                                 <div key={i} className="flex flex-col gap-3 rounded-2xl bg-[#f8fafc] p-4 transition hover:bg-[#f1f5f9] sm:flex-row sm:items-center sm:justify-between">
                                     <div className="flex items-center gap-3">
                                         <span className={`flex h-9 w-9 items-center justify-center rounded-full text-sm ${rev.isUrgent ? 'bg-[#fee2e2] text-[#b91c1c]' : 'bg-[#ede9fe] text-[#4338ca]'}`}>
-                                            {rev.isUrgent ? '⚠️' : '📖'}
+                                            {rev.isUrgent ? <AlertTriangle className="h-4 w-4" /> : <BookText className="h-4 w-4" />}
                                         </span>
                                         <div>
                                             <p className="text-sm font-semibold text-[#0f172a]">{rev.concept}</p>

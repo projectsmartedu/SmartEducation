@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { AlertTriangle, BarChart3, CheckCircle2, CircleDashed, X } from 'lucide-react';
 import './TraditionalMindMap.css';
 
 const TraditionalMindMap = ({ studentData, topicProgress, mlPredictions }) => {
@@ -47,7 +48,7 @@ const TraditionalMindMap = ({ studentData, topicProgress, mlPredictions }) => {
     return (
         <div className="mindmap-container">
             <div className="mindmap-header">
-                <h2>📚 Revision Study Plan</h2>
+                <h2>Revision Study Plan</h2>
                 <p className="header-subtitle">Total Topics: {totalTopics}</p>
             </div>
 
@@ -55,7 +56,7 @@ const TraditionalMindMap = ({ studentData, topicProgress, mlPredictions }) => {
                 {/* Left Column - Urgent Topics */}
                 <div className="mindmap-column urgent-column">
                     <div className="column-header">
-                        <span className="header-icon">🚨</span>
+                        <span className="header-icon"><AlertTriangle size={16} /></span>
                         <h3>Urgent</h3>
                         <span className="badge red">{urgent.length}</span>
                     </div>
@@ -72,7 +73,7 @@ const TraditionalMindMap = ({ studentData, topicProgress, mlPredictions }) => {
                 <div className="mindmap-column center-column">
                     <div className="center-hub">
                         <div className="hub-circle">
-                            <div className="hub-icon">📊</div>
+                            <div className="hub-icon"><BarChart3 size={20} /></div>
                             <div className="hub-title">Revision Hub</div>
                             <div className="hub-count">{totalTopics} Topics</div>
                         </div>
@@ -96,7 +97,7 @@ const TraditionalMindMap = ({ studentData, topicProgress, mlPredictions }) => {
                 {/* Right Column - Moderate Topics */}
                 <div className="mindmap-column moderate-column">
                     <div className="column-header">
-                        <span className="header-icon">⚠️</span>
+                        <span className="header-icon"><CircleDashed size={16} /></span>
                         <h3>Moderate</h3>
                         <span className="badge amber">{moderate.length}</span>
                     </div>
@@ -113,7 +114,7 @@ const TraditionalMindMap = ({ studentData, topicProgress, mlPredictions }) => {
             {/* Bottom Row - Low Priority */}
             <div className="mindmap-bottom">
                 <div className="column-header">
-                    <span className="header-icon">✅</span>
+                    <span className="header-icon"><CheckCircle2 size={16} /></span>
                     <h3>Low Priority</h3>
                     <span className="badge green">{low.length}</span>
                 </div>
@@ -131,7 +132,7 @@ const TraditionalMindMap = ({ studentData, topicProgress, mlPredictions }) => {
                 <div className="details-overlay">
                     <div className="details-panel">
                         <button className="close-details" onClick={() => setSelectedNode(null)} title="Close">
-                            ✕
+                            <X size={16} />
                         </button>
                         <div className="details-header">
                             <h2>{selectedNode.topicName}</h2>
@@ -156,9 +157,9 @@ const TraditionalMindMap = ({ studentData, topicProgress, mlPredictions }) => {
                             <div className="detail-group">
                                 <label>Recommendation</label>
                                 <p className="recommendation">
-                                    {selectedNode.urgency === 'URGENT' && '⚡ Start your revision immediately! This topic needs urgent attention to prepare effectively.'}
-                                    {selectedNode.urgency === 'MODERATE' && '📝 Schedule this topic for revision this week. Maintain a balanced study schedule.'}
-                                    {selectedNode.urgency === 'LOW' && '✅ You are well-prepared! Continue at your current pace and maintain your preparation level.'}
+                                    {selectedNode.urgency === 'URGENT' && 'Start your revision immediately. This topic needs urgent attention to prepare effectively.'}
+                                    {selectedNode.urgency === 'MODERATE' && 'Schedule this topic for revision this week. Maintain a balanced study schedule.'}
+                                    {selectedNode.urgency === 'LOW' && 'You are well-prepared. Continue at your current pace and maintain your preparation level.'}
                                 </p>
                             </div>
                         </div>

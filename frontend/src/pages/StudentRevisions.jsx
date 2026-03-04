@@ -2,6 +2,7 @@ import React, { useState, useEffect, useCallback } from 'react';
 import DashboardLayout from '../components/Layout/DashboardLayout';
 import TraditionalMindMap from '../components/TraditionalMindMap';
 import { revisionsAPI } from '../services/api';
+import { BarChart3 } from 'lucide-react';
 
 const StudentRevisions = () => {
     const [revisionSchedule, setRevisionSchedule] = useState([]);
@@ -216,7 +217,7 @@ const StudentRevisions = () => {
                 <section className="rounded-[28px] bg-white p-6 shadow-xl ring-1 ring-[#e2e8f0]">
                     <div className="flex items-center justify-between">
                         <div>
-                            <h2 className="text-2xl font-semibold text-[#0f172a]">📊 Visual Revision Mind Map</h2>
+                            <h2 className="flex items-center gap-2 text-2xl font-semibold text-[#0f172a]"><BarChart3 className="h-6 w-6 text-[#4338ca]" /> Visual Revision Mind Map</h2>
                             <p className="mt-2 text-sm text-[#475569]">Interactive visualization of your revision urgency with ML-powered predictions</p>
                         </div>
                         <button

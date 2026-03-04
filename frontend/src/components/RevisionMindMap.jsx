@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { BookOpen, Save, Pencil, Edit3, MousePointerClick, X } from 'lucide-react';
 import './RevisionMindMap.css';
 import MindMapAdapter from '../adapters/mindmapAdapter';
 
@@ -80,14 +81,14 @@ const RevisionMindMap = ({ studentData, topicProgress, mlPredictions, onUpdate }
     <div className="mind-map-wrapper">
       {/* Header */}
       <div className="mind-map-header">
-        <h2>📚 Revision Mind Map</h2>
+        <h2><BookOpen size={18} style={{ display: 'inline', marginRight: 6 }} />Revision Mind Map</h2>
         <div className="header-info">
           <span>{summary?.summary}</span>
           <button
             className="btn-edit-toggle"
             onClick={() => setEditMode(!editMode)}
           >
-            {editMode ? '💾 Save' : '✏️ Edit'}
+            {editMode ? <><Save size={14} style={{ display: 'inline', marginRight: 4 }} />Save</> : <><Pencil size={14} style={{ display: 'inline', marginRight: 4 }} />Edit</>}
           </button>
         </div>
       </div>
@@ -105,19 +106,19 @@ const RevisionMindMap = ({ studentData, topicProgress, mlPredictions, onUpdate }
             className={`filter-btn urgent ${filter === 'urgent' ? 'active' : ''}`}
             onClick={() => setFilter('urgent')}
           >
-            🔴 Urgent ({summary?.urgent || 0})
+            Urgent ({summary?.urgent || 0})
           </button>
           <button
             className={`filter-btn moderate ${filter === 'moderate' ? 'active' : ''}`}
             onClick={() => setFilter('moderate')}
           >
-            🟡 Moderate ({summary?.moderate || 0})
+            Moderate ({summary?.moderate || 0})
           </button>
           <button
             className={`filter-btn low ${filter === 'low' ? 'active' : ''}`}
             onClick={() => setFilter('low')}
           >
-            🟢 Low ({summary?.low || 0})
+            Low ({summary?.low || 0})
           </button>
         </div>
       </div>
@@ -280,7 +281,7 @@ const RevisionMindMap = ({ studentData, topicProgress, mlPredictions, onUpdate }
                   </div>
 
                   <div className="detail-recommendation">
-                    <strong>📋 Recommendation:</strong>
+                    <strong>Recommendation:</strong>
                     <p>{selectedNode.data.recommendation}</p>
                   </div>
 
@@ -291,7 +292,7 @@ const RevisionMindMap = ({ studentData, topicProgress, mlPredictions, onUpdate }
                       setEditingTopic(selectedNode.data);
                     }}
                   >
-                    ✏️ Edit Topic
+                    <Edit3 size={14} style={{ display: 'inline', marginRight: 4 }} />Edit Topic
                   </button>
                 </div>
               )}
@@ -306,7 +307,7 @@ const RevisionMindMap = ({ studentData, topicProgress, mlPredictions, onUpdate }
             </div>
           ) : (
             <div className="no-selection">
-              <p>👆 Click on a topic to view details</p>
+              <p><MousePointerClick size={14} style={{ display: 'inline', marginRight: 4 }} />Click on a topic to view details</p>
             </div>
           )}
         </div>
@@ -315,10 +316,10 @@ const RevisionMindMap = ({ studentData, topicProgress, mlPredictions, onUpdate }
       {/* Study Plan */}
       {studyPlan && (
         <div className="study-plan">
-          <h3>📅 Study Plan</h3>
+          <h3>Study Plan</h3>
           <div className="plan-grid">
             <div className="plan-section urgent">
-              <h4>🔴 Do Immediately</h4>
+              <h4>Do Immediately</h4>
               <ul>
                 {studyPlan.immediate.map((item, i) => (
                   <li key={i}>
@@ -330,7 +331,7 @@ const RevisionMindMap = ({ studentData, topicProgress, mlPredictions, onUpdate }
             </div>
 
             <div className="plan-section moderate">
-              <h4>🟡 This Week</h4>
+              <h4>This Week</h4>
               <ul>
                 {studyPlan.thisWeek.map((item, i) => (
                   <li key={i}>
@@ -342,7 +343,7 @@ const RevisionMindMap = ({ studentData, topicProgress, mlPredictions, onUpdate }
             </div>
 
             <div className="plan-section low">
-              <h4>🟢 Maintain</h4>
+              <h4>Maintain</h4>
               <ul>
                 {studyPlan.maintenance.map((item, i) => (
                   <li key={i}>
@@ -436,10 +437,10 @@ const EditNodePanel = ({ node, onSave, onCancel }) => {
 
       <div className="form-actions">
         <button className="btn-save" onClick={() => onSave(formData)}>
-          💾 Save Changes
+          <Save size={14} style={{ display: 'inline', marginRight: 4 }} />Save Changes
         </button>
         <button className="btn-cancel" onClick={onCancel}>
-          ❌ Cancel
+          <X size={14} style={{ display: 'inline', marginRight: 4 }} />Cancel
         </button>
       </div>
     </div>
