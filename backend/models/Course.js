@@ -1,59 +1,71 @@
 /**
  * Course Model
- * Represents a course (e.g., "Grade 11 Physics") with metadata.
- * Topics are linked via the Topic model (one-to-many).
+ * Represents a structured educational course (e.g., "Grade 11 Physics")
+ * Serves as the container for learning topics and student enrollment
+ * Topics are linked via the Topic model (one-to-many relationship)
+ * 
+ * Schema responsibilities:
+ * - Store course metadata (title, subject, description)
+ * - Track course ownership and creator information
+ * - Maintain student enrollment lists
+ * - Define difficulty level for curriculum design
+ * - Support timestamps for audit trails
  * 
  * Future AI/ML integration:
  * - Course difficulty scoring via learner performance aggregation
  * - Recommended course sequencing based on prerequisite graphs
+ * - Adaptive pacing recommendations based on cohort progress
  */
 const mongoose = require('mongoose');
 
 const courseSchema = new mongoose.Schema({
+  // Course display name and title
   title: {
     type: String,
     required: [true, 'Course title is required'],
     trim: true,
     maxlength: 200
   },
+  // Extended course description and curriculum overview
   description: {
     type: String,
     trim: true,
     maxlength: 2000
   },
+  // Subject area (e.g., Mathematics, Physics, History)
   subject: {
     type: String,
     required: [true, 'Subject is required'],
     trim: true
   },
-  // Teacher who created/owns this course
+  // Reference to the User who created and owns this course
   createdBy: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'User',
     required: true
   },
-  // Students enrolled in this course
+  // Array of student references currently enrolled in this course
   enrolledStudents: [{
     type: mongoose.Schema.Types.ObjectId,
     ref: 'User'
   }],
-  // Difficulty level for display & future ML difficulty calibration
+  // Difficulty level classification for display and ML calibration
   difficulty: {
     type: String,
     enum: ['beginner', 'intermediate', 'advanced'],
     default: 'intermediate'
   },
-  // Whether the course is published and visible to students
+  // Publication status: controls visibility and enrollment eligibility
   isPublished: {
     type: Boolean,
     default: true
   },
-  // Total estimated hours for the course
+  // Estimated total study time in hours for course completion
   estimatedHours: {
     type: Number,
     default: 0
   },
-  // Cover image URL (optional)
+  // Cover image URL for course display and catalog preview
   coverImage: {
     type: String,
     default: ''
