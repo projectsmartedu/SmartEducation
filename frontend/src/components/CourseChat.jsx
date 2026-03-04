@@ -50,10 +50,6 @@ export default function CourseChat({ courseId, course = null, topic = null, topi
     }
   }, [visibleProp, course, courseId, topic]);
 
-  useEffect(() => {
-    console.log('CourseChat visibleProp ->', visibleProp, 'topic ->', topic?._id || topic?.title);
-  }, [visibleProp, topic]);
-
   const scrollToBottom = () => {
     try { if (listRef.current) listRef.current.scrollTop = listRef.current.scrollHeight; } catch (_) { }
   };
@@ -101,7 +97,13 @@ export default function CourseChat({ courseId, course = null, topic = null, topi
       }
       scrollToBottom();
     } catch (err) {
-      setMessages(prev => [...prev, { role: 'assistant', content: 'Failed to get a reply. Try again later.' }]);
+      let errorMsg = 'Failed to get a reply. Try again later.';
+      if (err.response?.status === 401) {
+        errorMsg = 'Session expired. Please refresh the page and re-login.';
+      } else if (err.response?.status === 429) {
+        errorMsg = 'Too many requests. Please wait a moment before trying again.';
+      }
+      setMessages(prev => [...prev, { role: 'assistant', content: errorMsg }]);
       scrollToBottom();
     } finally {
       setLoading(false);

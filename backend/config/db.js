@@ -9,6 +9,8 @@ if (!cached) {
 
 const connectDB = async () => {
   const uri = process.env.MONGODB_URI;
+  const directUri = process.env.MONGODB_URI_DIRECT;
+  
   if (!uri || typeof uri !== 'string' || uri.trim() === '') {
     throw new Error('Missing MONGODB_URI environment variable');
   }
@@ -32,19 +34,24 @@ const connectDB = async () => {
         return mongooseInstance;
       } catch (err) {
         // Handle SRV/DNS failures by attempting a direct URI fallback if provided
-        const isSrvError = /querySrv|EREFUSED/i.test(err.message);
-        const directUri = process.env.MONGODB_URI_DIRECT;
+        const isSrvError = /querySrv|EREFUSED|ETIMEDOUT|getaddrinfo/i.test(err.message);
         if (isSrvError && directUri) {
           console.warn('SRV/DNS lookup failed. Trying direct connection URI fallback...');
-          const mongooseInstance = await mongoose.connect(directUri, options);
-          console.log(`MongoDB Connected via direct URI: ${mongooseInstance.connection.host}`);
-          return mongooseInstance;
+          try {
+            const mongooseInstance = await mongoose.connect(directUri, options);
+            console.log(`MongoDB Connected via direct URI: ${mongooseInstance.connection.host}`);
+            return mongooseInstance;
+          } catch (directErr) {
+            console.error('Direct URI also failed:', directErr.message);
+            throw err;
+          }
         }
         throw err;
       }
     };
 
-    cached.promise = tryConnect(uri);
+    // Try direct URI first since DNS is broken locally
+    cached.promise = directUri ? tryConnect(directUri) : tryConnect(uri);
   }
   cached.conn = await cached.promise;
   return cached.conn;

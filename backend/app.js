@@ -13,10 +13,8 @@ const progressRoutes = require('./routes/progress');
 const revisionRoutes = require('./routes/revisions');
 const gamificationRoutes = require('./routes/gamification');
 const aiRoutes = require('./routes/ai');
-<<<<<<< HEAD
-=======
 const notificationRoutes = require('./routes/notifications');
->>>>>>> 76817869ade28d4fe3ed2996515fc24659b2f641
+const quizRoutes = require('./routes/quiz');
 
 const app = express();
 
@@ -39,7 +37,8 @@ app.use('/api/progress', progressRoutes);
 app.use('/api/revisions', revisionRoutes);
 app.use('/api/gamification', gamificationRoutes);
 app.use('/api/ai', aiRoutes);
-<<<<<<< HEAD
+app.use('/api/quiz', quizRoutes);
+app.use('/api/notifications', notificationRoutes);
 
 // ========== ML SERVICE PROXY ENDPOINTS ==========
 
@@ -104,9 +103,8 @@ app.post('/api/ml/revision/topic-urgency', async (req, res) => {
     res.status(503).json({ error: 'ML Service unavailable' });
   }
 });
-=======
+
 app.use('/api/notifications', notificationRoutes);
->>>>>>> 76817869ade28d4fe3ed2996515fc24659b2f641
 
 // Root route (for Render health checks)
 app.get('/', (req, res) => {

@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import DashboardLayout from '../components/Layout/DashboardLayout';
+import FloatingChatButton from '../components/FloatingChatButton';
 import { useAuth } from '../context/AuthContext';
 import {
     BookOpen,
@@ -31,6 +32,7 @@ const StudentDashboard = () => {
     const [gamification, setGamification] = useState(null);
     const [progressStats, setProgressStats] = useState(null);
     const [loading, setLoading] = useState(true);
+    const [chatVisible, setChatVisible] = useState(false);
 
     useEffect(() => {
         const fetchAll = async () => {
@@ -407,6 +409,7 @@ const StudentDashboard = () => {
                     </div>
                 </section>
             </div>
+            <FloatingChatButton onActivate={() => setChatVisible(!chatVisible)} />
         </DashboardLayout>
     );
 };

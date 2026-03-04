@@ -3,7 +3,6 @@ import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import { useOnlineStatus } from '../../hooks/useOffline';
 import Navbar from './Navbar';
-import Footer from './Footer';
 import {
     LayoutDashboard,
     Map,
@@ -186,7 +185,6 @@ const DashboardLayout = ({ children }) => {
                         <div className="mx-auto max-w-6xl">{children}</div>
                     </div>
                 </main>
-                <Footer />
             </div>
         </div>
     );

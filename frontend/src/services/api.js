@@ -30,9 +30,9 @@ api.interceptors.response.use(
   (response) => response,
   (error) => {
     if (error.response?.status === 401) {
-      // Only clear auth and redirect if we're online (real auth failure)
-      // When offline, keep the stored credentials
-      if (navigator.onLine) {
+      // Only logout if this is NOT a skipAutoLogout request
+      const skipAutoLogout = error.config?.skipAutoLogout;
+      if (!skipAutoLogout && navigator.onLine) {
         localStorage.removeItem('token');
         localStorage.removeItem('user');
         window.location.href = '/login';
@@ -100,13 +100,13 @@ export const materialsAPI = {
 // Doubts API (Student)
 export const doubtsAPI = {
   // Submit a doubt and get AI answer
-  submit: (data) => api.post('/doubts', data),
+  submit: (data) => api.post('/doubts', data, { skipAutoLogout: true }),
   // Get doubt by ID
   getById: (id) => api.get(`/doubts/${id}`),
   // Get my doubts history
   getMyDoubts: (params = {}) => api.get('/doubts/my', { params }),
   // Search materials before asking
-  searchMaterials: (data) => api.post('/doubts/search-materials', data),
+  searchMaterials: (data) => api.post('/doubts/search-materials', data, { skipAutoLogout: true }),
   // Get available subjects
   getSubjects: () => api.get('/doubts/subjects'),
   // Get topics for a subject
