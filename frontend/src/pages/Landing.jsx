@@ -7,7 +7,7 @@ const heroMetrics = [
     { value: '92%', label: 'Average retention lift' },
     { value: '30+', label: 'Institutions served' }
 ];
-
+// some ui changes
 const features = [
     {
         title: 'Unified learning intelligence',
