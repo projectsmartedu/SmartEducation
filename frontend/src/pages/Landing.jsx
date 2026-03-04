@@ -14,16 +14,22 @@ const features = [
     {
         title: 'Unified learning intelligence',
         copy: 'Bring content analytics, quiz outcomes and behavioural signals into a single, explainable profile for every learner.',
+        image: 'https://images.unsplash.com/photo-1521737604893-d14cc237f11d?auto=format&fit=crop&w=900&q=80',
+        imageAlt: 'Mentor reviewing learning analytics with a student.',
         badge: 'Data fabric'
     },
     {
         title: 'Adaptive revision engine',
         copy: 'Predict forgetting risk, auto-build revision queues and deliver nudges before performance slips.',
+        image: 'https://images.unsplash.com/photo-1529101091764-c3526daf38fe?auto=format&fit=crop&w=900&q=80',
+        imageAlt: 'Student revising on a tablet with digital notes.',
         badge: 'Personalised plans'
     },
     {
         title: 'Institution-ready reporting',
         copy: 'Give leadership a real-time view of cohorts, subjects and mentor performance without drowning in spreadsheets.',
+        image: 'https://images.unsplash.com/photo-1517430816045-df4b7de711b4?auto=format&fit=crop&w=900&q=80',
+        imageAlt: 'Faculty team discussing performance dashboards in a meeting room.',
         badge: 'Executive insight'
     }
 ];
@@ -32,18 +38,37 @@ const partnerNames = ['Northbridge Academy', 'BrightPath Schools', 'SkillForge L
 
 const galleryShots = [
     {
+        image: 'https://images.unsplash.com/photo-1523580846011-d3a5bc25702b?auto=format&fit=crop&w=900&q=80',
+        alt: 'Students collaborating in a technology-enabled classroom.',
         title: 'Collaborative classrooms',
         copy: 'Connect mentors and learners through shared progress tiles and AI-curated tasks.'
     },
     {
+        image: 'https://images.unsplash.com/photo-1588072432836-e10032774350?auto=format&fit=crop&w=900&q=80',
+        alt: 'Teacher hosting a blended learning session with multiple devices.',
         title: 'Blended learning at scale',
         copy: 'Synchronise remote and in-person cohorts with nudges that keep progress aligned.'
     },
     {
+        image: 'https://images.unsplash.com/photo-1522202176988-66273c2fd55f?auto=format&fit=crop&w=900&q=80',
+        alt: 'LMS dashboards showing colourful charts and metrics.',
         title: 'Insights that drive action',
         copy: 'Surface risk, mastery and engagement signals in one command centre for leadership.'
     }
 ];
+
+const featureFallbackImage = 'https://images.pexels.com/photos/3184292/pexels-photo-3184292.jpeg?auto=compress&cs=tinysrgb&w=900';
+const galleryFallbackImage = 'https://images.pexels.com/photos/1181359/pexels-photo-1181359.jpeg?auto=compress&cs=tinysrgb&w=900';
+
+const handleImageError = (event) => {
+    const img = event.currentTarget;
+    const fallbackSrc = img.dataset.fallbacksrc;
+    if (fallbackSrc && img.src !== fallbackSrc) {
+        img.src = fallbackSrc;
+    } else {
+        img.classList.add('landing-image-hidden');
+    }
+};
 
 const floatDelayClasses = ['landing-float-delay-0', 'landing-float-delay-1', 'landing-float-delay-2'];
 
@@ -189,6 +214,10 @@ const Landing = () => {
                     transform: perspective(1400px) rotateX(var(--landing-tilt-rotateX)) rotateY(var(--landing-tilt-rotateY)) translate3d(0, 0, 10px) scale(1.005);
                     border-color: rgba(99, 102, 241, 0.25);
                 }
+
+                .landing-image-hidden {
+                    display: none;
+                }
             `}</style>
             <div className="min-h-screen bg-slate-50 text-slate-900 antialiased">
                 <header className="relative overflow-hidden border-b border-slate-200/70 bg-white">
@@ -228,12 +257,6 @@ const Landing = () => {
                                 all from one easy-to-use platform.
                             </p>
                             <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
-                                <Link
-                                    to="/login"
-                                    className="inline-flex items-center justify-center rounded-full bg-indigo-600 px-6 py-3 text-sm font-semibold text-white shadow-md shadow-indigo-500/30 transition hover:-translate-y-0.5 hover:bg-indigo-500"
-                                >
-                                    Request a demo
-                                </Link>
                                 <a
                                     href="#features"
                                     className="inline-flex items-center justify-center rounded-full border border-indigo-200 px-6 py-3 text-sm font-semibold text-indigo-700 transition hover:border-indigo-300 hover:bg-white"
@@ -310,8 +333,15 @@ const Landing = () => {
                                         key={feature.title}
                                         className={`landing-tilt-card ${delayClass} flex h-full flex-col rounded-[24px] border border-slate-200 bg-white p-6 shadow-sm transition hover:shadow-md`}
                                     >
-                                        <div className="flex h-12 w-12 items-center justify-center rounded-xl border border-indigo-100 bg-indigo-50 text-indigo-600">
-                                            <BookOpen className="h-5 w-5" />
+                                        <div className="overflow-hidden rounded-2xl border border-slate-200 bg-slate-100">
+                                            <img
+                                                src={feature.image}
+                                                alt={feature.imageAlt}
+                                                className="h-40 w-full object-cover"
+                                                loading="lazy"
+                                                onError={handleImageError}
+                                                data-fallbacksrc={featureFallbackImage}
+                                            />
                                         </div>
                                         <span className="mt-4 inline-flex w-fit items-center rounded-full bg-indigo-50 px-3 py-1 text-xs font-semibold tracking-wide text-indigo-600">
                                             {feature.badge}
@@ -329,7 +359,7 @@ const Landing = () => {
                             <div className="mx-auto max-w-2xl text-center">
                                 <h2 className="text-2xl font-semibold text-slate-900 sm:text-3xl">See Smart Education in action</h2>
                                 <p className="mt-3 text-base text-slate-600">
-                                    Explore capability snapshots designed for consistent learning outcomes across campuses.
+                                    Blend the right imagery, guidance and analytics to deliver consistent learning experiences across campuses.
                                 </p>
                             </div>
                             <div className="mt-10 grid gap-6 md:grid-cols-3">
@@ -340,8 +370,15 @@ const Landing = () => {
                                             key={shot.title}
                                             className={`landing-tilt-card ${delayClass} flex h-full flex-col rounded-[24px] border border-slate-200 bg-white p-4 shadow-sm backdrop-blur transition hover:shadow-md`}
                                         >
-                                            <div className="flex h-44 items-center justify-center rounded-2xl border border-slate-200 bg-slate-50">
-                                                <BookOpen className="h-10 w-10 text-slate-400" />
+                                            <div className="overflow-hidden rounded-2xl">
+                                                <img
+                                                    src={shot.image}
+                                                    alt={shot.alt}
+                                                    className="h-44 w-full object-cover"
+                                                    loading="lazy"
+                                                    onError={handleImageError}
+                                                    data-fallbacksrc={galleryFallbackImage}
+                                                />
                                             </div>
                                             <h3 className="mt-4 text-lg font-semibold text-slate-900">{shot.title}</h3>
                                             <p className="mt-2 text-sm leading-relaxed text-slate-600">{shot.copy}</p>
