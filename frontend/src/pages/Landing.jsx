@@ -2,6 +2,7 @@ import React, { useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import Footer from '../components/Layout/Footer';
 
+// Hero metrics displaying key platform statistics
 const heroMetrics = [
     { value: '18K+', label: 'Learners onboarded' },
     { value: '92%', label: 'Average retention lift' },
@@ -39,6 +40,7 @@ const heroMedia = {
     dashboardAlt: 'Education analytics dashboard displayed on a laptop screen in a modern workspace.'
 };
 
+// Brand logo configuration with fallback support
 const brandLogo = {
     primary: 'https://images.unsplash.com/photo-1545239351-1141bd82e8a6?auto=format&fit=crop&w=256&q=80',
     fallback: 'https://images.pexels.com/photos/3183165/pexels-photo-3183165.jpeg?auto=compress&cs=tinysrgb&w=256'
@@ -69,13 +71,16 @@ const featureFallbackImage = 'https://images.pexels.com/photos/3184292/pexels-ph
 const galleryFallbackImage = 'https://images.pexels.com/photos/1181359/pexels-photo-1181359.jpeg?auto=compress&cs=tinysrgb&w=900';
 const heroFallbackImage = 'https://images.pexels.com/photos/3861957/pexels-photo-3861957.jpeg?auto=compress&cs=tinysrgb&w=1200';
 
+// Handle image loading errors with graceful fallback
 const handleImageError = (event) => {
     const img = event.currentTarget;
     const fallbackSrc = img.dataset.fallbacksrc;
     if (fallbackSrc && img.src !== fallbackSrc) {
         img.src = fallbackSrc;
+        console.debug('Image fallback loaded for:', img.alt);
     } else {
         img.classList.add('landing-image-hidden');
+        console.warn('Image failed to load:', img.alt);
     }
 };
 
@@ -107,6 +112,7 @@ const ctaHighlights = [
 
 const Landing = () => {
     useEffect(() => {
+        // Skip effect on server-side rendering
         if (typeof window === 'undefined') {
             return undefined;
         }
@@ -116,9 +122,11 @@ const Landing = () => {
             return undefined;
         }
 
+        // Check feature support for progressive enhancement
         const supportsFinePointer = window.matchMedia('(pointer: fine)').matches;
         const supportsIntersectionObserver = 'IntersectionObserver' in window;
 
+        // Apply card tilt effect based on mouse position
         const handleMove = (event) => {
             const card = event.currentTarget;
             const rect = card.getBoundingClientRect();
@@ -131,6 +139,7 @@ const Landing = () => {
             card.classList.add('landing-card-active');
         };
 
+        // Reset card tilt on mouse leave
         const handleLeave = (event) => {
             const card = event.currentTarget;
             card.style.setProperty('--landing-tilt-rotateX', '0deg');
@@ -138,6 +147,7 @@ const Landing = () => {
             card.classList.remove('landing-card-active');
         };
 
+        // Initialize intersection observer for lazy animation triggers
         let observer;
         if (supportsIntersectionObserver) {
             observer = new IntersectionObserver(
@@ -167,6 +177,7 @@ const Landing = () => {
             }
         });
 
+        // Cleanup event listeners and observers
         return () => {
             if (observer) {
                 observer.disconnect();
