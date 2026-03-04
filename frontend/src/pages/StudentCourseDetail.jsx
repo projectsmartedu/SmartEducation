@@ -318,7 +318,7 @@ const StudentCourseDetail = () => {
             <DashboardLayout>
                 <div className="space-y-4">
                     {/* Reader Header */}
-                    <div className="rounded-[28px] bg-white p-5 shadow-xl ring-1 ring-[#e2e8f0]">
+                    <div className="rounded-xl border border-[#e2e8f0] bg-white p-5 shadow-sm">
                         <div className="flex items-center justify-between">
                             <div className="flex items-center gap-3">
                                 <button onClick={closeReader} className="rounded-full p-2 hover:bg-[#f1f5f9] transition">
@@ -354,7 +354,7 @@ const StudentCourseDetail = () => {
                                         <button
                                             onClick={() => handleMasterTopic(readingTopic)}
                                             disabled={updating === readingTopic._id}
-                                            className="inline-flex items-center gap-2 rounded-full bg-gradient-to-r from-[#f59e0b] to-[#d97706] px-5 py-2 text-sm font-semibold text-white shadow hover:from-[#d97706] hover:to-[#b45309] disabled:opacity-50 transition">
+                                            className="inline-flex items-center gap-2 rounded-full bg-[#f59e0b] px-5 py-2 text-sm font-semibold text-white hover:bg-[#d97706] disabled:opacity-50 transition">
                                             {updating === readingTopic._id ? (
                                                 <><Loader2 className="h-4 w-4 animate-spin" /> Mastering...</>
                                             ) : (
@@ -384,7 +384,7 @@ const StudentCourseDetail = () => {
                     <div className="grid grid-cols-1 gap-6">
                         <div className="relative">
                             {/* Content Area */}
-                            <div className="rounded-[28px] bg-white shadow-xl ring-1 ring-[#e2e8f0] overflow-hidden">
+                            <div className="overflow-hidden rounded-xl border border-[#e2e8f0] bg-white shadow-sm">
                                 {contentLoading ? (
                                     <div className="flex flex-col items-center justify-center py-24">
                                         <Loader2 className="h-10 w-10 animate-spin text-[#4338ca]" />
@@ -475,7 +475,7 @@ const StudentCourseDetail = () => {
             )}
 
             {/* Course Header */}
-            <section className="rounded-[28px] bg-gradient-to-br from-[#ede9fe] via-[#f0f9ff] to-[#fef9c3] p-6 shadow-xl">
+            <section className="rounded-xl border border-[#e2e8f0] bg-white p-6 shadow-sm">
                 <Link to="/student/courses" className="inline-flex items-center gap-1 text-sm font-medium text-[#4338ca] hover:text-[#312e81] mb-4">
                     <ArrowLeft className="h-4 w-4" /> Back to My Courses
                 </Link>
@@ -492,8 +492,8 @@ const StudentCourseDetail = () => {
                         <span>Progress</span>
                         <span className="font-semibold">{progressPercent}%</span>
                     </div>
-                    <div className="h-3 rounded-full bg-white/60">
-                        <div className="h-3 rounded-full bg-gradient-to-r from-[#4338ca] to-[#0ea5e9] transition-all"
+                    <div className="h-3 rounded-full bg-[#e2e8f0]">
+                        <div className="h-3 rounded-full bg-[#4338ca] transition-all"
                             style={{ width: `${progressPercent}%` }} />
                     </div>
                 </div>
@@ -527,7 +527,7 @@ const StudentCourseDetail = () => {
             )}
 
             {/* Topics list - sequential learning path */}
-            <section className="rounded-[28px] bg-white p-6 shadow-xl ring-1 ring-[#e2e8f0]">
+            <section className="rounded-xl border border-[#e2e8f0] bg-white p-6 shadow-sm">
                 <h2 className="text-lg font-semibold text-[#0f172a] mb-2">Course Topics</h2>
                 <p className="text-sm text-[#64748b] mb-6">Complete topics in order. Each topic earns you XP points.</p>
 
@@ -614,7 +614,7 @@ const StudentCourseDetail = () => {
                                             ) : status === 'completed' ? (
                                                 <div className="flex items-center gap-2">
                                                     <button onClick={() => handleMasterTopic(topic)}
-                                                        className="inline-flex items-center gap-1 rounded-full bg-gradient-to-r from-[#f59e0b] to-[#d97706] px-3 py-1 text-xs font-semibold text-white hover:from-[#d97706] hover:to-[#b45309] transition">
+                                                        className="inline-flex items-center gap-1 rounded-full bg-[#f59e0b] px-3 py-1 text-xs font-semibold text-white hover:bg-[#d97706] transition">
                                                         <Star className="h-3 w-3" /> Master
                                                     </button>
                                                     <button onClick={() => handleRestartTopic(topic)}
@@ -645,7 +645,7 @@ const StudentCourseDetail = () => {
 
                 {/* Course completion message */}
                 {completedCount === topics.length && topics.length > 0 && (
-                    <div className="mt-8 rounded-2xl bg-gradient-to-r from-[#dcfce7] via-[#fef9c3] to-[#ede9fe] p-6 text-center">
+                    <div className="mt-8 rounded-xl border border-[#bbf7d0] bg-[#f0fdf4] p-6 text-center">
                         <GraduationCap className="mx-auto h-10 w-10 text-[#4338ca]" />
                         <h3 className="mt-2 text-xl font-bold text-[#0f172a]">Course Completed!</h3>
                         <p className="mt-1 text-sm text-[#475569]">

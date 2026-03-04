@@ -57,7 +57,7 @@ const StudentKnowledgeMap = () => {
     return (
         <DashboardLayout>
             <div className="space-y-6">
-                <section className="rounded-[28px] bg-white p-6 shadow-xl ring-1 ring-[#e2e8f0]">
+                <section className="rounded-xl border border-[#e2e8f0] bg-white p-6 shadow-sm">
                     <h1 className="text-2xl font-semibold text-[#0f172a]">Knowledge Map Overview</h1>
                     <p className="mt-2 text-sm text-[#475569]">
                         This page surfaces concept mastery across your personalized graph, powered by live progress data.
@@ -79,7 +79,7 @@ const StudentKnowledgeMap = () => {
                     <div className="rounded-2xl bg-[#fee2e2] p-4 text-sm text-[#b91c1c]">{error}</div>
                 )}
 
-                <section className="rounded-[28px] bg-white p-6 shadow-xl ring-1 ring-[#e2e8f0]">
+                <section className="rounded-xl border border-[#e2e8f0] bg-white p-6 shadow-sm">
                     {loading ? (
                         <div className="flex items-center justify-center py-12">
                             <div className="h-8 w-8 animate-spin rounded-full border-4 border-[#e2e8f0] border-t-[#4338ca]" />
@@ -89,7 +89,7 @@ const StudentKnowledgeMap = () => {
                     ) : (
                         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
                             {knowledgeConcepts.map((concept) => (
-                                <div key={concept.name} className="rounded-3xl bg-[#f8fafc] p-5 shadow transition hover:-translate-y-1">
+                                <div key={concept.name} className="rounded-xl border border-[#e2e8f0] bg-[#f8fafc] p-5 transition hover:border-[#cbd5e1] hover:bg-white">
                                     <div className="flex items-center justify-between">
                                         <h2 className="text-lg font-semibold text-[#111827]">{concept.name}</h2>
                                         <span
@@ -106,7 +106,7 @@ const StudentKnowledgeMap = () => {
                                     <p className="mt-2 text-sm text-[#475569]">Mastery {concept.mastery}%</p>
                                     <div className="mt-3 h-2 rounded-full bg-[#e2e8f0]">
                                         <div
-                                            className="h-2 rounded-full bg-gradient-to-r from-[#4338ca] to-[#0ea5e9]"
+                                            className="h-2 rounded-full bg-[#4338ca]"
                                             style={{ width: `${concept.mastery}%` }}
                                         />
                                     </div>

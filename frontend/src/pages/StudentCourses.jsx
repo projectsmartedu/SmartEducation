@@ -155,7 +155,7 @@ const StudentCourses = () => {
     return (
         <DashboardLayout>
             <div className="space-y-6">
-                <section className="rounded-[28px] bg-white p-6 shadow-xl ring-1 ring-[#e2e8f0]">
+                <section className="rounded-xl border border-[#e2e8f0] bg-white p-6 shadow-sm">
                     <h1 className="text-2xl font-semibold text-[#0f172a]">My Courses</h1>
                     <p className="mt-1 text-sm text-[#475569]">View enrolled courses, track progress, and discover new ones.</p>
                 </section>
@@ -170,14 +170,14 @@ const StudentCourses = () => {
                 {error && <div className="rounded-2xl bg-red-50 p-4 text-sm text-red-700">{error}</div>}
 
                 {/* Enrolled courses */}
-                <section className="rounded-[28px] bg-white p-6 shadow-xl ring-1 ring-[#e2e8f0]">
+                <section className="rounded-xl border border-[#e2e8f0] bg-white p-6 shadow-sm">
                     <h2 className="text-lg font-semibold text-[#0f172a] mb-4">Enrolled ({myCourses.length})</h2>
                     {myCourses.length === 0 ? (
                         <p className="py-8 text-center text-sm text-[#94a3b8]">You haven't enrolled in any courses yet. Browse available courses below.</p>
                     ) : (
                         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
                             {myCourses.map(course => (
-                                <div key={course._id} className="rounded-3xl border border-[#e2e8f0] bg-[#f8fafc] p-5 transition hover:-translate-y-1 hover:shadow-xl">
+                                <div key={course._id} className="rounded-xl border border-[#e2e8f0] bg-[#f8fafc] p-5 transition hover:border-[#cbd5e1] hover:bg-white">
                                     <div className="flex items-start justify-between">
                                         <div>
                                             <h3 className="text-sm font-semibold text-[#0f172a]">{course.title}</h3>
@@ -225,11 +225,11 @@ const StudentCourses = () => {
 
                 {/* Available courses */}
                 {availableCourses.length > 0 && (
-                    <section className="rounded-[28px] bg-white p-6 shadow-xl ring-1 ring-[#e2e8f0]">
+                    <section className="rounded-xl border border-[#e2e8f0] bg-white p-6 shadow-sm">
                         <h2 className="text-lg font-semibold text-[#0f172a] mb-4">Discover Courses ({availableCourses.length})</h2>
                         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
                             {availableCourses.map(course => (
-                                <div key={course._id} className="rounded-3xl border border-[#e2e8f0] bg-[#f8fafc] p-5 transition hover:-translate-y-1 hover:shadow-xl">
+                                <div key={course._id} className="rounded-xl border border-[#e2e8f0] bg-[#f8fafc] p-5 transition hover:border-[#cbd5e1] hover:bg-white">
                                     <div className="flex items-start justify-between">
                                         <div>
                                             <h3 className="text-sm font-semibold text-[#0f172a]">{course.title}</h3>

@@ -24,12 +24,12 @@ import { Link } from 'react-router-dom';
 import { progressAPI, revisionsAPI, gamificationAPI, coursesAPI } from '../services/api';
 
 const BADGE_ACCENT_MAP = {
-    streak: 'from-[#fef9c3] via-[#fde68a] to-[#fbbf24]',
-    mastery: 'from-[#ede9fe] via-[#c4b5fd] to-[#8b5cf6]',
-    revision: 'from-[#cffafe] via-[#67e8f9] to-[#06b6d4]',
-    milestone: 'from-[#dcfce7] via-[#86efac] to-[#22c55e]',
-    special: 'from-[#fce7f3] via-[#f9a8d4] to-[#ec4899]',
-    speed: 'from-[#fff7ed] via-[#fed7aa] to-[#f97316]'
+    streak: 'bg-[#fff7ed] border-[#fed7aa]',
+    mastery: 'bg-[#f5f3ff] border-[#ddd6fe]',
+    revision: 'bg-[#ecfeff] border-[#a5f3fc]',
+    milestone: 'bg-[#f0fdf4] border-[#bbf7d0]',
+    special: 'bg-[#fdf2f8] border-[#fbcfe8]',
+    speed: 'bg-[#fff7ed] border-[#fdba74]'
 };
 
 const BADGE_ICON_MAP = {
@@ -154,47 +154,46 @@ const StudentDashboard = () => {
         <DashboardLayout>
             <div className="space-y-6">
                 {/* Welcome Header */}
-                <section className="relative overflow-hidden rounded-[28px] border border-[#dbe4ff] bg-gradient-to-r from-[#3b82f6] to-[#7c3aed] p-6 text-white shadow-sm sm:p-7">
-                    <div className="pointer-events-none absolute -left-24 top-1/2 h-64 w-64 -translate-y-1/2 rounded-full bg-white/10 blur-3xl" />
+                <section className="rounded-2xl border border-[#e2e8f0] bg-white p-6 shadow-sm sm:p-7">
                     <div className="flex flex-col gap-6 md:flex-row md:items-center md:justify-between">
                         <div className="flex items-start gap-4">
-                            <div className="flex h-14 w-14 items-center justify-center rounded-3xl bg-white/20 text-2xl font-semibold text-white sm:h-16 sm:w-16">
+                            <div className="flex h-12 w-12 items-center justify-center rounded-full bg-[#4338ca] text-lg font-semibold text-white sm:h-14 sm:w-14">
                                 {initial}
                             </div>
                             <div className="space-y-1">
-                                <p className="text-xs uppercase tracking-[0.28em] text-white/75">Student Portal</p>
-                                <h1 className="text-2xl font-semibold sm:text-3xl">Welcome back, {user?.name ?? 'Learner'}!</h1>
-                                <p className="text-sm text-white/80">Your learning progress is moving forward.</p>
+                                <p className="text-xs uppercase tracking-[0.18em] text-[#64748b]">Dashboard</p>
+                                <h1 className="text-2xl font-semibold text-[#0f172a] sm:text-3xl">Welcome back, {user?.name ?? 'Learner'}</h1>
+                                <p className="text-sm text-[#64748b]">Track your courses, revisions, and progress in one place.</p>
                             </div>
                         </div>
                         <div className="grid w-full grid-cols-1 gap-3 sm:w-auto sm:grid-cols-3">
-                            <div className="rounded-2xl bg-white/15 px-4 py-2 text-sm font-semibold text-white shadow-inner">
-                                <p className="text-xs uppercase tracking-[0.28em] text-white/60">Level</p>
-                                <p className="mt-1 text-lg">{level}</p>
+                            <div className="rounded-xl border border-[#e2e8f0] bg-[#f8fafc] px-4 py-2 text-sm font-semibold text-[#0f172a]">
+                                <p className="text-[11px] uppercase tracking-wide text-[#64748b]">Level</p>
+                                <p className="mt-1 text-base">{level}</p>
                             </div>
-                            <div className="rounded-2xl bg-white/15 px-4 py-2 text-sm font-semibold text-white shadow-inner">
-                                <p className="text-xs uppercase tracking-[0.28em] text-white/60">Total XP</p>
-                                <p className="mt-1 text-lg">{xp.toLocaleString()}</p>
+                            <div className="rounded-xl border border-[#e2e8f0] bg-[#f8fafc] px-4 py-2 text-sm font-semibold text-[#0f172a]">
+                                <p className="text-[11px] uppercase tracking-wide text-[#64748b]">Total XP</p>
+                                <p className="mt-1 text-base">{xp.toLocaleString()}</p>
                             </div>
-                            <div className="rounded-2xl bg-white/15 px-4 py-2 text-sm font-semibold text-white shadow-inner">
-                                <p className="text-xs uppercase tracking-[0.28em] text-white/60">Streak</p>
-                                <p className="mt-1 text-lg">{streakLabel}</p>
+                            <div className="rounded-xl border border-[#e2e8f0] bg-[#f8fafc] px-4 py-2 text-sm font-semibold text-[#0f172a]">
+                                <p className="text-[11px] uppercase tracking-wide text-[#64748b]">Streak</p>
+                                <p className="mt-1 text-base">{streakLabel}</p>
                             </div>
                         </div>
                     </div>
                     <div className="mt-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-                        <p className="text-sm text-white/80 sm:max-w-xl">
+                        <p className="text-sm text-[#64748b] sm:max-w-xl">
                             {completedTopics > 0
                                 ? `You've completed ${completedTopics} of ${totalTopics} topics. Keep the momentum going!`
                                 : 'Enroll in a course and start learning to build your mastery map.'}
                         </p>
                         <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
                             <Link to="/student/courses"
-                                className="inline-flex items-center justify-center gap-2 rounded-xl bg-white px-4 py-2 text-sm font-semibold text-[#1e3a8a] transition hover:bg-[#eef2ff]">
+                                className="inline-flex items-center justify-center gap-2 rounded-xl bg-[#4338ca] px-4 py-2 text-sm font-semibold text-white transition hover:bg-[#3730a3]">
                                 <BookOpen className="h-4 w-4" /> <span>Browse Courses</span>
                             </Link>
                             <Link to="/student/leaderboard"
-                                className="inline-flex items-center justify-center gap-2 rounded-xl border border-white/60 px-4 py-2 text-sm font-semibold text-white transition hover:bg-white/10">
+                                className="inline-flex items-center justify-center gap-2 rounded-xl border border-[#d1d5db] px-4 py-2 text-sm font-semibold text-[#334155] transition hover:bg-[#f8fafc]">
                                 <Trophy className="h-4 w-4" /> <span>Leaderboard</span>
                             </Link>
                         </div>
@@ -203,40 +202,40 @@ const StudentDashboard = () => {
 
                 {/* Stats Cards */}
                 <section className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
-                    <div className="rounded-[20px] border border-[#e2e8f0] bg-white p-5 shadow-sm">
+                    <div className="rounded-xl border border-[#e2e8f0] bg-white p-5 shadow-sm">
                         <div className="flex items-center justify-between">
                             <div>
                                 <p className="text-xs uppercase tracking-widest text-[#64748b]">Total XP</p>
                                 <p className="mt-1 text-2xl font-bold text-[#0f172a]">{xp.toLocaleString()}</p>
                             </div>
-                            <Zap className="h-7 w-7 text-[#f59e0b]" />
+                            <span className="flex h-9 w-9 items-center justify-center rounded-lg bg-[#fef3c7]"><Zap className="h-5 w-5 text-[#d97706]" /></span>
                         </div>
                     </div>
-                    <div className="rounded-[20px] border border-[#e2e8f0] bg-white p-5 shadow-sm">
+                    <div className="rounded-xl border border-[#e2e8f0] bg-white p-5 shadow-sm">
                         <div className="flex items-center justify-between">
                             <div>
                                 <p className="text-xs uppercase tracking-widest text-[#64748b]">Level</p>
                                 <p className="mt-1 text-2xl font-bold text-[#4338ca]">{level}</p>
                             </div>
-                            <Brain className="h-7 w-7 text-[#4338ca]" />
+                            <span className="flex h-9 w-9 items-center justify-center rounded-lg bg-[#ede9fe]"><Brain className="h-5 w-5 text-[#4338ca]" /></span>
                         </div>
                     </div>
-                    <div className="rounded-[20px] border border-[#e2e8f0] bg-white p-5 shadow-sm">
+                    <div className="rounded-xl border border-[#e2e8f0] bg-white p-5 shadow-sm">
                         <div className="flex items-center justify-between">
                             <div>
                                 <p className="text-xs uppercase tracking-widest text-[#64748b]">Streak</p>
                                 <p className="mt-1 text-2xl font-bold text-[#f59e0b]">{streakDays} days</p>
                             </div>
-                            <Flame className="h-7 w-7 text-[#f97316]" />
+                            <span className="flex h-9 w-9 items-center justify-center rounded-lg bg-[#fff7ed]"><Flame className="h-5 w-5 text-[#ea580c]" /></span>
                         </div>
                     </div>
-                    <div className="rounded-[20px] border border-[#e2e8f0] bg-white p-5 shadow-sm">
+                    <div className="rounded-xl border border-[#e2e8f0] bg-white p-5 shadow-sm">
                         <div className="flex items-center justify-between">
                             <div>
                                 <p className="text-xs uppercase tracking-widest text-[#64748b]">Completed</p>
                                 <p className="mt-1 text-2xl font-bold text-[#16a34a]">{lessonsCompleted}</p>
                             </div>
-                            <CheckCircle2 className="h-7 w-7 text-[#16a34a]" />
+                            <span className="flex h-9 w-9 items-center justify-center rounded-lg bg-[#dcfce7]"><CheckCircle2 className="h-5 w-5 text-[#15803d]" /></span>
                         </div>
                     </div>
                 </section>
@@ -269,7 +268,7 @@ const StudentDashboard = () => {
                                 const isComplete = prog.percent === 100 && prog.totalTopics > 0;
                                 return (
                                     <Link key={course._id} to={`/student/courses/${course._id}`}
-                                        className="group rounded-2xl border border-[#e2e8f0] bg-[#f8fafc] p-5 transition hover:-translate-y-0.5 hover:shadow-md">
+                                        className="group rounded-xl border border-[#e2e8f0] bg-[#f8fafc] p-5 transition hover:border-[#cbd5e1] hover:bg-white">
                                         <div className="flex items-start justify-between">
                                             <div>
                                                 <h3 className="text-sm font-semibold text-[#0f172a] group-hover:text-[#4338ca]">{course.title}</h3>
@@ -287,7 +286,7 @@ const StudentDashboard = () => {
                                                 <span className="font-semibold text-[#4338ca]">{prog.percent}%</span>
                                             </div>
                                             <div className="h-2 rounded-full bg-[#e2e8f0]">
-                                                <div className={`h-2 rounded-full transition-all ${isComplete ? 'bg-[#16a34a]' : 'bg-gradient-to-r from-[#4338ca] to-[#0ea5e9]'}`}
+                                                <div className={`h-2 rounded-full transition-all ${isComplete ? 'bg-[#16a34a]' : 'bg-[#4338ca]'}`}
                                                     style={{ width: `${prog.percent}%` }} />
                                             </div>
                                         </div>
@@ -304,7 +303,7 @@ const StudentDashboard = () => {
 
                 <section className="grid gap-6 lg:grid-cols-[1.1fr,0.9fr]">
                     {/* Overall Progress */}
-                    <div className="rounded-[24px] border border-[#e2e8f0] bg-white p-6 shadow-sm">
+                    <div className="rounded-xl border border-[#e2e8f0] bg-white p-6 shadow-sm">
                         <h2 className="text-lg font-semibold text-[#0f172a]">Overall Progress</h2>
                         <div className="mt-5 space-y-4">
                             <div className="rounded-2xl bg-[#f8fafc] p-4">
@@ -352,7 +351,7 @@ const StudentDashboard = () => {
                     </div>
 
                     {/* Badge Cabinet */}
-                    <div className="rounded-[24px] border border-[#e2e8f0] bg-white p-6 shadow-sm">
+                    <div className="rounded-xl border border-[#e2e8f0] bg-white p-6 shadow-sm">
                         <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
                             <h2 className="text-lg font-semibold text-[#0f172a]">Badge Cabinet</h2>
                             <Link to="/student/leaderboard" className="text-sm font-semibold text-[#4338ca] hover:text-[#312e81]">
@@ -360,7 +359,7 @@ const StudentDashboard = () => {
                             </Link>
                         </div>
                         {badges.length === 0 ? (
-                            <div className="mt-6 rounded-3xl bg-[#f8fafc] p-8 text-center">
+                            <div className="mt-6 rounded-xl border border-[#e2e8f0] bg-[#f8fafc] p-8 text-center">
                                 <Award className="mx-auto h-10 w-10 text-[#cbd5e1]" />
                                 <p className="mt-3 text-sm font-medium text-[#475569]">No badges yet</p>
                                 <p className="mt-1 text-xs text-[#94a3b8]">Complete topics and maintain streaks to earn badges!</p>
@@ -368,17 +367,15 @@ const StudentDashboard = () => {
                         ) : (
                             <div className="mt-5 grid grid-cols-2 gap-3">
                                 {badges.slice(0, 6).map((badge, i) => {
-                                    const rotations = ['-rotate-2', 'rotate-1', '-rotate-1', 'rotate-2'];
-                                    const rotation = rotations[i % rotations.length];
                                     const BadgeIcon = BADGE_ICON_MAP[badge.icon] || Trophy;
                                     return (
                                         <div key={badge.title}
-                                            className={`group ${rotation} rounded-3xl bg-gradient-to-br ${badge.gradient} p-4 text-center shadow-lg transition-all duration-300 hover:rotate-0 hover:scale-110 hover:shadow-2xl cursor-default`}>
-                                            <span className="flex justify-center drop-shadow-lg transition-transform duration-300 group-hover:scale-125">
+                                            className={`group rounded-xl border ${badge.gradient} p-4 text-center shadow-sm transition hover:border-[#cbd5e1]`}>
+                                            <span className="flex justify-center">
                                                 <BadgeIcon className="h-8 w-8 text-[#0f172a]" />
                                             </span>
-                                            <p className="mt-1.5 text-xs font-extrabold text-[#0f172a] drop-shadow-sm">{badge.title}</p>
-                                            <p className="text-[10px] text-[#475569]">{badge.description}</p>
+                                            <p className="mt-2 text-xs font-bold text-[#0f172a]">{badge.title}</p>
+                                            <p className="text-[10px] text-[#64748b]">{badge.description}</p>
                                         </div>
                                     );
                                 })}
@@ -389,7 +386,7 @@ const StudentDashboard = () => {
 
                 {/* Pending Revisions */}
                 {revisionPlan.length > 0 && (
-                    <section className="rounded-[28px] bg-white p-6 shadow-xl ring-1 ring-[#e2e8f0]">
+                    <section className="rounded-xl border border-[#e2e8f0] bg-white p-6 shadow-sm">
                         <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
                             <h2 className="text-lg font-semibold text-[#0f172a]">Upcoming Revisions</h2>
                             <Link to="/student/revisions" className="flex items-center gap-1 text-sm font-semibold text-[#4338ca] hover:text-[#312e81]">
@@ -405,7 +402,7 @@ const StudentDashboard = () => {
                                         </span>
                                         <div>
                                             <p className="text-sm font-semibold text-[#0f172a]">{rev.concept}</p>
-                                            <p className="text-xs text-[#94a3b8]">{rev.priority} priority</p>
+                                            <p className="text-xs capitalize text-[#94a3b8]">{rev.priority} priority</p>
                                         </div>
                                     </div>
                                     <div className="text-sm font-semibold text-[#475569] sm:text-right">
@@ -418,20 +415,20 @@ const StudentDashboard = () => {
                 )}
 
                 {/* Quick Actions */}
-                <section className="rounded-[28px] bg-white p-5 shadow-xl ring-1 ring-[#e2e8f0] sm:p-6">
+                <section className="rounded-xl border border-[#e2e8f0] bg-white p-5 shadow-sm sm:p-6">
                     <h2 className="mb-4 text-lg font-semibold text-[#0f172a]">Quick Actions</h2>
                     <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4">
-                        <Link to="/student/courses" className="flex flex-col items-center gap-2 rounded-2xl bg-[#ede9fe] p-5 text-center transition hover:-translate-y-1 hover:shadow-lg">
-                            <BookOpen className="h-6 w-6 text-[#4338ca]" />
-                            <span className="text-xs font-semibold text-[#4338ca]">My Courses</span>
+                        <Link to="/student/courses" className="flex flex-col items-center gap-2 rounded-xl border border-[#e2e8f0] bg-[#f8fafc] p-5 text-center transition hover:bg-white">
+                            <span className="flex h-10 w-10 items-center justify-center rounded-full bg-[#ede9fe]"><BookOpen className="h-5 w-5 text-[#4338ca]" /></span>
+                            <span className="text-xs font-semibold text-[#334155]">My Courses</span>
                         </Link>
-                        <Link to="/student/materials" className="flex flex-col items-center gap-2 rounded-2xl bg-[#fef9c3] p-5 text-center transition hover:-translate-y-1 hover:shadow-lg">
-                            <Sparkles className="h-6 w-6 text-[#92400e]" />
-                            <span className="text-xs font-semibold text-[#92400e]">Materials</span>
+                        <Link to="/student/materials" className="flex flex-col items-center gap-2 rounded-xl border border-[#e2e8f0] bg-[#f8fafc] p-5 text-center transition hover:bg-white">
+                            <span className="flex h-10 w-10 items-center justify-center rounded-full bg-[#fef3c7]"><Sparkles className="h-5 w-5 text-[#92400e]" /></span>
+                            <span className="text-xs font-semibold text-[#334155]">Materials</span>
                         </Link>
-                        <Link to="/student/revisions" className="flex flex-col items-center gap-2 rounded-2xl bg-[#cffafe] p-5 text-center transition hover:-translate-y-1 hover:shadow-lg">
-                            <Clock className="h-6 w-6 text-[#0e7490]" />
-                            <span className="text-xs font-semibold text-[#0e7490]">Revisions</span>
+                        <Link to="/student/revisions" className="flex flex-col items-center gap-2 rounded-xl border border-[#e2e8f0] bg-[#f8fafc] p-5 text-center transition hover:bg-white">
+                            <span className="flex h-10 w-10 items-center justify-center rounded-full bg-[#cffafe]"><Clock className="h-5 w-5 text-[#0e7490]" /></span>
+                            <span className="text-xs font-semibold text-[#334155]">Revisions</span>
                         </Link>
                         {/* Doubt Support removed - use topic-scoped chat inside courses */}
                     </div>

@@ -217,12 +217,12 @@ const StudentMaterials = () => {
                 </div>
 
                 {/* Stats Bar */}
-                <div className="bg-gradient-to-br from-gray-800 via-gray-700 to-gray-900 rounded-2xl p-6 text-white">
+                <div className="rounded-xl border border-[#e2e8f0] bg-white p-6 shadow-sm">
                     <div className="flex items-center justify-between">
                         <div>
-                            <p className="text-gray-300 text-sm font-medium">Available Materials</p>
-                            <p className="text-4xl font-bold mt-1">{materials.length}</p>
-                            <p className="text-gray-300 text-sm mt-2">
+                            <p className="text-sm font-medium text-[#64748b]">Available Materials</p>
+                            <p className="mt-1 text-4xl font-bold text-[#0f172a]">{materials.length}</p>
+                            <p className="mt-2 text-sm text-[#94a3b8]">
                                 {subjects.length} subjects • {hasActiveFilters ? 'Filtered' : offlineMode ? 'Offline mode' : 'All materials'}
                             </p>
                         </div>
@@ -232,8 +232,8 @@ const StudentMaterials = () => {
                                     <WifiOff className="h-3.5 w-3.5" /> Offline
                                 </span>
                             )}
-                            <div className="p-4 bg-white/90 backdrop-blur rounded-2xl shadow-lg">
-                                <BookOpen className="w-10 h-10 text-gray-800" />
+                            <div className="rounded-xl border border-[#e2e8f0] bg-[#f8fafc] p-4">
+                                <BookOpen className="h-10 w-10 text-[#334155]" />
                             </div>
                         </div>
                     </div>
@@ -269,7 +269,7 @@ const StudentMaterials = () => {
                         <button
                             onClick={() => setShowFilters(!showFilters)}
                             className={`inline-flex items-center gap-2 px-4 py-3 border rounded-xl transition-all ${showFilters || hasActiveFilters
-                                ? 'bg-gradient-to-r from-gray-800 to-gray-900 text-white border-gray-700 shadow-md'
+                                ? 'border-[#0f172a] bg-[#0f172a] text-white'
                                 : 'bg-white text-gray-700 border-gray-200 hover:bg-gray-50'
                                 }`}
                         >

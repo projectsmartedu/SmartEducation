@@ -17,7 +17,6 @@ import {
     X,
     Trophy,
     User,
-    MessageSquare,
     Download,
     WifiOff
 } from 'lucide-react';
@@ -33,18 +32,19 @@ const studentSections = [
         ]
     },
     {
-        title: 'Career Tools',
+        title: 'Learning Resources',
         links: [
             { label: 'My Courses', href: '/student/courses', icon: BookOpen, needsOnline: false },
             { label: 'Course Materials', href: '/student/materials', icon: GraduationCap, needsOnline: false },
-            { label: 'Knowledge Map', href: '/student/knowledge-map', icon: Map, needsOnline: true },
-            { label: 'Revisions', href: '/student/revisions', icon: CalendarClock, needsOnline: true },
             { label: 'Offline Downloads', href: '/student/offline-downloads', icon: Download, needsOnline: false }
         ]
     },
     {
-        title: 'AI Agents',
-        links: [{ label: 'AI Chatbot', href: '/student/chatbot', icon: MessageSquare, needsOnline: true }]
+        title: 'AI/ML Insights',
+        links: [
+            { label: 'Knowledge Map', href: '/student/knowledge-map', icon: Map, needsOnline: true },
+            { label: 'Revisions', href: '/student/revisions', icon: CalendarClock, needsOnline: true }
+        ]
     }
 ];
 

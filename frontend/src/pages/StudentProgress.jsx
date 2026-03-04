@@ -38,7 +38,7 @@ const StudentProgress = () => {
     return (
         <DashboardLayout>
             <div className="space-y-6">
-                <section className="rounded-[28px] bg-white p-6 shadow-xl ring-1 ring-[#e2e8f0]">
+                <section className="rounded-xl border border-[#e2e8f0] bg-white p-6 shadow-sm">
                     <h1 className="text-2xl font-semibold text-[#0f172a]">Progress Insights</h1>
                     <p className="mt-2 text-sm text-[#475569]">
                         Analytics drawn from your live study telemetry across all enrolled courses.
@@ -55,11 +55,11 @@ const StudentProgress = () => {
                     </div>
                 ) : (
                     <>
-                        <section className="rounded-[28px] bg-white p-6 shadow-xl ring-1 ring-[#e2e8f0]">
+                        <section className="rounded-xl border border-[#e2e8f0] bg-white p-6 shadow-sm">
                             <h2 className="text-lg font-semibold text-[#0f172a] mb-4">Core Metrics</h2>
                             <div className="space-y-4">
                                 {progressMetrics.map((metric) => (
-                                    <div key={metric.label} className="rounded-3xl bg-[#f8fafc] p-5 shadow transition hover:-translate-y-1">
+                                    <div key={metric.label} className="rounded-xl border border-[#e2e8f0] bg-[#f8fafc] p-5 transition hover:bg-white">
                                         <div className="flex items-center justify-between">
                                             <span className="text-sm font-semibold text-[#111827]">{metric.label}</span>
                                             <span className="text-sm font-semibold text-[#4338ca]">
@@ -74,7 +74,7 @@ const StudentProgress = () => {
                                         {!metric.isText && (
                                             <div className="mt-3 h-2 rounded-full bg-[#e2e8f0]">
                                                 <div
-                                                    className="h-2 rounded-full bg-gradient-to-r from-[#4338ca] to-[#2563eb]"
+                                                    className="h-2 rounded-full bg-[#4338ca]"
                                                     style={{ width: `${metric.isCount ? Math.round((metric.value / metric.max) * 100) : metric.value}%` }}
                                                 />
                                             </div>
@@ -85,18 +85,18 @@ const StudentProgress = () => {
                         </section>
 
                         {gamification && (
-                            <section className="rounded-[28px] bg-white p-6 shadow-xl ring-1 ring-[#e2e8f0]">
+                            <section className="rounded-xl border border-[#e2e8f0] bg-white p-6 shadow-sm">
                                 <h2 className="text-lg font-semibold text-[#0f172a] mb-4">Gamification</h2>
                                 <div className="grid gap-4 md:grid-cols-3">
-                                    <div className="rounded-3xl bg-[#f8fafc] p-5 text-center">
+                                    <div className="rounded-xl border border-[#e2e8f0] bg-[#f8fafc] p-5 text-center">
                                         <p className="text-xs uppercase tracking-widest text-[#64748b]">Total XP</p>
                                         <p className="mt-2 text-2xl font-semibold text-[#111827]">{gamification.totalPoints?.toLocaleString()}</p>
                                     </div>
-                                    <div className="rounded-3xl bg-[#f8fafc] p-5 text-center">
+                                    <div className="rounded-xl border border-[#e2e8f0] bg-[#f8fafc] p-5 text-center">
                                         <p className="text-xs uppercase tracking-widest text-[#64748b]">Level</p>
                                         <p className="mt-2 text-2xl font-semibold text-[#4338ca]">{gamification.level}</p>
                                     </div>
-                                    <div className="rounded-3xl bg-[#f8fafc] p-5 text-center">
+                                    <div className="rounded-xl border border-[#e2e8f0] bg-[#f8fafc] p-5 text-center">
                                         <p className="text-xs uppercase tracking-widest text-[#64748b]">Current Streak</p>
                                         <p className="mt-2 text-2xl font-semibold text-[#ef4444]">{gamification.currentStreak} days</p>
                                     </div>
@@ -117,11 +117,11 @@ const StudentProgress = () => {
                         )}
 
                         {stats?.courseBreakdown?.length > 0 && (
-                            <section className="rounded-[28px] bg-white p-6 shadow-xl ring-1 ring-[#e2e8f0]">
+                            <section className="rounded-xl border border-[#e2e8f0] bg-white p-6 shadow-sm">
                                 <h2 className="text-lg font-semibold text-[#0f172a] mb-4">Course Breakdown</h2>
                                 <div className="grid gap-4 md:grid-cols-2">
                                     {stats.courseBreakdown.map((cb) => (
-                                        <div key={cb.course} className="rounded-3xl bg-[#f8fafc] p-5 shadow transition hover:-translate-y-1">
+                                        <div key={cb.course} className="rounded-xl border border-[#e2e8f0] bg-[#f8fafc] p-5 transition hover:bg-white">
                                             <h3 className="text-sm font-semibold text-[#111827]">{cb.courseName || cb.course}</h3>
                                             <p className="mt-1 text-xs text-[#475569]">
                                                 Mastery: {Math.round((cb.averageMastery ?? 0) * 100)}%
@@ -129,7 +129,7 @@ const StudentProgress = () => {
                                             </p>
                                             <div className="mt-3 h-2 rounded-full bg-[#e2e8f0]">
                                                 <div
-                                                    className="h-2 rounded-full bg-gradient-to-r from-[#4338ca] to-[#0ea5e9]"
+                                                    className="h-2 rounded-full bg-[#4338ca]"
                                                     style={{ width: `${Math.round((cb.averageMastery ?? 0) * 100)}%` }}
                                                 />
                                             </div>

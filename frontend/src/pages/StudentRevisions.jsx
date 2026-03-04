@@ -121,26 +121,26 @@ const StudentRevisions = () => {
     return (
         <DashboardLayout>
             <div className="space-y-6">
-                <section className="rounded-[28px] bg-white p-6 shadow-xl ring-1 ring-[#e2e8f0]">
+                <section className="rounded-xl border border-[#e2e8f0] bg-white p-6 shadow-sm">
                     <h1 className="text-2xl font-semibold text-[#0f172a]">Adaptive Revision Planner</h1>
                     <p className="mt-2 text-sm text-[#475569]">
                         Revision slots are generated based on your mastery and forget-risk analysis. Complete or skip revisions to keep your schedule updated.
                     </p>
                     {stats && (
-                        <div className="mt-4 flex flex-wrap gap-4">
-                            <div className="rounded-2xl bg-[#f8fafc] px-4 py-2">
+                            <div className="mt-4 flex flex-wrap gap-4">
+                            <div className="rounded-xl border border-[#e2e8f0] bg-[#f8fafc] px-4 py-2">
                                 <span className="text-xs uppercase tracking-widest text-[#64748b]">Pending</span>
                                 <p className="text-lg font-semibold text-[#111827]">{stats.pending ?? 0}</p>
                             </div>
-                            <div className="rounded-2xl bg-[#f8fafc] px-4 py-2">
+                            <div className="rounded-xl border border-[#e2e8f0] bg-[#f8fafc] px-4 py-2">
                                 <span className="text-xs uppercase tracking-widest text-[#64748b]">Completed</span>
                                 <p className="text-lg font-semibold text-[#166534]">{stats.completed ?? 0}</p>
                             </div>
-                            <div className="rounded-2xl bg-[#f8fafc] px-4 py-2">
+                            <div className="rounded-xl border border-[#e2e8f0] bg-[#f8fafc] px-4 py-2">
                                 <span className="text-xs uppercase tracking-widest text-[#64748b]">Overdue</span>
                                 <p className="text-lg font-semibold text-[#b91c1c]">{stats.overdue ?? 0}</p>
                             </div>
-                            <div className="rounded-2xl bg-[#f8fafc] px-4 py-2">
+                            <div className="rounded-xl border border-[#e2e8f0] bg-[#f8fafc] px-4 py-2">
                                 <span className="text-xs uppercase tracking-widest text-[#64748b]">Avg Score</span>
                                 <p className="text-lg font-semibold text-[#4338ca]">{stats.averageScore ? `${Math.round(stats.averageScore)}%` : '—'}</p>
                             </div>
@@ -152,7 +152,7 @@ const StudentRevisions = () => {
                     <div className="rounded-2xl bg-[#fee2e2] p-4 text-sm text-[#b91c1c]">{error}</div>
                 )}
 
-                <section className="rounded-[28px] bg-white p-6 shadow-xl ring-1 ring-[#e2e8f0]">
+                <section className="rounded-xl border border-[#e2e8f0] bg-white p-6 shadow-sm">
                     {loading ? (
                         <div className="flex items-center justify-center py-12">
                             <div className="h-8 w-8 animate-spin rounded-full border-4 border-[#e2e8f0] border-t-[#4338ca]" />
@@ -214,7 +214,7 @@ const StudentRevisions = () => {
                 </section>
 
                 {/* Visual Mind Map Section */}
-                <section className="rounded-[28px] bg-white p-6 shadow-xl ring-1 ring-[#e2e8f0]">
+                <section className="rounded-xl border border-[#e2e8f0] bg-white p-6 shadow-sm">
                     <div className="flex items-center justify-between">
                         <div>
                             <h2 className="flex items-center gap-2 text-2xl font-semibold text-[#0f172a]"><BarChart3 className="h-6 w-6 text-[#4338ca]" /> Visual Revision Mind Map</h2>

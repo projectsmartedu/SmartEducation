@@ -2,7 +2,24 @@ import React, { useState, useEffect, useMemo } from 'react';
 import DashboardLayout from '../components/Layout/DashboardLayout';
 import { useAuth } from '../context/AuthContext';
 import { gamificationAPI } from '../services/api';
-import { Flame, Trophy, BookOpen, RotateCcw, Star, Award, Calendar } from 'lucide-react';
+import { Flame, Trophy, BookOpen, RotateCcw, Star, Award, Calendar, Rocket, Sparkles, Gem, Target, GraduationCap, Zap, Crown } from 'lucide-react';
+
+const BADGE_ICON_MAP = {
+    sword: Rocket,
+    medal: Award,
+    crown: Crown,
+    flame: Flame,
+    biceps: Target,
+    star: Star,
+    sparkles: Sparkles,
+    gem: Gem,
+    trophy: Trophy,
+    rocket: Rocket,
+    book: BookOpen,
+    graduation: GraduationCap,
+    bolt: Zap,
+    brain: Sparkles
+};
 
 // ─── Activity Heatmap Component (GitHub/LeetCode style) ────────
 const ActivityHeatmap = ({ data }) => {
@@ -179,22 +196,22 @@ const StudentProfile = () => {
         <DashboardLayout>
             <div className="space-y-6">
                 {/* Profile Header */}
-                <section className="rounded-[28px] bg-gradient-to-br from-[#0f172a] via-[#1e293b] to-[#334155] p-8 text-white shadow-xl">
+                <section className="rounded-xl border border-[#e2e8f0] bg-white p-8 shadow-sm">
                     <div className="flex items-center gap-6">
-                        <div className="flex h-20 w-20 items-center justify-center rounded-full bg-gradient-to-br from-[#4338ca] to-[#7c3aed] text-3xl font-bold shadow-lg">
+                        <div className="flex h-20 w-20 items-center justify-center rounded-full bg-[#4338ca] text-3xl font-bold text-white shadow-sm">
                             {user?.name?.charAt(0)?.toUpperCase() || 'S'}
                         </div>
                         <div>
-                            <h1 className="text-2xl font-bold">{user?.name || 'Student'}</h1>
-                            <p className="text-sm text-gray-300">{user?.email}</p>
+                            <h1 className="text-2xl font-bold text-[#0f172a]">{user?.name || 'Student'}</h1>
+                            <p className="text-sm text-[#64748b]">{user?.email}</p>
                             <div className="mt-2 flex items-center gap-4">
-                                <span className="inline-flex items-center gap-1 rounded-full bg-white/10 px-3 py-1 text-sm font-medium">
+                                <span className="inline-flex items-center gap-1 rounded-full border border-[#e2e8f0] bg-[#f8fafc] px-3 py-1 text-sm font-medium text-[#334155]">
                                     <Trophy className="h-4 w-4 text-[#f59e0b]" /> Level {data?.level || 1}
                                 </span>
-                                <span className="inline-flex items-center gap-1 rounded-full bg-white/10 px-3 py-1 text-sm font-medium">
+                                <span className="inline-flex items-center gap-1 rounded-full border border-[#e2e8f0] bg-[#f8fafc] px-3 py-1 text-sm font-medium text-[#334155]">
                                     <Star className="h-4 w-4 text-[#f59e0b]" /> {data?.totalPoints?.toLocaleString() || 0} XP
                                 </span>
-                                <span className="inline-flex items-center gap-1 rounded-full bg-white/10 px-3 py-1 text-sm font-medium">
+                                <span className="inline-flex items-center gap-1 rounded-full border border-[#e2e8f0] bg-[#f8fafc] px-3 py-1 text-sm font-medium text-[#334155]">
                                     <Flame className="h-4 w-4 text-[#ef4444]" /> {data?.currentStreak || 0} day streak
                                 </span>
                             </div>
@@ -205,7 +222,7 @@ const StudentProfile = () => {
                 {/* Stats Grid */}
                 <section className="grid grid-cols-2 sm:grid-cols-4 gap-4">
                     {stats.map((stat, i) => (
-                        <div key={i} className="rounded-2xl bg-white p-4 shadow-md ring-1 ring-[#e2e8f0]">
+                        <div key={i} className="rounded-xl border border-[#e2e8f0] bg-white p-4 shadow-sm">
                             <div className="flex items-center gap-3">
                                 <div className={`flex h-10 w-10 items-center justify-center rounded-xl ${stat.bg}`}>
                                     <stat.icon className={`h-5 w-5 ${stat.color}`} />
@@ -220,7 +237,7 @@ const StudentProfile = () => {
                 </section>
 
                 {/* Activity Heatmap */}
-                <section className="rounded-[28px] bg-white p-6 shadow-xl ring-1 ring-[#e2e8f0]">
+                <section className="rounded-xl border border-[#e2e8f0] bg-white p-6 shadow-sm">
                     <div className="flex items-center justify-between mb-4">
                         <div>
                             <h2 className="text-lg font-semibold text-[#0f172a]">Study Activity</h2>
@@ -234,14 +251,17 @@ const StudentProfile = () => {
 
                 {/* Badges Section */}
                 {data?.badges && data.badges.length > 0 && (
-                    <section className="rounded-[28px] bg-white p-6 shadow-xl ring-1 ring-[#e2e8f0]">
+                    <section className="rounded-xl border border-[#e2e8f0] bg-white p-6 shadow-sm">
                         <h2 className="text-lg font-semibold text-[#0f172a] mb-4">
                             Badges Earned ({data.badges.length})
                         </h2>
                         <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-3">
                             {data.badges.map((badge, i) => (
-                                <div key={i} className="flex flex-col items-center rounded-2xl bg-[#f8fafc] p-4 ring-1 ring-[#e2e8f0] hover:shadow-md transition">
-                                    <span className="text-3xl mb-2">{badge.icon}</span>
+                                <div key={i} className="flex flex-col items-center rounded-xl border border-[#e2e8f0] bg-[#f8fafc] p-4 transition hover:bg-white">
+                                    {(() => {
+                                        const BadgeIcon = BADGE_ICON_MAP[badge.icon] || Trophy;
+                                        return <BadgeIcon className="mb-2 h-7 w-7 text-[#334155]" />;
+                                    })()}
                                     <p className="text-xs font-semibold text-[#0f172a] text-center">{badge.name}</p>
                                     <p className="text-[10px] text-[#94a3b8] text-center mt-0.5">{badge.description}</p>
                                     <p className="text-[10px] text-[#4338ca] mt-1">
