@@ -6,7 +6,7 @@ import './ChannelChat.css';
 const ChannelChat = ({ classId, onClose }) => {
     // View mode: 'channels' or 'dms'
     const [viewMode, setViewMode] = useState('channels');
-    
+
     // Channel states
     const [channels, setChannels] = useState([]);
     const [selectedChannel, setSelectedChannel] = useState(null);
@@ -14,13 +14,13 @@ const ChannelChat = ({ classId, onClose }) => {
     const [showCreateChannel, setShowCreateChannel] = useState(false);
     const [newChannelName, setNewChannelName] = useState('');
     const [newChannelDesc, setNewChannelDesc] = useState('');
-    
+
     // DM states
     const [conversations, setConversations] = useState([]);
     const [selectedConversation, setSelectedConversation] = useState(null);
     const [courseMembers, setCourseMembers] = useState([]);
     const [showMemberList, setShowMemberList] = useState(false);
-    
+
     // General states
     const [newMessage, setNewMessage] = useState('');
     const [typingUsers, setTypingUsers] = useState({});
@@ -340,10 +340,10 @@ const ChannelChat = ({ classId, onClose }) => {
                 setViewMode('dms');
                 setMessages([]);
                 setShowMemberList(false);
-                
+
                 // Fetch messages for this conversation
                 await fetchDMMessages(conversation._id);
-                
+
                 // Join DM room
                 socketRef.current?.emit('joinDMConversation', {
                     conversationId: conversation._id,

@@ -9,11 +9,13 @@ This document outlines the complete Teams-like chat channels feature that has be
 ## ✅ What Was Fixed
 
 ### 1. **ML Service 502 Error** ✓
+
 **Problem**: ML predictions were returning 502 Bad Gateway errors, preventing risk predictions from displaying.
 
 **Root Cause**: The Render deployment was using a `node` environment that doesn't include Python runtime. When Node.js tried to spawn Python processes, it failed silently.
 
 **Solution Implemented**:
+
 - Created `Dockerfile` with Node.js + Python 3.11 support
 - Updated `render.yaml` to use Docker environment instead of native Node
 - Improved error handling in server.js:
@@ -22,6 +24,7 @@ This document outlines the complete Teams-like chat channels feature that has be
   - Check for header status before sending responses
 
 **Files Changed**:
+
 - `ml-service/Dockerfile` (NEW)
 - `ml-service/render.yaml` (UPDATED)
 - `ml-service/server.js` (IMPROVED error handling)
@@ -31,15 +34,18 @@ This document outlines the complete Teams-like chat channels feature that has be
 ---
 
 ### 2. **Cleaned Up Console Logs** ✓
+
 **Problem**: Dashboard showed too many verbose console logs that weren't suitable for presenting to stakeholders.
 
-**Solution**: 
+**Solution**:
+
 - Removed debug logging statements
 - Kept only summary messages (e.g., "ML Predictions loaded for 10 students")
 - Made remaining logs conditional (only show in DEBUG mode)
 - Suppressed ML API URL logging
 
 **Files Changed**:
+
 - `frontend/src/pages/TeacherDashboard.jsx` (CLEANED)
 
 **Status**: ✅ Deployed to Vercel (Commit: 0b5aea30)
@@ -49,6 +55,7 @@ This document outlines the complete Teams-like chat channels feature that has be
 ## 🚀 New Feature: Teams-Like Chat Channels
 
 ### Overview
+
 A complete communication system allowing teachers and students to collaborate through dedicated class channels, similar to Microsoft Teams or Slack.
 
 ### Backend Implementation
@@ -56,6 +63,7 @@ A complete communication system allowing teachers and students to collaborate th
 #### **1. Data Models**
 
 **Channel.js** - Stores channel information
+
 ```javascript
 {
   name: String,                    // Channel name
@@ -75,6 +83,7 @@ A complete communication system allowing teachers and students to collaborate th
 ```
 
 **Message.js** - Stores individual messages
+
 ```javascript
 {
   channel: ObjectId,               // Reference to Channel
@@ -94,32 +103,35 @@ A complete communication system allowing teachers and students to collaborate th
 
 #### **2. API Controller** (channelController.js)
 
-| Method | Endpoint | Description |
-|--------|----------|-------------|
-| POST | `/api/channels` | Create new channel |
-| GET | `/api/channels/class/:classId` | Get all channels for a class |
-| GET | `/api/channels/:channelId` | Get channel with paginated messages |
-| PATCH | `/api/channels/:channelId` | Update channel settings |
-| DELETE | `/api/channels/:channelId` | Archive channel |
-| POST | `/api/channels/:channelId/members` | Add members to channel |
-| DELETE | `/api/channels/:channelId/members/:memberId` | Remove member |
-| POST | `/api/channels/:channelId/messages` | Send message |
-| PATCH | `/api/channels/messages/:messageId` | Edit message |
-| DELETE | `/api/channels/messages/:messageId` | Delete message (soft) |
-| POST | `/api/channels/messages/:messageId/reactions` | Add emoji reaction |
-| POST | `/api/channels/messages/:messageId/pin` | Pin/unpin message |
+| Method | Endpoint                                      | Description                         |
+| ------ | --------------------------------------------- | ----------------------------------- |
+| POST   | `/api/channels`                               | Create new channel                  |
+| GET    | `/api/channels/class/:classId`                | Get all channels for a class        |
+| GET    | `/api/channels/:channelId`                    | Get channel with paginated messages |
+| PATCH  | `/api/channels/:channelId`                    | Update channel settings             |
+| DELETE | `/api/channels/:channelId`                    | Archive channel                     |
+| POST   | `/api/channels/:channelId/members`            | Add members to channel              |
+| DELETE | `/api/channels/:channelId/members/:memberId`  | Remove member                       |
+| POST   | `/api/channels/:channelId/messages`           | Send message                        |
+| PATCH  | `/api/channels/messages/:messageId`           | Edit message                        |
+| DELETE | `/api/channels/messages/:messageId`           | Delete message (soft)               |
+| POST   | `/api/channels/messages/:messageId/reactions` | Add emoji reaction                  |
+| POST   | `/api/channels/messages/:messageId/pin`       | Pin/unpin message                   |
 
 #### **3. Routes** (routes/channels.js)
+
 All routes require authentication via middleware. Full REST API implementation with proper authorization checks.
 
 ---
 
 ### Frontend Implementation
 
-#### **1. ChannelChat Component** 
+#### **1. ChannelChat Component**
+
 Location: `frontend/src/components/ChannelChat.jsx`
 
 **Features**:
+
 - ✓ Sidebar with channel list
 - ✓ Real-time message display (polls every 2 seconds)
 - ✓ Auto-scroll to latest messages
@@ -131,10 +143,11 @@ Location: `frontend/src/components/ChannelChat.jsx`
 - ✓ Edited message indicators
 
 **Props**:
+
 ```javascript
-<ChannelChat 
-  classId={classId}              // Course ID
-  onClose={() => {}}             // Callback when closing
+<ChannelChat
+  classId={classId} // Course ID
+  onClose={() => {}} // Callback when closing
 />
 ```
 
@@ -143,9 +156,11 @@ Location: `frontend/src/components/ChannelChat.jsx`
 ---
 
 #### **2. ChannelsPage Component**
+
 Location: `frontend/src/pages/ChannelsPage.jsx`
 
 **Features**:
+
 - ✓ List of all teacher's classes
 - ✓ Search and filter classes
 - ✓ Click to open channel chat
@@ -154,6 +169,7 @@ Location: `frontend/src/pages/ChannelsPage.jsx`
 - ✓ Loading and empty states
 
 **How to Use**:
+
 1. Navigate to Channels page
 2. Select a class
 3. Click "Open Chat"
@@ -200,6 +216,7 @@ Location: `frontend/src/pages/ChannelsPage.jsx`
 ## 📋 Features Included
 
 ### Channel Management
+
 - ✓ Create channels per class
 - ✓ Channel types: general, announcement, discussion, assignment
 - ✓ Pin important channels
@@ -207,6 +224,7 @@ Location: `frontend/src/pages/ChannelsPage.jsx`
 - ✓ Update channel metadata
 
 ### Messaging
+
 - ✓ Real-time message sending/receiving
 - ✓ Edit own messages
 - ✓ Delete messages (soft delete)
@@ -216,6 +234,7 @@ Location: `frontend/src/pages/ChannelsPage.jsx`
 - ✓ Attachment support (URL-based)
 
 ### Member Management
+
 - ✓ Add members to channels
 - ✓ Remove members
 - ✓ Creator controls channels
@@ -223,6 +242,7 @@ Location: `frontend/src/pages/ChannelsPage.jsx`
 - ✓ User avatars and names
 
 ### UI/UX
+
 - ✓ Professional Teams-like design
 - ✓ Responsive (desktop & mobile)
 - ✓ Dark sidebar theme
@@ -237,6 +257,7 @@ Location: `frontend/src/pages/ChannelsPage.jsx`
 ### Backend Testing
 
 1. **Create a Channel**:
+
 ```bash
 POST /api/channels
 Content-Type: application/json
@@ -251,6 +272,7 @@ Authorization: Bearer <TOKEN>
 ```
 
 2. **Send Message**:
+
 ```bash
 POST /api/channels/<CHANNEL_ID>/messages
 Content-Type: application/json
@@ -262,6 +284,7 @@ Authorization: Bearer <TOKEN>
 ```
 
 3. **Get Messages**:
+
 ```bash
 GET /api/channels/<CHANNEL_ID>?page=1&limit=50
 Authorization: Bearer <TOKEN>
@@ -294,6 +317,7 @@ Authorization: Bearer <TOKEN>
 ## 📱 Integration Steps
 
 ### 1. Add Route to Frontend Router
+
 Add this to your `App.jsx` or routing file:
 
 ```javascript
@@ -305,7 +329,9 @@ import ChannelsPage from './pages/ChannelsPage';
 ```
 
 ### 2. Add Navigation Link
+
 Add to your navigation/sidebar:
+
 ```javascript
 <NavLink to="/channels">
   <MessageSquare /> Channels
@@ -313,10 +339,12 @@ Add to your navigation/sidebar:
 ```
 
 ### 3. Update API Service
+
 Ensure your API service in `services/api.js` includes:
+
 ```javascript
 export const channelsAPI = {
-  createChannel: (data) => api.post('/channels', data),
+  createChannel: (data) => api.post("/channels", data),
   getChannels: (classId) => api.get(`/channels/class/${classId}`),
   getChannel: (channelId) => api.get(`/channels/${channelId}`),
   deleteChannel: (channelId) => api.delete(`/channels/${channelId}`),
@@ -358,10 +386,12 @@ export const channelsAPI = {
 For optimal performance, these indexes are created:
 
 **Channel Collection**:
+
 - `{ class: 1, createdAt: -1 }` - Fast class-based queries
 - `{ name: "text", description: "text" }` - Full-text search
 
 **Message Collection**:
+
 - `{ channel: 1, createdAt: -1 }` - Fast message retrieval by channel
 - `{ sender: 1 }` - Filter messages by user
 
@@ -369,11 +399,11 @@ For optimal performance, these indexes are created:
 
 ## 📝 Deployment Status
 
-| Component | Status | Commit |
-|-----------|--------|--------|
+| Component             | Status      | Commit   |
+| --------------------- | ----------- | -------- |
 | ML Service Docker Fix | ✅ Deployed | 3eefd733 |
-| Console Log Cleanup | ✅ Deployed | 0b5aea30 |
-| Channels Feature | ✅ Deployed | e48a595c |
+| Console Log Cleanup   | ✅ Deployed | 0b5aea30 |
+| Channels Feature      | ✅ Deployed | e48a595c |
 
 **All changes pushed to**: `final` branch on GitHub
 
@@ -382,6 +412,7 @@ For optimal performance, these indexes are created:
 ## 🎓 Summary
 
 The Smart Education platform now has a complete Teams-like communication system that enables:
+
 - **Teachers** to manage class discussions through organized channels
 - **Students** to collaborate and ask questions in dedicated spaces
 - **Real-time** message exchange within class context
