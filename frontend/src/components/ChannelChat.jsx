@@ -1,5 +1,5 @@
-import React, { useState, useEffect, useRef } from 'react';
-import { Send, Plus, Users, Settings, Search, MoreHorizontal, Smile, Paperclip, Zap } from 'lucide-react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
+import { Send, Plus, Users, Settings, Smile, Paperclip, Zap } from 'lucide-react';
 import { io } from 'socket.io-client';
 import './ChannelChat.css';
 
@@ -8,7 +8,6 @@ const ChannelChat = ({ classId, onClose }) => {
     const [selectedChannel, setSelectedChannel] = useState(null);
     const [messages, setMessages] = useState([]);
     const [newMessage, setNewMessage] = useState('');
-    const [loading, setLoading] = useState(false);
     const [showCreateChannel, setShowCreateChannel] = useState(false);
     const [newChannelName, setNewChannelName] = useState('');
     const [newChannelDesc, setNewChannelDesc] = useState('');
@@ -50,7 +49,44 @@ const ChannelChat = ({ classId, onClose }) => {
         return () => {
             if (socketRef.current) socketRef.current.disconnect();
         };
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
+
+    // Fetch channels for the class
+    const fetchChannels = useCallback(async () => {
+        try {
+            const token = localStorage.getItem('token');
+            const res = await fetch(`${API_BASE}/api/channels/class/${classId}`, {
+                headers: { 'Authorization': `Bearer ${token}` }
+            });
+            if (res.ok) {
+                const data = await res.json();
+                setChannels(data);
+                if (data.length > 0) {
+                    setSelectedChannel(data[0]._id);
+                }
+            }
+        } catch (err) {
+            console.error('Error fetching channels:', err);
+        }
+    }, [API_BASE, classId]);
+
+    // Fetch initial messages for selected channel
+    const fetchMessages = useCallback(async () => {
+        if (!selectedChannel) return;
+        try {
+            const token = localStorage.getItem('token');
+            const res = await fetch(`${API_BASE}/api/channels/${selectedChannel}`, {
+                headers: { 'Authorization': `Bearer ${token}` }
+            });
+            if (res.ok) {
+                const data = await res.json();
+                setMessages(data.messages);
+            }
+        } catch (err) {
+            console.error('Error fetching messages:', err);
+        }
+    }, [API_BASE, selectedChannel]);
 
     // Handle channel selection - listen for real-time events
     useEffect(() => {
@@ -116,51 +152,12 @@ const ChannelChat = ({ classId, onClose }) => {
     // Load channels on mount
     useEffect(() => {
         fetchChannels();
-    }, [classId]);
+    }, [fetchChannels]);
 
     // Load initial messages when channel changes
     useEffect(() => {
         fetchMessages();
-    }, [selectedChannel]);
-
-    // Fetch channels for the class
-    const fetchChannels = async () => {
-        try {
-            setLoading(true);
-            const token = localStorage.getItem('token');
-            const res = await fetch(`${API_BASE}/api/channels/class/${classId}`, {
-                headers: { 'Authorization': `Bearer ${token}` }
-            });
-            if (res.ok) {
-                const data = await res.json();
-                setChannels(data);
-                if (data.length > 0 && !selectedChannel) {
-                    setSelectedChannel(data[0]._id);
-                }
-            }
-        } catch (err) {
-            console.error('Error fetching channels:', err);
-        } finally {
-            setLoading(false);
-        }
-    };
-
-    // Fetch initial messages for selected channel
-    const fetchMessages = async () => {
-        if (!selectedChannel) return;
-        try {
-            const token = localStorage.getItem('token');
-            const res = await fetch(`${API_BASE}/api/channels/${selectedChannel}`, {
-                headers: { 'Authorization': `Bearer ${token}` }
-            });
-            if (res.ok) {
-                const data = await res.json();
-                setMessages(data.messages);
-            }
-        } catch (err) {
-            console.error('Error fetching messages:', err);
-        }
-    };
+    }, [fetchMessages]);
 
     // Send message
     const handleSendMessage = async (e) => {
