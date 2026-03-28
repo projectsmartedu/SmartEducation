@@ -11,6 +11,9 @@ const ChannelChat = ({ classId, onClose }) => {
     // View mode: 'channels' or 'dms'
     const [viewMode, setViewMode] = useState('channels');
 
+    // Course states
+    const [courseInfo, setCourseInfo] = useState(null);
+
     // Channel states
     const [channels, setChannels] = useState([]);
     const [selectedChannel, setSelectedChannel] = useState(null);
@@ -40,6 +43,11 @@ const ChannelChat = ({ classId, onClose }) => {
 
     const API_BASE = process.env.REACT_APP_API_URL || 'http://localhost:5000';
     const currentUser = JSON.parse(localStorage.getItem('user') || '{}');
+
+    // Fetch course info on mount
+    useEffect(() => {
+        fetchCourseInfo();
+    }, [fetchCourseInfo]);
 
     // Initialize Socket.io connection
     useEffect(() => {
@@ -73,6 +81,23 @@ const ChannelChat = ({ classId, onClose }) => {
         };
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
+
+    // Fetch course info
+    const fetchCourseInfo = useCallback(async () => {
+        try {
+            const token = localStorage.getItem('token');
+            const res = await fetch(`${API_BASE}/api/courses/${classId}`, {
+                headers: { 'Authorization': `Bearer ${token}` }
+            });
+            if (res.ok) {
+                const data = await res.json();
+                console.log('📚 Course info:', data.course?.name);
+                setCourseInfo(data.course);
+            }
+        } catch (err) {
+            console.error('❌ Error fetching course:', err);
+        }
+    }, [API_BASE, classId]);
 
     // Fetch channels for the class - auto-create "General" if none exist
     const fetchChannels = useCallback(async () => {
@@ -785,7 +810,13 @@ const ChannelChat = ({ classId, onClose }) => {
                     <>
                         <div className="chat-header">
                             <div className="header-info">
-                                <h2>#{currentChannel.name}</h2>
+                                <div className="header-breadcrumb">
+                                    {courseInfo?.name && (
+                                        <span className="course-name">{courseInfo.name}</span>
+                                    )}
+                                    <span className="divider">›</span>
+                                    <h2>#{currentChannel.name}</h2>
+                                </div>
                                 <p>{currentChannel.description}</p>
                             </div>
                             <div className="header-actions">
