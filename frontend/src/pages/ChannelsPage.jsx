@@ -1,7 +1,8 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { MessageSquare, Plus, SearchIcon, Settings } from 'lucide-react';
 import DashboardLayout from '../components/Layout/DashboardLayout';
 import ChannelChat from '../components/ChannelChat';
+import { coursesAPI } from '../services/api';
 import './ChannelsPage.css';
 
 const ChannelsPage = () => {
@@ -11,21 +12,19 @@ const ChannelsPage = () => {
     const [searchTerm, setSearchTerm] = useState('');
     const [loading, setLoading] = useState(false);
 
-    React.useEffect(() => {
+    useEffect(() => {
         // Fetch user's courses/classes
         const fetchCourses = async () => {
             try {
                 setLoading(true);
-                const token = localStorage.getItem('token');
-                const res = await fetch(process.env.REACT_APP_API_URL + '/api/courses', {
-                    headers: { 'Authorization': `Bearer ${token}` }
-                });
-                if (res.ok) {
-                    const data = await res.json();
-                    setCourses(data);
+                const res = await coursesAPI.getMyCourses();
+                const coursesList = res.data?.courses || [];
+                setCourses(coursesList);
+                if (coursesList.length === 0) {
+                    console.log('No courses found for user');
                 }
             } catch (err) {
-                console.error('Error fetching courses:', err);
+                console.error('❌ Error fetching courses:', err);
             } finally {
                 setLoading(false);
             }

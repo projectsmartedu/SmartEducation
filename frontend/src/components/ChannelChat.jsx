@@ -52,7 +52,7 @@ const ChannelChat = ({ classId, onClose }) => {
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
-    // Fetch channels for the class
+    // Fetch channels for the class - auto-create "General" if none exist
     const fetchChannels = useCallback(async () => {
         try {
             const token = localStorage.getItem('token');
@@ -61,13 +61,42 @@ const ChannelChat = ({ classId, onClose }) => {
             });
             if (res.ok) {
                 const data = await res.json();
-                setChannels(data);
-                if (data.length > 0) {
-                    setSelectedChannel(data[0]._id);
+                console.log('📋 Fetched channels:', data);
+
+                if (data.length === 0) {
+                    // No channels exist - create a default "General" channel
+                    console.log('📝 Creating default General channel...');
+                    const createRes = await fetch(`${API_BASE}/api/channels`, {
+                        method: 'POST',
+                        headers: {
+                            'Authorization': `Bearer ${token}`,
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({
+                            name: 'General',
+                            description: 'General discussion for this class',
+                            classId: classId,
+                            channelType: 'discussion'
+                        })
+                    });
+
+                    if (createRes.ok) {
+                        const newChannel = await createRes.json();
+                        console.log('✅ Created default channel:', newChannel);
+                        setChannels([newChannel]);
+                        setSelectedChannel(newChannel._id);
+                    }
+                } else {
+                    setChannels(data);
+                    if (data.length > 0) {
+                        setSelectedChannel(data[0]._id);
+                    }
                 }
+            } else {
+                console.error('Failed to fetch channels:', res.status);
             }
         } catch (err) {
-            console.error('Error fetching channels:', err);
+            console.error('❌ Error fetching channels:', err);
         }
     }, [API_BASE, classId]);
 
@@ -81,10 +110,13 @@ const ChannelChat = ({ classId, onClose }) => {
             });
             if (res.ok) {
                 const data = await res.json();
-                setMessages(data.messages);
+                console.log('💬 Fetched messages:', data.messages?.length || 0);
+                setMessages(data.messages || []);
+            } else {
+                console.error('Failed to fetch messages:', res.status, res.statusText);
             }
         } catch (err) {
-            console.error('Error fetching messages:', err);
+            console.error('❌ Error fetching messages:', err);
         }
     }, [API_BASE, selectedChannel]);
 
