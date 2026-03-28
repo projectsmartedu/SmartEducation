@@ -45,6 +45,21 @@ const TeacherDashboard = () => {
     const [expandedStudent, setExpandedStudent] = useState(null);
     const [riskPredictions, setRiskPredictions] = useState({}); // Cache ML predictions
 
+    // Track student data changes to avoid unnecessary API calls
+    const prevStudentHashRef = React.useRef(null);
+
+    // Helper to create hash of student data for change detection
+    const getStudentHash = (students) => {
+        return JSON.stringify(students?.map(s => ({
+            id: s.student?._id,
+            level: s.level,
+            lessons: s.lessonsCompleted,
+            streak: s.currentStreak,
+            badges: s.badgeCount,
+            points: s.totalPoints
+        })));
+    };
+
     useEffect(() => {
         const fetchDashboard = async () => {
             try {
@@ -59,6 +74,16 @@ const TeacherDashboard = () => {
                 if (myCourses.length > 0) {
                     setSelectedCourse(myCourses[0]._id);
                 }
+                
+                // Try to load cached predictions from localStorage
+                const studentHash = getStudentHash(overviewRes.data?.students || []);
+                const cachedKey = `riskPredictions_${studentHash}`;
+                const cached = localStorage.getItem(cachedKey);
+                if (cached) {
+                    console.log('💾 Loading cached predictions on mount');
+                    setRiskPredictions(JSON.parse(cached));
+                    prevStudentHashRef.current = studentHash;
+                }
             } catch (err) {
                 console.error('Dashboard fetch error:', err);
             } finally {
@@ -68,13 +93,30 @@ const TeacherDashboard = () => {
         fetchDashboard();
     }, []);
 
-    // Fetch ML risk predictions for all students
+    // Fetch ML risk predictions for all students - with smart caching
     useEffect(() => {
         if (classOverview.students.length === 0) return;
 
         const fetchRiskPredictions = async () => {
+            // Check if student data actually changed
+            const currentHash = getStudentHash(classOverview.students);
+            if (prevStudentHashRef.current === currentHash) {
+                console.log('✓ Student data unchanged, skipping API calls');
+                return;
+            }
+            
+            // Try loading from localStorage first
+            const cachedKey = `riskPredictions_${currentHash}`;
+            const cached = localStorage.getItem(cachedKey);
+            if (cached) {
+                console.log('💾 Loading cached predictions from localStorage');
+                setRiskPredictions(JSON.parse(cached));
+                prevStudentHashRef.current = currentHash;
+                return;
+            }
+
             try {
-                console.log('📊 Fetching ML predictions for', classOverview.students.length, 'students');
+                console.log('📊 Fetching NEW ML predictions for', classOverview.students.length, 'students');
                 const predictions = {};
 
                 // Helper function to retry failed requests
@@ -145,6 +187,10 @@ const TeacherDashboard = () => {
 
                 console.log(`📈 ML Predictions loaded for ${Object.keys(predictions).length} students:`, predictions);
                 setRiskPredictions(predictions);
+                
+                // Save to localStorage
+                localStorage.setItem(cachedKey, JSON.stringify(predictions));
+                prevStudentHashRef.current = currentHash;
             } catch (err) {
                 console.error('❌ Error fetching risk predictions:', err);
             }
