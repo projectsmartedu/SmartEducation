@@ -39,7 +39,6 @@ const TeacherDashboard = () => {
     const [sortDir, setSortDir] = useState('desc');
     const [expandedStudent, setExpandedStudent] = useState(null);
     const [riskPredictions, setRiskPredictions] = useState({}); // Cache ML predictions
-    const [predictionsLoading, setPredictionsLoading] = useState(false);
 
     useEffect(() => {
         const fetchDashboard = async () => {
@@ -69,7 +68,6 @@ const TeacherDashboard = () => {
         if (classOverview.students.length === 0) return;
 
         const fetchRiskPredictions = async () => {
-            setPredictionsLoading(true);
             try {
                 const predictions = {};
 
@@ -111,8 +109,8 @@ const TeacherDashboard = () => {
                 setRiskPredictions(predictions);
             } catch (err) {
                 console.error('Error fetching risk predictions:', err);
-            } finally {
-                setPredictionsLoading(false);
+            } catch (err) {
+                console.error('Error catching risk predictions error:', err);
             }
         };
 
