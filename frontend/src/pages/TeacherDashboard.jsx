@@ -27,6 +27,11 @@ import { coursesAPI, progressAPI, gamificationAPI } from '../services/api';
 // API endpoint for ML risk predictions
 const ML_API_BASE = process.env.REACT_APP_ML_API_URL || 'https://smarteducation-mlmodel.onrender.com';
 
+// Log the ML API URL for debugging
+if (typeof window !== 'undefined') {
+    console.log('🤖 ML API Base URL:', ML_API_BASE);
+}
+
 const TeacherDashboard = () => {
     const { user } = useAuth();
     const [courses, setCourses] = useState([]);
@@ -69,6 +74,7 @@ const TeacherDashboard = () => {
 
         const fetchRiskPredictions = async () => {
             try {
+                console.log('📊 Fetching ML predictions for', classOverview.students.length, 'students');
                 const predictions = {};
 
                 // Fetch risk predictions for each student
@@ -76,20 +82,21 @@ const TeacherDashboard = () => {
                     try {
                         // Map student gamification data to ML features
                         const riskData = {
-                            prior_failures: Math.max(0, 3 - (student.level || 1)), // Infer from level
-                            study_time: Math.min(5, Math.floor((student.lessonsCompleted || 0) / 10)), // Lessons to study time
-                            absences: Math.max(0, 14 - (student.currentStreak || 0)), // Invert streak to absences
-                            parent_edu: 2, // Default assumption
-                            family_support: 3, // Default assumption
-                            health: 4, // Default assumption
-                            internet: 1, // Assume they have internet (1=yes)
+                            prior_failures: Math.max(0, 3 - (student.level || 1)),
+                            study_time: Math.min(5, Math.floor((student.lessonsCompleted || 0) / 10)),
+                            absences: Math.max(0, 14 - (student.currentStreak || 0)),
+                            parent_edu: 2,
+                            family_support: 3,
+                            health: 4,
+                            internet: 1,
                             activities: Math.max(0, 1 - (student.badgeCount > 5 ? 1 : 0)),
-                            travel_time: 2, // Default assumption
-                            age: 18, // Default assumption
-                            paid_support: student.totalPoints > 5000 ? 1 : 0 // If high points, assume paid support
+                            travel_time: 2,
+                            age: 18,
+                            paid_support: student.totalPoints > 5000 ? 1 : 0
                         };
 
-                        const res = await fetch(`${ML_API_BASE}/api/risk/predict`, {
+                        const url = `${ML_API_BASE}/api/risk/predict`;
+                        const res = await fetch(url, {
                             method: 'POST',
                             headers: { 'Content-Type': 'application/json' },
                             body: JSON.stringify(riskData)
@@ -98,17 +105,21 @@ const TeacherDashboard = () => {
                         if (res.ok) {
                             const prediction = await res.json();
                             predictions[student.student?._id] = prediction;
+                            console.log(`✅ ${student.student?.name}: Risk ${(prediction.riskScore * 100).toFixed(1)}% (${prediction.category})`);
                         } else {
-                            console.error(`Risk prediction failed for student ${student.student?._id}`);
+                            console.error(`❌ Risk prediction failed for ${student.student?.name}:`, res.status, res.statusText);
+                            const errorText = await res.text();
+                            console.error('Response:', errorText);
                         }
                     } catch (err) {
                         console.error(`Error predicting risk for student:`, err);
                     }
                 }
 
+                console.log(`📈 ML Predictions loaded for ${Object.keys(predictions).length} students:`, predictions);
                 setRiskPredictions(predictions);
             } catch (err) {
-                console.error('Error fetching risk predictions:', err);
+                console.error('❌ Error fetching risk predictions:', err);
             }
         };
 
