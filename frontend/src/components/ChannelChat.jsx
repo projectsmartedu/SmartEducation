@@ -353,7 +353,7 @@ const ChannelChat = ({ classId, onClose }) => {
         } catch (err) {
             console.error('❌ Error starting DM:', err);
         }
-    }, [classId, currentUser._id, API_BASE]);
+    }, [classId, currentUser._id, API_BASE, fetchDMMessages]);
 
     // Fetch DM messages
     const fetchDMMessages = useCallback(async (conversationId) => {
