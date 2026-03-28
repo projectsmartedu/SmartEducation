@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import DashboardLayout from '../components/Layout/DashboardLayout';
 import InteractiveRevisionPlanner from '../components/InteractiveRevisionPlanner';
+import TraditionalMindMap from '../components/TraditionalMindMap';
 import { revisionsAPI } from '../services/api';
 import { BarChart3 } from 'lucide-react';
 
@@ -11,6 +12,8 @@ const StudentRevisions = () => {
     const [error, setError] = useState('');
     const [predictions, setPredictions] = useState(null);
     const [mlPredictions, setMlPredictions] = useState({});
+    const [showMindMap, setShowMindMap] = useState(false);
+    const [studentData, setStudentData] = useState(null);
 
     const fetchRevisions = useCallback(async () => {
         setLoading(true);

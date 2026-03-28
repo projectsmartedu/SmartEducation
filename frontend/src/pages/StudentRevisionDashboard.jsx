@@ -47,21 +47,6 @@ const StudentRevisionDashboard = ({ studentId = 'student-001' }) => {
     const handleTopicUpdate = (updatedTopic) => {
         console.log('Topic updated:', updatedTopic);
     };
-=======
-            return `Start revision immediately. This topic needs urgent focus to prevent knowledge decay.`;
-        } else if (urgency > 0.33) {
-            return `Schedule regular revision this week. Maintain your current understanding.`;
-        } else {
-            return `Well-maintained topic. Continue with your current learning pace.`;
-        }
-    }, [calculateUrgencyScore]);
-
-    // Fetch data from API
-    const fetchMindMapData = React.useCallback(async () => {
-        try {
-            setLoading(true);
-            setError(null);
->>>>>>> Stashed changes
 
     // In production, fetch from your API:
     // const progressRes = await fetch(`/api/progress/${studentId}`);
