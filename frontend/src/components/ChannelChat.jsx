@@ -75,11 +75,11 @@ const ChannelChat = ({ classId, onClose }) => {
             if (res.ok) {
                 const data = await res.json();
                 console.log('📋 Fetched channels:', data);
-                
+
                 // Filter out duplicate "General" channels - keep only one
                 const uniqueChannels = [];
                 let generalChannelExists = false;
-                
+
                 for (const channel of data) {
                     if (channel.name === 'General') {
                         if (!generalChannelExists) {
@@ -175,13 +175,13 @@ const ChannelChat = ({ classId, onClose }) => {
             console.log('✅ NEW MESSAGE EVENT RECEIVED!');
             console.log('   📨 Content:', message.content, 'from', message.sender?.name);
             console.log('   Channel:', message.channel, 'Selected:', selectedChannel);
-            
+
             // Only add message if it belongs to the current channel
             if (message.channel === selectedChannel) {
                 setMessages(prev => [...prev, message]);
                 // Update channel message count
-                setChannels(prev => prev.map(ch => 
-                    ch._id === selectedChannel 
+                setChannels(prev => prev.map(ch =>
+                    ch._id === selectedChannel
                         ? { ...ch, messageCount: (ch.messageCount || 0) + 1 }
                         : ch
                 ));
@@ -198,8 +198,8 @@ const ChannelChat = ({ classId, onClose }) => {
         const handleDeleteMessage = ({ messageId }) => {
             console.log('🗑️ Message deleted:', messageId);
             setMessages(prev => prev.filter(msg => msg._id !== messageId));
-            setChannels(prev => prev.map(ch => 
-                ch._id === selectedChannel 
+            setChannels(prev => prev.map(ch =>
+                ch._id === selectedChannel
                     ? { ...ch, messageCount: Math.max(0, (ch.messageCount || 1) - 1) }
                     : ch
             ));
@@ -323,7 +323,7 @@ const ChannelChat = ({ classId, onClose }) => {
             console.log('💬 Loading DM messages...');
             fetchDMMessages(selectedConversation);
         }
-    }, [viewMode]);
+    }, [viewMode, selectedChannel, selectedConversation, fetchMessages, fetchDMMessages]);
 
     // Send message
     const handleSendMessage = async (e) => {
@@ -447,7 +447,7 @@ const ChannelChat = ({ classId, onClose }) => {
     // Fetch DM messages
     const fetchDMMessages = useCallback(async (conversationId) => {
         if (!conversationId) return;
-        
+
         try {
             console.log('📥 Fetching DM messages for conversation:', conversationId);
             const token = localStorage.getItem('token');
@@ -482,7 +482,7 @@ const ChannelChat = ({ classId, onClose }) => {
             });
             if (res.ok) {
                 const conversation = await res.json();
-                
+
                 // Add to conversations list if not already there
                 setConversations(prev => {
                     const exists = prev.find(c => c._id === conversation._id);
@@ -492,7 +492,7 @@ const ChannelChat = ({ classId, onClose }) => {
                     }
                     return prev;
                 });
-                
+
                 setSelectedConversation(conversation._id);
                 setViewMode('dms');
                 setMessages([]);
@@ -701,7 +701,7 @@ const ChannelChat = ({ classId, onClose }) => {
                                     <Zap size={18} />
                                     <span>Real-time</span>
                                 </div>
-                                <button 
+                                <button
                                     className="btn-icon"
                                     onClick={() => setShowChannelMembers(!showChannelMembers)}
                                     title="View members"
@@ -726,26 +726,27 @@ const ChannelChat = ({ classId, onClose }) => {
                                 messages.map((msg, idx) => {
                                     const isSent = msg.sender?._id === currentUser._id;
                                     return (
-                                    <div key={msg._id || idx} className={`message ${isSent ? 'sent' : 'received'}`}>
-                                        <div className="message-avatar">
-                                            {msg.sender?.avatar ? (
-                                                <img src={msg.sender.avatar} alt="" />
-                                            ) : (
-                                                <div>{msg.sender?.name?.[0] || 'U'}</div>
-                                            )}
-                                        </div>
-                                        <div className="message-content">
-                                            <div className="message-header">
-                                                <strong>{msg.sender?.name}</strong>
-                                                <span className="message-time">
-                                                    {new Date(msg.createdAt).toLocaleTimeString()}
-                                                </span>
+                                        <div key={msg._id || idx} className={`message ${isSent ? 'sent' : 'received'}`}>
+                                            <div className="message-avatar">
+                                                {msg.sender?.avatar ? (
+                                                    <img src={msg.sender.avatar} alt="" />
+                                                ) : (
+                                                    <div>{msg.sender?.name?.[0] || 'U'}</div>
+                                                )}
                                             </div>
-                                            <div className="message-text">{msg.content}</div>
-                                            {msg.edited && <span className="edited">(edited)</span>}
+                                            <div className="message-content">
+                                                <div className="message-header">
+                                                    <strong>{msg.sender?.name}</strong>
+                                                    <span className="message-time">
+                                                        {new Date(msg.createdAt).toLocaleTimeString()}
+                                                    </span>
+                                                </div>
+                                                <div className="message-text">{msg.content}</div>
+                                                {msg.edited && <span className="edited">(edited)</span>}
+                                            </div>
                                         </div>
-                                    </div>
-                                );})
+                                    );
+                                })
                             )}
                             {Object.entries(typingUsers).length > 0 && (
                                 <div className="typing-indicator">
@@ -841,26 +842,27 @@ const ChannelChat = ({ classId, onClose }) => {
                                 messages.map((msg, idx) => {
                                     const isSent = msg.sender?._id === currentUser._id;
                                     return (
-                                    <div key={msg._id || idx} className={`message ${isSent ? 'sent' : 'received'}`}>
-                                        <div className="message-avatar">
-                                            {msg.sender?.avatar ? (
-                                                <img src={msg.sender.avatar} alt="" />
-                                            ) : (
-                                                <div>{msg.sender?.name?.[0] || 'U'}</div>
-                                            )}
-                                        </div>
-                                        <div className="message-content">
-                                            <div className="message-header">
-                                                <strong>{msg.sender?.name}</strong>
-                                                <span className="message-time">
-                                                    {new Date(msg.createdAt).toLocaleTimeString()}
-                                                </span>
+                                        <div key={msg._id || idx} className={`message ${isSent ? 'sent' : 'received'}`}>
+                                            <div className="message-avatar">
+                                                {msg.sender?.avatar ? (
+                                                    <img src={msg.sender.avatar} alt="" />
+                                                ) : (
+                                                    <div>{msg.sender?.name?.[0] || 'U'}</div>
+                                                )}
                                             </div>
-                                            <div className="message-text">{msg.content}</div>
-                                            {msg.edited && <span className="edited">(edited)</span>}
+                                            <div className="message-content">
+                                                <div className="message-header">
+                                                    <strong>{msg.sender?.name}</strong>
+                                                    <span className="message-time">
+                                                        {new Date(msg.createdAt).toLocaleTimeString()}
+                                                    </span>
+                                                </div>
+                                                <div className="message-text">{msg.content}</div>
+                                                {msg.edited && <span className="edited">(edited)</span>}
+                                            </div>
                                         </div>
-                                    </div>
-                                );})
+                                    );
+                                })
                             )}
                             <div ref={messagesEndRef} />
                         </div>
