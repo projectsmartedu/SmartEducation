@@ -41,6 +41,7 @@ const ChannelChat = ({ classId, onClose }) => {
     const typingTimeoutRef = useRef(null);
     const fileInputRef = useRef(null);
     const isInitialLoadRef = useRef(true);
+    const prevMessageCountRef = useRef(0);
 
     const API_BASE = process.env.REACT_APP_API_URL || 'http://localhost:5000';
     const currentUser = JSON.parse(localStorage.getItem('user') || '{}');
@@ -266,9 +267,22 @@ const ChannelChat = ({ classId, onClose }) => {
     // Fetch messages when channel is selected
     useEffect(() => {
         if (selectedChannel) {
+            // Reset scroll tracking when changing channels
+            isInitialLoadRef.current = true;
+            prevMessageCountRef.current = 0;
             fetchMessages();
         }
     }, [selectedChannel, fetchMessages]);
+
+    // Fetch DM messages when conversation is selected
+    useEffect(() => {
+        if (selectedConversation) {
+            // Reset scroll tracking when changing conversations
+            isInitialLoadRef.current = true;
+            prevMessageCountRef.current = 0;
+            fetchDMMessages(selectedConversation);
+        }
+    }, [selectedConversation, fetchDMMessages]);
 
     // Handle channel selection - listen for real-time events
     useEffect(() => {
@@ -676,15 +690,24 @@ const ChannelChat = ({ classId, onClose }) => {
         fetchConversations();
     }, [fetchCourseMembers, fetchConversations]);
 
-    // Auto-scroll to bottom when messages change (but not on initial load)
+    // Auto-scroll to bottom only when a NEW message arrives (not on initial load or channel switch)
     useEffect(() => {
         if (isInitialLoadRef.current) {
             isInitialLoadRef.current = false;
+            prevMessageCountRef.current = messages.length;
             return;
         }
-        setTimeout(() => {
-            messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-        }, 0);
+        
+        // Only scroll if a new message was added (count increased by 1)
+        const newMessageCount = messages.length;
+        if (newMessageCount > prevMessageCountRef.current) {
+            // New message was added - scroll to bottom
+            setTimeout(() => {
+                messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+            }, 0);
+        }
+        
+        prevMessageCountRef.current = newMessageCount;
     }, [messages]);
 
     const currentChannel = channels.find(c => c._id === selectedChannel);
