@@ -97,7 +97,7 @@ const TeacherDashboard = () => {
 
                         const url = `${ML_API_BASE}/api/risk/predict`;
                         const controller = new AbortController();
-                        const timeoutId = setTimeout(() => controller.abort(), 5000); // 5 second timeout
+                        const timeoutId = setTimeout(() => controller.abort(), 10000); // 10 second timeout for free tier Render
 
                         const res = await fetch(url, {
                             method: 'POST',
@@ -171,7 +171,7 @@ const TeacherDashboard = () => {
             return sortDir === 'desc' ? bVal - aVal : aVal - bVal;
         });
         return list;
-    }, [students, searchTerm, sortField, sortDir]);
+    }, [students, searchTerm, sortField, sortDir, riskPredictions]);
 
     const atRiskStudents = useMemo(() =>
         students
