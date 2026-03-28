@@ -322,6 +322,23 @@ const ChannelChat = ({ classId, onClose }) => {
         }
     }, [API_BASE, classId]);
 
+    // Fetch DM messages
+    const fetchDMMessages = useCallback(async (conversationId) => {
+        try {
+            const token = localStorage.getItem('token');
+            const res = await fetch(`${API_BASE}/api/direct-messages/conversations/${conversationId}/messages`, {
+                headers: { 'Authorization': `Bearer ${token}` }
+            });
+            if (res.ok) {
+                const data = await res.json();
+                setMessages(data.messages || []);
+                console.log('💬 Fetched DM messages:', data.messages?.length || 0);
+            }
+        } catch (err) {
+            console.error('❌ Error fetching DM messages:', err);
+        }
+    }, [API_BASE]);
+
     // Start DM with a user
     const startDM = useCallback(async (userId) => {
         try {
@@ -354,23 +371,6 @@ const ChannelChat = ({ classId, onClose }) => {
             console.error('❌ Error starting DM:', err);
         }
     }, [classId, currentUser._id, API_BASE, fetchDMMessages]);
-
-    // Fetch DM messages
-    const fetchDMMessages = useCallback(async (conversationId) => {
-        try {
-            const token = localStorage.getItem('token');
-            const res = await fetch(`${API_BASE}/api/direct-messages/conversations/${conversationId}/messages`, {
-                headers: { 'Authorization': `Bearer ${token}` }
-            });
-            if (res.ok) {
-                const data = await res.json();
-                setMessages(data.messages || []);
-                console.log('💬 Fetched DM messages:', data.messages?.length || 0);
-            }
-        } catch (err) {
-            console.error('❌ Error fetching DM messages:', err);
-        }
-    }, [API_BASE]);
 
     // Send DM
     const handleSendDM = async (e) => {
