@@ -20,19 +20,27 @@ console.log('ML Service starting...');
 console.log(`   Models directory: ${path.join(__dirname, 'models')}`);
 console.log(`   Inference script: ${path.join(__dirname, 'ml_inference.py')}`);
 
-// Auto-install Python dependencies if running on Render
-if (process.env.NODE_ENV === 'production' || process.env.RENDER === 'true') {
-  console.log('Installing Python dependencies...');
+// Auto-install Python dependencies on every startup
+const installDeps = () => {
+  console.log('\n[STARTUP] Checking Python dependencies...');
   try {
     const reqPath = path.join(__dirname, 'requirements.txt');
     if (fs.existsSync(reqPath)) {
-      execSync('pip install -r ' + reqPath, { stdio: 'inherit' });
-      console.log('Python dependencies installed successfully');
+      console.log('[STARTUP] Running: pip install -r requirements.txt');
+      const result = execSync('pip install -q -r ' + reqPath, { 
+        encoding: 'utf-8',
+        timeout: 120000 
+      });
+      console.log('[STARTUP] Python dependencies installed successfully\n');
+      return true;
     }
   } catch (e) {
-    console.warn('Warning: Could not install Python dependencies', e.message);
+    console.warn('[STARTUP] Warning: pip install error -', e.message);
+    console.log('[STARTUP] Attempting to continue anyway...\n');
   }
-}
+};
+
+installDeps();
 
 // ========== RISK PREDICTION API ==========
 
