@@ -1,6 +1,7 @@
 const Channel = require('../models/Channel');
 const Message = require('../models/Message');
 const User = require('../models/User');
+const notifications = require('../notifications');
 
 // Create a new channel
 exports.createChannel = async (req, res) => {
@@ -23,6 +24,9 @@ exports.createChannel = async (req, res) => {
 
         await channel.save();
         await channel.populate('createdBy', 'name email avatar');
+        
+        // Emit socket event to class members
+        notifications.emitChannelCreated(classId, channel);
         
         res.status(201).json(channel);
     } catch (err) {
@@ -133,6 +137,9 @@ exports.addMessage = async (req, res) => {
         channel.lastMessageTime = new Date();
         await channel.save();
 
+        // Emit socket event - real-time message delivery
+        notifications.emitNewMessage(channelId, message);
+
         res.status(201).json(message);
     } catch (err) {
         res.status(500).json({ error: err.message });
@@ -161,6 +168,10 @@ exports.editMessage = async (req, res) => {
         await message.save();
 
         await message.populate('sender', 'name email avatar');
+        
+        // Emit socket event - real-time edit
+        notifications.emitMessageEdited(message.channel, messageId, content);
+        
         res.json(message);
     } catch (err) {
         res.status(500).json({ error: err.message });
@@ -184,6 +195,9 @@ exports.deleteMessage = async (req, res) => {
 
         message.deleted = true;
         await message.save();
+
+        // Emit socket event - real-time delete
+        notifications.emitMessageDeleted(message.channel, messageId);
 
         res.json({ message: 'Message deleted' });
     } catch (err) {
@@ -215,6 +229,10 @@ exports.addReaction = async (req, res) => {
 
         await message.save();
         await message.populate('sender', 'name email avatar');
+        
+        // Emit socket event - real-time reaction
+        notifications.emitReactionAdded(message.channel, messageId, emoji, userId);
+        
         res.json(message);
     } catch (err) {
         res.status(500).json({ error: err.message });

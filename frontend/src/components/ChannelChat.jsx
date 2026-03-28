@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Send, Plus, Users, Settings, Search, MoreHorizontal, Smile, Paperclip } from 'lucide-react';
+import { Send, Plus, Users, Settings, Search, MoreHorizontal, Smile, Paperclip, Zap } from 'lucide-react';
+import { io } from 'socket.io-client';
 import './ChannelChat.css';
 
 const ChannelChat = ({ classId, onClose }) => {
@@ -11,9 +12,117 @@ const ChannelChat = ({ classId, onClose }) => {
     const [showCreateChannel, setShowCreateChannel] = useState(false);
     const [newChannelName, setNewChannelName] = useState('');
     const [newChannelDesc, setNewChannelDesc] = useState('');
+    const [typingUsers, setTypingUsers] = useState({}); // {userId: userName}
     const messagesEndRef = useRef(null);
+    const socketRef = useRef(null);
+    const typingTimeoutRef = useRef(null);
 
     const API_BASE = process.env.REACT_APP_API_URL || 'http://localhost:5000';
+    const currentUser = JSON.parse(localStorage.getItem('user') || '{}');
+    const currentUser = JSON.parse(localStorage.getItem('user') || '{}');
+
+    // Initialize Socket.io connection
+    useEffect(() => {
+        const token = localStorage.getItem('token');
+        socketRef.current = io(API_BASE, {
+            auth: { token },
+            reconnection: true,
+            reconnectionDelay: 1000,
+            reconnectionDelayMax: 5000,
+            reconnectionAttempts: 5
+        });
+
+        socketRef.current.on('connect', () => {
+            console.log('✅ Real-time chat connected');
+            socketRef.current.emit('register', {
+                userId: currentUser._id,
+                role: currentUser.role
+            });
+        });
+
+        socketRef.current.on('error', (error) => {
+            console.error('❌ Socket error:', error);
+        });
+
+        socketRef.current.on('disconnect', () => {
+            console.log('⚠️  Chat disconnected - attempting to reconnect...');
+        });
+
+        return () => {
+            if (socketRef.current) socketRef.current.disconnect();
+        };
+    }, []);
+
+    // Handle channel selection - listen for real-time events
+    useEffect(() => {
+        if (!selectedChannel || !socketRef.current) return;
+
+        // Join channel room
+        socketRef.current.emit('joinChannel', {
+            channelId: selectedChannel,
+            userId: currentUser._id
+        });
+
+        // Listen for real-time message events
+        socketRef.current.on('newMessage', ({ message }) => {
+            setMessages(prev => [...prev, message]);
+        });
+
+        socketRef.current.on('messageEdited', ({ messageId, newContent }) => {
+            setMessages(prev => prev.map(msg =>
+                msg._id === messageId ? { ...msg, content: newContent, edited: true } : msg
+            ));
+        });
+
+        socketRef.current.on('messageDeleted', ({ messageId }) => {
+            setMessages(prev => prev.filter(msg => msg._id !== messageId));
+        });
+
+        socketRef.current.on('reactionAdded', ({ emoji, userId }) => {
+            setMessages(prev => prev.map(msg => {
+                const reaction = msg.reactions?.find(r => r.emoji === emoji);
+                if (reaction && !reaction.users.includes(userId)) {
+                    reaction.users.push(userId);
+                }
+                return msg;
+            }));
+        });
+
+        socketRef.current.on('userIsTyping', ({ userId, userName }) => {
+            if (userId !== currentUser._id) {
+                setTypingUsers(prev => ({ ...prev, [userId]: userName }));
+            }
+        });
+
+        socketRef.current.on('userStoppedTyping', ({ userId }) => {
+            setTypingUsers(prev => {
+                const updated = { ...prev };
+                delete updated[userId];
+                return updated;
+            });
+        });
+
+        return () => {
+            if (socketRef.current) {
+                socketRef.current.off('newMessage');
+                socketRef.current.off('messageEdited');
+                socketRef.current.off('messageDeleted');
+                socketRef.current.off('reactionAdded');
+                socketRef.current.off('userIsTyping');
+                socketRef.current.off('userStoppedTyping');
+            }
+        };
+    }, [selectedChannel, currentUser._id]);
+
+    // Load channels on mount
+    useEffect(() => {
+        fetchChannels();
+    }, [classId]);
+
+    // Load initial messages when channel changes
+    useEffect(() => {
+        fetchMessages();
+    }, [selectedChannel]);
 
     // Fetch channels for the class
     const fetchChannels = async () => {
@@ -37,7 +146,7 @@ const ChannelChat = ({ classId, onClose }) => {
         }
     };
 
-    // Fetch messages for selected channel
+    // Fetch initial messages for selected channel
     const fetchMessages = async () => {
         if (!selectedChannel) return;
         try {
@@ -70,13 +179,38 @@ const ChannelChat = ({ classId, onClose }) => {
                 body: JSON.stringify({ content: newMessage })
             });
             if (res.ok) {
-                const newMsg = await res.json();
-                setMessages([...messages, newMsg]);
                 setNewMessage('');
+                // Clear typing indicator
+                socketRef.current?.emit('stopTyping', {
+                    channelId: selectedChannel,
+                    userId: currentUser._id
+                });
             }
         } catch (err) {
             console.error('Error sending message:', err);
         }
+    };
+
+    // Handle typing with real-time indicator
+    const handleTyping = (value) => {
+        setNewMessage(value);
+
+        if (typingTimeoutRef.current) clearTimeout(typingTimeoutRef.current);
+
+        // Send typing indicator
+        socketRef.current?.emit('userTyping', {
+            channelId: selectedChannel,
+            userId: currentUser._id,
+            userName: currentUser.name
+        });
+
+        // Auto stop typing after 2 seconds of inactivity
+        typingTimeoutRef.current = setTimeout(() => {
+            socketRef.current?.emit('stopTyping', {
+                channelId: selectedChannel,
+                userId: currentUser._id
+            });
+        }, 2000);
     };
 
     // Create new channel
@@ -115,19 +249,6 @@ const ChannelChat = ({ classId, onClose }) => {
     useEffect(() => {
         messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
     }, [messages]);
-
-    // Load channels on mount
-    useEffect(() => {
-        fetchChannels();
-    }, [classId]);
-
-    // Load messages when channel changes
-    useEffect(() => {
-        fetchMessages();
-        // Poll for new messages every 2 seconds
-        const interval = setInterval(fetchMessages, 2000);
-        return () => clearInterval(interval);
-    }, [selectedChannel]);
 
     const currentChannel = channels.find(c => c._id === selectedChannel);
 
@@ -171,6 +292,10 @@ const ChannelChat = ({ classId, onClose }) => {
                                 <p>{currentChannel.description}</p>
                             </div>
                             <div className="header-actions">
+                                <div className="online-badge">
+                                    <Zap size={18} />
+                                    <span>Real-time</span>
+                                </div>
                                 <button className="btn-icon">
                                     <Users size={20} />
                                 </button>
@@ -211,6 +336,14 @@ const ChannelChat = ({ classId, onClose }) => {
                                     </div>
                                 ))
                             )}
+                            {Object.entries(typingUsers).length > 0 && (
+                                <div className="typing-indicator">
+                                    <div className="dots">
+                                        <span></span><span></span><span></span>
+                                    </div>
+                                    <span>{Object.values(typingUsers).join(', ')} typing...</span>
+                                </div>
+                            )}
                             <div ref={messagesEndRef} />
                         </div>
 
@@ -223,7 +356,7 @@ const ChannelChat = ({ classId, onClose }) => {
                                     type="text"
                                     placeholder="Type a message..."
                                     value={newMessage}
-                                    onChange={(e) => setNewMessage(e.target.value)}
+                                    onChange={(e) => handleTyping(e.target.value)}
                                     className="message-input"
                                 />
                                 <button type="button" className="btn-icon">
