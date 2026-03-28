@@ -26,7 +26,7 @@ app.post('/api/risk/predict', async (req, res) => {
     const studentData = req.body;
     let responseSent = false;
     
-    const pythonProcess = spawn('C:\\Users\\harsh\\Downloads\\finalpro\\.venv\\Scripts\\python.exe', [
+    const pythonProcess = spawn('python3', [
       path.join(__dirname, 'ml_inference.py'),
       'risk',
       JSON.stringify(studentData)
@@ -82,7 +82,7 @@ app.post('/api/risk/batch-predict', async (req, res) => {
 
     let responseSent = false;
 
-    const pythonProcess = spawn('C:\\Users\\harsh\\Downloads\\finalpro\\.venv\\Scripts\\python.exe', [
+    const pythonProcess = spawn('python3', [
       path.join(__dirname, 'ml_inference.py'),
       'batch_risk',
       JSON.stringify(students)
@@ -138,7 +138,7 @@ app.post('/api/revision/mindmap', async (req, res) => {
       return res.status(400).json({ error: 'studentId and topicProgress required' });
     }
 
-    const pythonProcess = spawn('C:\\Users\\harsh\\Downloads\\finalpro\\.venv\\Scripts\\python.exe', [
+    const pythonProcess = spawn('python3', [
       path.join(__dirname, 'ml_inference.py'),
       'mindmap',
       JSON.stringify({ studentId, topicProgress })
@@ -192,7 +192,7 @@ app.post('/api/revision/topic-urgency', async (req, res) => {
       return res.status(400).json({ error: 'Missing required fields' });
     }
 
-    const pythonProcess = spawn('C:\\Users\\harsh\\Downloads\\finalpro\\.venv\\Scripts\\python.exe', [
+    const pythonProcess = spawn('python3', [
       path.join(__dirname, 'ml_inference.py'),
       'topic_urgency',
       JSON.stringify({ 
