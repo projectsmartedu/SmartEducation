@@ -26,6 +26,8 @@ const ChannelChat = ({ classId, onClose }) => {
     // General states
     const [newMessage, setNewMessage] = useState('');
     const [typingUsers, setTypingUsers] = useState({});
+    const [showSettings, setShowSettings] = useState(false);
+    const [showEmojiPicker, setShowEmojiPicker] = useState(false);
     const messagesEndRef = useRef(null);
     const socketRef = useRef(null);
     const typingTimeoutRef = useRef(null);
@@ -354,6 +356,15 @@ const ChannelChat = ({ classId, onClose }) => {
         };
     }, [selectedConversation]);
 
+    // Add Emoji handler
+    const addEmoji = (emoji) => {
+        setNewMessage(newMessage + emoji);
+        setShowEmojiPicker(false);
+    };
+
+    // Add emoji list
+    const emojis = ['😀', '😂', '😍', '🤔', '😢', '😡', '👍', '👎', '🎉', '🔥', '💯', '✨'];
+
     // Load channels on mount
     useEffect(() => {
         fetchChannels();
@@ -544,7 +555,9 @@ const ChannelChat = ({ classId, onClose }) => {
 
     // Auto-scroll to bottom when messages change
     useEffect(() => {
-        messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+        setTimeout(() => {
+            messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+        }, 0);
     }, [messages]);
 
     const currentChannel = channels.find(c => c._id === selectedChannel);
@@ -709,7 +722,11 @@ const ChannelChat = ({ classId, onClose }) => {
                                 >
                                     <Users size={20} />
                                 </button>
-                                <button className="btn-icon">
+                                <button
+                                    className="btn-icon"
+                                    onClick={() => setShowSettings(true)}
+                                    title="Channel settings"
+                                >
                                     <Settings size={20} />
                                 </button>
                                 <button className="btn-icon" onClick={onClose}>
@@ -772,7 +789,11 @@ const ChannelChat = ({ classId, onClose }) => {
                                     onChange={(e) => handleTyping(e.target.value)}
                                     className="message-input"
                                 />
-                                <button type="button" className="btn-icon">
+                                <button
+                                    type="button"
+                                    className="btn-icon"
+                                    onClick={() => setShowEmojiPicker(!showEmojiPicker)}
+                                >
                                     <Smile size={20} />
                                 </button>
                             </div>
@@ -780,6 +801,39 @@ const ChannelChat = ({ classId, onClose }) => {
                                 <Send size={20} />
                             </button>
                         </form>
+
+                        {/* Emoji Picker */}
+                        {showEmojiPicker && (
+                            <div style={{
+                                padding: '12px',
+                                background: '#f7fafc',
+                                borderTop: '1px solid #e2e8f0',
+                                display: 'flex',
+                                gap: '8px',
+                                flexWrap: 'wrap'
+                            }}>
+                                {emojis.map((emoji, idx) => (
+                                    <button
+                                        key={idx}
+                                        type="button"
+                                        onClick={() => addEmoji(emoji)}
+                                        style={{
+                                            background: 'white',
+                                            border: '1px solid #e2e8f0',
+                                            borderRadius: '6px',
+                                            padding: '8px 12px',
+                                            cursor: 'pointer',
+                                            fontSize: '18px',
+                                            transition: 'all 0.2s'
+                                        }}
+                                        onMouseOver={(e) => e.target.style.background = '#edf2f7'}
+                                        onMouseOut={(e) => e.target.style.background = 'white'}
+                                    >
+                                        {emoji}
+                                    </button>
+                                ))}
+                            </div>
+                        )}
 
                         {/* Members Panel */}
                         {showChannelMembers && (
@@ -931,6 +985,34 @@ const ChannelChat = ({ classId, onClose }) => {
                                 onClick={handleCreateChannel}
                             >
                                 Create Channel
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            {/* Settings Modal */}
+            {showSettings && (
+                <div className="modal-overlay" onClick={() => setShowSettings(false)}>
+                    <div className="modal" onClick={(e) => e.stopPropagation()}>
+                        <h3>Channel Settings</h3>
+                        <div style={{ marginBottom: '16px' }}>
+                            <p style={{ marginBottom: '8px', color: '#1a202c', fontWeight: 500 }}>
+                                Channel Name: <strong>{currentChannel?.name}</strong>
+                            </p>
+                            <p style={{ marginBottom: '8px', color: '#1a202c', fontWeight: 500 }}>
+                                Members: <strong>{currentChannel?.members?.length || 0}</strong>
+                            </p>
+                            <p style={{ marginBottom: '8px', color: '#1a202c', fontWeight: 500 }}>
+                                Messages: <strong>{currentChannel?.messageCount || 0}</strong>
+                            </p>
+                        </div>
+                        <div className="modal-actions">
+                            <button
+                                className="btn btn-primary"
+                                onClick={() => setShowSettings(false)}
+                            >
+                                Close
                             </button>
                         </div>
                     </div>

@@ -157,10 +157,82 @@ async function runTest() {
     await new Promise(resolve => setTimeout(resolve, 500));
 
     console.log('\n╭─────────────────────────────────────────────────────────────╮');
-    console.log('│ STEP 2: Both Users Join Same Channel                       │');
+    console.log('│ STEP 2: Get Channel & Both Users Join                      │');
     console.log('╰─────────────────────────────────────────────────────────────╯');
 
-    const testChannelId = 'test-channel-001';
+    // First, get a real channel from the database - try to find a class first
+    // Assuming Jane's class (you can modify this)
+    const classResponse = await fetch(`${API_BASE}/api/users/${auth1.user._id}`, {
+      headers: { 'Authorization': `Bearer ${auth1.token}` }
+    });
+    
+    let testChannelId = null;
+    
+    if (classResponse.ok) {
+      const userData = await classResponse.json();
+      const classId = userData.enrolledCourses?.[0]?.course || userData.enrolledCourses?.[0]?._id;
+      
+      if (classId) {
+        const channelsRes = await fetch(`${API_BASE}/api/channels/class/${classId}`, {
+          headers: { 'Authorization': `Bearer ${auth1.token}` }
+        });
+        
+        if (channelsRes.ok) {
+          const channels = await channelsRes.json();
+          if (channels.length > 0) {
+            testChannelId = channels[0]._id;
+            console.log('✅ Using real channel:', channels[0].name, '(' + testChannelId + ')');
+          }
+        }
+      }
+    }
+    
+    // Fallback: Create a test channel if none found
+    if (!testChannelId) {
+      console.log('📝 Creating new test channel...');
+      const createChannelRes = await fetch(`${API_BASE}/api/channels`, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${auth1.token}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          name: 'Test Real-Time Channel',
+          description: 'Channel for real-time messaging tests',
+          classId: '507f1f77bcf86cd799439011', // Default test class ID
+          channelType: 'discussion'
+        })
+      });
+      
+      if (createChannelRes.ok) {
+        const newChannel = await createChannelRes.json();
+        testChannelId = newChannel._id;
+        console.log('✅ Created test channel:', newChannel.name);
+      } else {
+        console.error('❌ Failed to create test channel. No valid channel ID available.');
+        process.exit(1);
+      }
+    }
+
+    // Add Priya as a member to the channel (so she can send messages)
+    console.log('👥 Adding Priya as channel member...');
+    const addMemberRes = await fetch(`${API_BASE}/api/channels/${testChannelId}/members`, {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${auth1.token}`,
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        memberIds: [auth2.user._id]
+      })
+    });
+    
+    if (addMemberRes.ok) {
+      console.log('✅ Priya added to channel');
+    } else {
+      console.log('⚠️  Could not add Priya explicitly (she may auto-join anyway)');
+    }
+
     user1.joinChannel(testChannelId);
     await new Promise(resolve => setTimeout(resolve, 500));
     

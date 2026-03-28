@@ -95,9 +95,17 @@ function App() {
                         }
                     />
 
-                    {/* Channels Route */}
+                    {/* Channels Routes */}
                     <Route
                         path="/channels"
+                        element={
+                            <ProtectedRoute allowedRoles={['teacher', 'student']}>
+                                <ChannelsPage />
+                            </ProtectedRoute>
+                        }
+                    />
+                    <Route
+                        path="/channels/:channelId"
                         element={
                             <ProtectedRoute allowedRoles={['teacher', 'student']}>
                                 <ChannelsPage />
