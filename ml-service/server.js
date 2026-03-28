@@ -6,7 +6,8 @@ require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
 const path = require('path');
-const { spawn } = require('child_process');
+const { spawn, execSync } = require('child_process');
+const fs = require('fs');
 
 const app = express();
 const PORT = process.env.PORT || 5001;
@@ -18,6 +19,20 @@ app.use(express.json({ limit: '50mb' }));
 console.log('ML Service starting...');
 console.log(`   Models directory: ${path.join(__dirname, 'models')}`);
 console.log(`   Inference script: ${path.join(__dirname, 'ml_inference.py')}`);
+
+// Auto-install Python dependencies if running on Render
+if (process.env.NODE_ENV === 'production' || process.env.RENDER === 'true') {
+  console.log('Installing Python dependencies...');
+  try {
+    const reqPath = path.join(__dirname, 'requirements.txt');
+    if (fs.existsSync(reqPath)) {
+      execSync('pip install -r ' + reqPath, { stdio: 'inherit' });
+      console.log('Python dependencies installed successfully');
+    }
+  } catch (e) {
+    console.warn('Warning: Could not install Python dependencies', e.message);
+  }
+}
 
 // ========== RISK PREDICTION API ==========
 
