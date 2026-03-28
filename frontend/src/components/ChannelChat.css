@@ -211,6 +211,8 @@
     padding: 0 4px;
     width: 100%;
 }
+
+@keyframes slideIn {
     from {
         opacity: 0;
         transform: translateY(10px);
