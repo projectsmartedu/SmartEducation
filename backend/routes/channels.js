@@ -1,10 +1,10 @@
 const express = require('express');
 const router = express.Router();
 const channelController = require('../controllers/channelController');
-const auth = require('../middleware/auth');
+const { protect } = require('../middleware/auth');
 
 // All routes require authentication
-router.use(auth);
+router.use(protect);
 
 // Channel management
 router.post('/', channelController.createChannel);

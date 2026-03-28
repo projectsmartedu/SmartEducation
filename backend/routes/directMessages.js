@@ -1,10 +1,10 @@
 const express = require('express');
 const router = express.Router();
-const auth = require('../middleware/auth');
+const { protect } = require('../middleware/auth');
 const directMessageController = require('../controllers/directMessageController');
 
 // All routes require authentication
-router.use(auth);
+router.use(protect);
 
 // Get or create DM conversation
 router.post('/conversations', directMessageController.getOrCreateConversation);
