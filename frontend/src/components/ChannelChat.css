@@ -661,3 +661,15 @@
     font-size: 14px;
 }
 
+/* Members Panel for Channel Chat */
+.members-panel {
+    border-top: 1px solid #e5e7eb;
+    background: #fff;
+    max-height: 250px;
+    overflow-y: auto;
+}
+
+.members-list-panel {
+    padding: 8px 0;
+}
+

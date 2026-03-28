@@ -1,0 +1,91 @@
+Implementation (Module-wise implementation details, important code fragments, packages & tools used in modules, etc)
+
+---
+
+# Slide 1: Project Architecture Overview
+- High-level diagram: Frontend (React), Backend (Node.js/Express), ML Service (Python)
+- Key tools: React, Node.js, Express, MongoDB, Python, XGBoost, joblib
+
+---
+
+# Slide 2: Backend Module Implementation
+- Main files: controllers/, models/, routes/
+- Example code (risk prediction endpoint):
+```js
+exports.predictRisk = async (req, res) => {
+  const studentData = req.body;
+  const result = await callMLService('risk', studentData);
+  res.json(result);
+};
+```
+- Packages: express, mongoose, axios
+
+---
+
+# Slide 3: ML Service Module Implementation
+- Main file: ml_inference.py
+- Key functions: load_models(), predict_risk(), predict_topic_urgency(), generate_mindmap()
+- Example code (risk prediction):
+```python
+def predict_risk(student_data):
+    risk_model, risk_features, _, _, _ = load_models()
+    df = pd.DataFrame([student_data])[risk_features]
+    pred_proba = risk_model.predict_proba(df)[0]
+    risk_score = pred_proba[1]
+    # ...determine category and intervention...
+    return {...}
+```
+- Packages: pandas, joblib, xgboost
+
+---
+
+# Slide 4: Frontend Module Implementation
+- Main files: src/components/, src/services/mlService.js
+- Example code (mind map integration):
+```js
+useEffect(() => {
+  fetch('/api/mindmap', { ... })
+    .then(res => res.json())
+    .then(data => setMindMapData(data));
+}, []);
+```
+- Packages: React, axios, vis-network
+
+---
+
+# Slide 5: Inter-module Communication & Data Flow
+- Diagram: User → Frontend → Backend API → ML Service (Python) → Backend → Frontend
+- Backend calls ML service via HTTP/child_process
+- ML service returns JSON (risk, revision, mind map)
+- Example code (backend calling Python ML):
+```js
+const { spawn } = require('child_process');
+function callMLService(task, data) {
+  return new Promise((resolve) => {
+    const py = spawn('python', ['ml_inference.py', task, JSON.stringify(data)]);
+    // ...handle output...
+  });
+}
+```
+
+---
+
+# Slide 6: Packages, Tools & Deployment
+- Backend: express, mongoose, dotenv, axios
+- Frontend: react, vis-network, tailwindcss
+- ML Service: pandas, xgboost, joblib
+- Deployment: Docker, Vercel, Render
+- Testing: jest, supertest, react-testing-library
+- Example code (Dockerfile for ML Service):
+```dockerfile
+FROM python:3.9
+COPY . /app
+WORKDIR /app
+RUN pip install -r requirements.txt
+CMD ["python", "ml_inference.py"]
+```
+
+---
+
+# Figures
+- [Mermaid diagrams for architecture and data flow are provided in a separate file.]

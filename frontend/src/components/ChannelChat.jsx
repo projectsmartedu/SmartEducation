@@ -20,6 +20,7 @@ const ChannelChat = ({ classId, onClose }) => {
     const [selectedConversation, setSelectedConversation] = useState(null);
     const [courseMembers, setCourseMembers] = useState([]);
     const [showMemberList, setShowMemberList] = useState(false);
+    const [showChannelMembers, setShowChannelMembers] = useState(false);
 
     // General states
     const [newMessage, setNewMessage] = useState('');
@@ -145,6 +146,12 @@ const ChannelChat = ({ classId, onClose }) => {
         // Listen for real-time message events
         socketRef.current.on('newMessage', ({ message }) => {
             setMessages(prev => [...prev, message]);
+            // Update channel message count
+            setChannels(prev => prev.map(ch => 
+                ch._id === selectedChannel 
+                    ? { ...ch, messageCount: (ch.messageCount || 0) + 1 }
+                    : ch
+            ));
         });
 
         socketRef.current.on('messageEdited', ({ messageId, newContent }) => {
@@ -155,6 +162,12 @@ const ChannelChat = ({ classId, onClose }) => {
 
         socketRef.current.on('messageDeleted', ({ messageId }) => {
             setMessages(prev => prev.filter(msg => msg._id !== messageId));
+            // Update channel message count
+            setChannels(prev => prev.map(ch => 
+                ch._id === selectedChannel 
+                    ? { ...ch, messageCount: Math.max(0, (ch.messageCount || 1) - 1) }
+                    : ch
+            ));
         });
 
         socketRef.current.on('reactionAdded', ({ emoji, userId }) => {
@@ -192,6 +205,48 @@ const ChannelChat = ({ classId, onClose }) => {
             }
         };
     }, [selectedChannel, currentUser._id]);
+
+    // Handle DM socket events
+    useEffect(() => {
+        if (!selectedConversation || !socketRef.current) return;
+
+        socketRef.current.on('directMessage', ({ message }) => {
+            if (message.conversation === selectedConversation) {
+                setMessages(prev => [...prev, message]);
+            }
+        });
+
+        socketRef.current.on('directMessageEdited', ({ messageId, newContent }) => {
+            setMessages(prev => prev.map(msg =>
+                msg._id === messageId ? { ...msg, content: newContent, edited: true } : msg
+            ));
+        });
+
+        socketRef.current.on('directMessageDeleted', ({ messageId }) => {
+            setMessages(prev => prev.filter(msg => msg._id !== messageId));
+        });
+
+        socketRef.current.on('directMessageReaction', ({ messageId, emoji, userId }) => {
+            setMessages(prev => prev.map(msg => {
+                if (msg._id === messageId) {
+                    const reaction = msg.reactions?.find(r => r.emoji === emoji);
+                    if (reaction && !reaction.users.includes(userId)) {
+                        reaction.users.push(userId);
+                    }
+                }
+                return msg;
+            }));
+        });
+
+        return () => {
+            if (socketRef.current) {
+                socketRef.current.off('directMessage');
+                socketRef.current.off('directMessageEdited');
+                socketRef.current.off('directMessageDeleted');
+                socketRef.current.off('directMessageReaction');
+            }
+        };
+    }, [selectedConversation]);
 
     // Load channels on mount
     useEffect(() => {
@@ -556,7 +611,11 @@ const ChannelChat = ({ classId, onClose }) => {
                                     <Zap size={18} />
                                     <span>Real-time</span>
                                 </div>
-                                <button className="btn-icon">
+                                <button 
+                                    className="btn-icon"
+                                    onClick={() => setShowChannelMembers(!showChannelMembers)}
+                                    title="View members"
+                                >
                                     <Users size={20} />
                                 </button>
                                 <button className="btn-icon">
@@ -627,6 +686,35 @@ const ChannelChat = ({ classId, onClose }) => {
                                 <Send size={20} />
                             </button>
                         </form>
+
+                        {/* Members Panel */}
+                        {showChannelMembers && (
+                            <div className="members-panel">
+                                <div className="members-header">
+                                    <h4>Members ({currentChannel.members?.length || 0})</h4>
+                                    <button onClick={() => setShowChannelMembers(false)}>
+                                        <X size={16} />
+                                    </button>
+                                </div>
+                                <div className="members-list-panel">
+                                    {currentChannel.members?.map(member => (
+                                        <div key={member._id} className="member-item-panel">
+                                            <div className="member-avatar">
+                                                {member.avatar ? (
+                                                    <img src={member.avatar} alt="" />
+                                                ) : (
+                                                    <div>{member.name?.[0] || 'U'}</div>
+                                                )}
+                                            </div>
+                                            <div className="member-info">
+                                                <div className="member-name">{member.name}</div>
+                                                <div className="member-email">{member.email}</div>
+                                            </div>
+                                        </div>
+                                    )) || <p>No members yet</p>}
+                                </div>
+                            </div>
+                        )}
                     </>
                 )}
 
