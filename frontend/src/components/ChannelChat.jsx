@@ -137,14 +137,23 @@ const ChannelChat = ({ classId, onClose }) => {
     useEffect(() => {
         if (!selectedChannel || !socketRef.current) return;
 
+        // Remove any existing listeners to avoid duplicates
+        socketRef.current.off('newMessage');
+        socketRef.current.off('messageEdited');
+        socketRef.current.off('messageDeleted');
+        socketRef.current.off('reactionAdded');
+        socketRef.current.off('userIsTyping');
+        socketRef.current.off('userStoppedTyping');
+
         // Join channel room
         socketRef.current.emit('joinChannel', {
             channelId: selectedChannel,
             userId: currentUser._id
         });
 
-        // Listen for real-time message events
-        socketRef.current.on('newMessage', ({ message }) => {
+        // Listen for real-time message events (fresh listeners)
+        const handleNewMessage = ({ message }) => {
+            console.log('📨 New message received:', message.content, 'from', message.sender?.name);
             setMessages(prev => [...prev, message]);
             // Update channel message count
             setChannels(prev => prev.map(ch => 
@@ -152,25 +161,24 @@ const ChannelChat = ({ classId, onClose }) => {
                     ? { ...ch, messageCount: (ch.messageCount || 0) + 1 }
                     : ch
             ));
-        });
+        };
 
-        socketRef.current.on('messageEdited', ({ messageId, newContent }) => {
+        const handleEditMessage = ({ messageId, newContent }) => {
             setMessages(prev => prev.map(msg =>
                 msg._id === messageId ? { ...msg, content: newContent, edited: true } : msg
             ));
-        });
+        };
 
-        socketRef.current.on('messageDeleted', ({ messageId }) => {
+        const handleDeleteMessage = ({ messageId }) => {
             setMessages(prev => prev.filter(msg => msg._id !== messageId));
-            // Update channel message count
             setChannels(prev => prev.map(ch => 
                 ch._id === selectedChannel 
                     ? { ...ch, messageCount: Math.max(0, (ch.messageCount || 1) - 1) }
                     : ch
             ));
-        });
+        };
 
-        socketRef.current.on('reactionAdded', ({ emoji, userId }) => {
+        const handleReaction = ({ emoji, userId }) => {
             setMessages(prev => prev.map(msg => {
                 const reaction = msg.reactions?.find(r => r.emoji === emoji);
                 if (reaction && !reaction.users.includes(userId)) {
@@ -178,30 +186,37 @@ const ChannelChat = ({ classId, onClose }) => {
                 }
                 return msg;
             }));
-        });
+        };
 
-        socketRef.current.on('userIsTyping', ({ userId, userName }) => {
+        const handleTyping = ({ userId, userName }) => {
             if (userId !== currentUser._id) {
                 setTypingUsers(prev => ({ ...prev, [userId]: userName }));
             }
-        });
+        };
 
-        socketRef.current.on('userStoppedTyping', ({ userId }) => {
+        const handleStopTyping = ({ userId }) => {
             setTypingUsers(prev => {
                 const updated = { ...prev };
                 delete updated[userId];
                 return updated;
             });
-        });
+        };
+
+        socketRef.current.on('newMessage', handleNewMessage);
+        socketRef.current.on('messageEdited', handleEditMessage);
+        socketRef.current.on('messageDeleted', handleDeleteMessage);
+        socketRef.current.on('reactionAdded', handleReaction);
+        socketRef.current.on('userIsTyping', handleTyping);
+        socketRef.current.on('userStoppedTyping', handleStopTyping);
 
         return () => {
             if (socketRef.current) {
-                socketRef.current.off('newMessage');
-                socketRef.current.off('messageEdited');
-                socketRef.current.off('messageDeleted');
-                socketRef.current.off('reactionAdded');
-                socketRef.current.off('userIsTyping');
-                socketRef.current.off('userStoppedTyping');
+                socketRef.current.off('newMessage', handleNewMessage);
+                socketRef.current.off('messageEdited', handleEditMessage);
+                socketRef.current.off('messageDeleted', handleDeleteMessage);
+                socketRef.current.off('reactionAdded', handleReaction);
+                socketRef.current.off('userIsTyping', handleTyping);
+                socketRef.current.off('userStoppedTyping', handleStopTyping);
             }
         };
     }, [selectedChannel, currentUser._id]);
@@ -506,7 +521,12 @@ const ChannelChat = ({ classId, onClose }) => {
                                 >
                                     <div className="channel-icon">#</div>
                                     <div className="channel-info">
-                                        <div className="channel-name">{channel.name}</div>
+                                        <div className="channel-name">
+                                            {channel.name}
+                                            {channel.name === 'General' && channel.channelType === 'discussion' && (
+                                                <span style={{ fontSize: '11px', color: '#a0aec0', marginLeft: '4px' }}>(default)</span>
+                                            )}
+                                        </div>
                                         <div className="channel-meta">{channel.messageCount} messages</div>
                                     </div>
                                 </div>
