@@ -1,30 +1,35 @@
 import React, { useState, useEffect } from 'react';
-import { MessageSquare, Plus, SearchIcon, Settings } from 'lucide-react';
+import { MessageSquare, Plus, SearchIcon, Settings, BookOpen, LogIn } from 'lucide-react';
 import DashboardLayout from '../components/Layout/DashboardLayout';
 import ChannelChat from '../components/ChannelChat';
 import { coursesAPI } from '../services/api';
+import { useAuth } from '../context/AuthContext';
+import { Link } from 'react-router-dom';
 import './ChannelsPage.css';
 
 const ChannelsPage = () => {
+    const { user } = useAuth();
     const [selectedClass, setSelectedClass] = useState(null);
     const [courses, setCourses] = useState([]);
     const [showChat, setShowChat] = useState(false);
     const [searchTerm, setSearchTerm] = useState('');
     const [loading, setLoading] = useState(false);
+    const [error, setError] = useState(null);
 
     useEffect(() => {
         // Fetch user's courses/classes
         const fetchCourses = async () => {
             try {
                 setLoading(true);
+                setError(null);
+                console.log('📚 Fetching courses for', user?.role, 'user...');
                 const res = await coursesAPI.getMyCourses();
                 const coursesList = res.data?.courses || [];
+                console.log('✅ Found', coursesList.length, 'courses:', coursesList);
                 setCourses(coursesList);
-                if (coursesList.length === 0) {
-                    console.log('No courses found for user');
-                }
             } catch (err) {
                 console.error('❌ Error fetching courses:', err);
+                setError(err.message || 'Failed to load courses');
             } finally {
                 setLoading(false);
             }
@@ -68,12 +73,35 @@ const ChannelsPage = () => {
                             </div>
 
                             {loading ? (
-                                <div className="loading">Loading classes...</div>
+                                <div className="loading">⏳ Loading your classes...</div>
+                            ) : error ? (
+                                <div className="error-state">
+                                    <p style={{ color: '#dc2626' }}>❌ {error}</p>
+                                </div>
                             ) : filteredCourses.length === 0 ? (
                                 <div className="empty-state">
                                     <MessageSquare size={48} />
-                                    <h3>No classes found</h3>
-                                    <p>You haven't created any classes yet</p>
+                                    <h3>
+                                        {user?.role === 'teacher'
+                                            ? '📚 No courses yet'
+                                            : '📖 No enrolled courses'}
+                                    </h3>
+                                    <p>
+                                        {user?.role === 'teacher'
+                                            ? 'Create a course to start using channels with your students'
+                                            : 'Enroll in a course to join class channels'}
+                                    </p>
+                                    {user?.role === 'teacher' ? (
+                                        <Link to="/teacher/courses" className="btn btn-primary" style={{ marginTop: '20px' }}>
+                                            <BookOpen size={16} style={{ marginRight: '8px' }} />
+                                            Create Course
+                                        </Link>
+                                    ) : (
+                                        <Link to="/student/courses" className="btn btn-primary" style={{ marginTop: '20px' }}>
+                                            <LogIn size={16} style={{ marginRight: '8px' }} />
+                                            Browse Courses
+                                        </Link>
+                                    )}
                                 </div>
                             ) : (
                                 <div className="classes-grid">
