@@ -13,7 +13,6 @@ const StudentRevisions = () => {
     const [predictions, setPredictions] = useState(null);
     const [mlPredictions, setMlPredictions] = useState({});
     const [showMindMap, setShowMindMap] = useState(false);
-    const [studentData, setStudentData] = useState(null);
 
     const fetchRevisions = useCallback(async () => {
         setLoading(true);

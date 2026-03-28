@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useMemo } from 'react';
 import './ModernMindMap.css';
 
 /**
@@ -21,7 +21,6 @@ const ModernMindMap = ({
 }) => {
     const [selectedTopic, setSelectedTopic] = useState(null);
     const [filterLevel, setFilterLevel] = useState('all');
-    const [isLoading, setIsLoading] = useState(false);
 
     // Categorize topics by urgency from ML predictions
     const categorizedTopics = useMemo(() => {
@@ -65,8 +64,6 @@ const ModernMindMap = ({
         if (filterLevel === 'low') return categorizedTopics.low;
         return [...categorizedTopics.urgent, ...categorizedTopics.moderate, ...categorizedTopics.low];
     };
-
-    const displayTopics = getDisplayTopics();
 
     // Summary stats
     const stats = {
