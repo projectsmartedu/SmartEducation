@@ -48,11 +48,17 @@ const StudentRevisionDashboard = ({ studentId = 'student-001' }) => {
         console.log('Topic updated:', updatedTopic);
     };
 
-    // In production, fetch from your API:
-    // const progressRes = await fetch(`/api/progress/${studentId}`);
-    // const topicsData = await progressRes.json();
+    // Fetch data and generate mind map
+    const fetchMindMapData = React.useCallback(async () => {
+        try {
+            setLoading(true);
+            setError(null);
 
-    // For now, use mock data
+            // In production, fetch from your API:
+            // const progressRes = await fetch(`/api/progress/${studentId}`);
+            // const topicsData = await progressRes.json();
+
+            // For now, use mock data
     const mockStudentData = {
         id: studentId,
         name: 'Harsh Sharma',
