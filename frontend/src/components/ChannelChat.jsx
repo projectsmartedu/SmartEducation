@@ -299,8 +299,31 @@ const ChannelChat = ({ classId, onClose }) => {
 
     // Load initial messages when channel changes
     useEffect(() => {
-        fetchMessages();
-    }, [fetchMessages]);
+        console.log('📨 Channel changed, fetching messages for:', selectedChannel);
+        if (selectedChannel) {
+            fetchMessages();
+        }
+    }, [selectedChannel]);
+
+    // Load DM messages when conversation changes
+    useEffect(() => {
+        console.log('💬 Conversation changed, fetching DM messages for:', selectedConversation);
+        if (selectedConversation && viewMode === 'dms') {
+            fetchDMMessages(selectedConversation);
+        }
+    }, [selectedConversation, viewMode]);
+
+    // Switch view mode and load appropriate messages
+    useEffect(() => {
+        console.log('🔄 View mode changed to:', viewMode);
+        if (viewMode === 'channels' && selectedChannel) {
+            console.log('📨 Loading channel messages...');
+            fetchMessages();
+        } else if (viewMode === 'dms' && selectedConversation) {
+            console.log('💬 Loading DM messages...');
+            fetchDMMessages(selectedConversation);
+        }
+    }, [viewMode]);
 
     // Send message
     const handleSendMessage = async (e) => {
@@ -423,18 +446,25 @@ const ChannelChat = ({ classId, onClose }) => {
 
     // Fetch DM messages
     const fetchDMMessages = useCallback(async (conversationId) => {
+        if (!conversationId) return;
+        
         try {
+            console.log('📥 Fetching DM messages for conversation:', conversationId);
             const token = localStorage.getItem('token');
             const res = await fetch(`${API_BASE}/api/direct-messages/conversations/${conversationId}/messages`, {
                 headers: { 'Authorization': `Bearer ${token}` }
             });
             if (res.ok) {
                 const data = await res.json();
+                console.log('✅ Loaded', data.messages?.length || 0, 'DM messages');
                 setMessages(data.messages || []);
-                console.log('💬 Fetched DM messages:', data.messages?.length || 0);
+            } else {
+                console.error('❌ Failed to fetch DM messages:', res.status);
+                setMessages([]);
             }
         } catch (err) {
             console.error('❌ Error fetching DM messages:', err);
+            setMessages([]);
         }
     }, [API_BASE]);
 
@@ -452,6 +482,17 @@ const ChannelChat = ({ classId, onClose }) => {
             });
             if (res.ok) {
                 const conversation = await res.json();
+                
+                // Add to conversations list if not already there
+                setConversations(prev => {
+                    const exists = prev.find(c => c._id === conversation._id);
+                    if (!exists) {
+                        console.log('✅ Adding new conversation to list:', conversation._id);
+                        return [conversation, ...prev];
+                    }
+                    return prev;
+                });
+                
                 setSelectedConversation(conversation._id);
                 setViewMode('dms');
                 setMessages([]);
