@@ -44,11 +44,6 @@ const ChannelChat = ({ classId, onClose }) => {
     const API_BASE = process.env.REACT_APP_API_URL || 'http://localhost:5000';
     const currentUser = JSON.parse(localStorage.getItem('user') || '{}');
 
-    // Fetch course info on mount
-    useEffect(() => {
-        fetchCourseInfo();
-    }, [fetchCourseInfo]);
-
     // Initialize Socket.io connection
     useEffect(() => {
         const token = localStorage.getItem('token');
@@ -246,6 +241,12 @@ const ChannelChat = ({ classId, onClose }) => {
             setMessages([]);
         }
     }, [API_BASE]);
+
+    // Fetch course info on component mount
+    useEffect(() => {
+        fetchCourseInfo();
+        fetchChannels();
+    }, [fetchCourseInfo, fetchChannels]);
 
     // Handle channel selection - listen for real-time events
     useEffect(() => {
