@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { Send, Plus, Users, Settings, Smile, Paperclip, Zap, MessageCircle, X } from 'lucide-react';
+import { useParams, useNavigate } from 'react-router-dom';
 import { io } from 'socket.io-client';
 import './ChannelChat.css';
 
@@ -148,6 +149,67 @@ const ChannelChat = ({ classId, onClose }) => {
             console.error('❌ Error fetching messages:', err);
         }
     }, [API_BASE, selectedChannel]);
+
+    // Fetch course members for DM
+    const fetchCourseMembers = useCallback(async () => {
+        try {
+            const token = localStorage.getItem('token');
+            const res = await fetch(`${API_BASE}/api/courses/${classId}`, {
+                headers: { 'Authorization': `Bearer ${token}` }
+            });
+            if (res.ok) {
+                const data = await res.json();
+                const members = data.course?.enrolledStudents || [];
+                // Filter out current user
+                const filtered = members.filter(m => m._id !== currentUser._id);
+                setCourseMembers(filtered);
+                console.log('👥 Fetched course members:', filtered);
+            }
+        } catch (err) {
+            console.error('❌ Error fetching members:', err);
+        }
+    }, [API_BASE, classId, currentUser._id]);
+
+    // Fetch DM conversations
+    const fetchConversations = useCallback(async () => {
+        try {
+            const token = localStorage.getItem('token');
+            const res = await fetch(`${API_BASE}/api/direct-messages/conversations/${classId}`, {
+                headers: { 'Authorization': `Bearer ${token}` }
+            });
+            if (res.ok) {
+                const data = await res.json();
+                setConversations(data);
+                console.log('💬 Fetched conversations:', data);
+            }
+        } catch (err) {
+            console.error('❌ Error fetching conversations:', err);
+        }
+    }, [API_BASE, classId]);
+
+    // Fetch DM messages
+    const fetchDMMessages = useCallback(async (conversationId) => {
+        if (!conversationId) return;
+
+        try {
+            console.log('📥 Fetching DM messages for conversation:', conversationId);
+            const token = localStorage.getItem('token');
+            const res = await fetch(`${API_BASE}/api/direct-messages/conversations/${conversationId}/messages`, {
+                headers: { 'Authorization': `Bearer ${token}` }
+            });
+            if (res.ok) {
+                const data = await res.json();
+                console.log('✅ Loaded', data.messages?.length || 0, 'DM messages');
+                setMessages(data.messages || []);
+            } else {
+                console.error('❌ Failed to fetch DM messages:', res.status);
+                setMessages([]);
+            }
+        } catch (err) {
+            console.error('❌ Error fetching DM messages:', err);
+            setMessages([]);
+        }
+    }, [API_BASE]);
 
     // Handle channel selection - listen for real-time events
     useEffect(() => {
@@ -406,67 +468,6 @@ const ChannelChat = ({ classId, onClose }) => {
             console.error('Error creating channel:', err);
         }
     };
-
-    // Fetch course members for DM
-    const fetchCourseMembers = useCallback(async () => {
-        try {
-            const token = localStorage.getItem('token');
-            const res = await fetch(`${API_BASE}/api/courses/${classId}`, {
-                headers: { 'Authorization': `Bearer ${token}` }
-            });
-            if (res.ok) {
-                const data = await res.json();
-                const members = data.course?.enrolledStudents || [];
-                // Filter out current user
-                const filtered = members.filter(m => m._id !== currentUser._id);
-                setCourseMembers(filtered);
-                console.log('👥 Fetched course members:', filtered);
-            }
-        } catch (err) {
-            console.error('❌ Error fetching members:', err);
-        }
-    }, [API_BASE, classId, currentUser._id]);
-
-    // Fetch DM conversations
-    const fetchConversations = useCallback(async () => {
-        try {
-            const token = localStorage.getItem('token');
-            const res = await fetch(`${API_BASE}/api/direct-messages/conversations/${classId}`, {
-                headers: { 'Authorization': `Bearer ${token}` }
-            });
-            if (res.ok) {
-                const data = await res.json();
-                setConversations(data);
-                console.log('💬 Fetched conversations:', data);
-            }
-        } catch (err) {
-            console.error('❌ Error fetching conversations:', err);
-        }
-    }, [API_BASE, classId]);
-
-    // Fetch DM messages
-    const fetchDMMessages = useCallback(async (conversationId) => {
-        if (!conversationId) return;
-
-        try {
-            console.log('📥 Fetching DM messages for conversation:', conversationId);
-            const token = localStorage.getItem('token');
-            const res = await fetch(`${API_BASE}/api/direct-messages/conversations/${conversationId}/messages`, {
-                headers: { 'Authorization': `Bearer ${token}` }
-            });
-            if (res.ok) {
-                const data = await res.json();
-                console.log('✅ Loaded', data.messages?.length || 0, 'DM messages');
-                setMessages(data.messages || []);
-            } else {
-                console.error('❌ Failed to fetch DM messages:', res.status);
-                setMessages([]);
-            }
-        } catch (err) {
-            console.error('❌ Error fetching DM messages:', err);
-            setMessages([]);
-        }
-    }, [API_BASE]);
 
     // Start DM with a user
     const startDM = useCallback(async (userId) => {
