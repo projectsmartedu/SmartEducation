@@ -18,7 +18,8 @@ import {
     Trophy,
     User,
     Download,
-    WifiOff
+    WifiOff,
+    MessageSquare
 } from 'lucide-react';
 
 const studentSections = [
@@ -37,6 +38,12 @@ const studentSections = [
             { label: 'My Courses', href: '/student/courses', icon: BookOpen, needsOnline: false },
             { label: 'Course Materials', href: '/student/materials', icon: GraduationCap, needsOnline: false },
             { label: 'Offline Downloads', href: '/student/offline-downloads', icon: Download, needsOnline: false }
+        ]
+    },
+    {
+        title: 'Collaboration',
+        links: [
+            { label: 'Class Channels', href: '/channels', icon: MessageSquare, needsOnline: true }
         ]
     },
     {
@@ -59,6 +66,12 @@ const teacherSections = [
             { label: 'Manage Courses', href: '/teacher/courses', icon: BookOpen },
             { label: 'Manage Students', href: '/teacher/students', icon: Users2 },
             { label: 'Course Materials', href: '/teacher/materials', icon: GraduationCap }
+        ]
+    },
+    {
+        title: 'Collaboration',
+        links: [
+            { label: 'Class Channels', href: '/channels', icon: MessageSquare }
         ]
     }
 ];
