@@ -111,7 +111,7 @@ const StudentRevisions = () => {
                         Revision slots are generated based on your mastery and forget-risk analysis. Complete or skip revisions to keep your schedule updated.
                     </p>
                     {stats && (
-                            <div className="mt-4 flex flex-wrap gap-4">
+                        <div className="mt-4 flex flex-wrap gap-4">
                             <div className="rounded-xl border border-[#e2e8f0] bg-[#f8fafc] px-4 py-2">
                                 <span className="text-xs uppercase tracking-widest text-[#64748b]">Pending</span>
                                 <p className="text-lg font-semibold text-[#111827]">{stats.pending ?? 0}</p>
@@ -197,7 +197,6 @@ const StudentRevisions = () => {
                     )}
                 </section>
 
-<<<<<<< Updated upstream
                 {/* Visual Mind Map Section */}
                 <section className="rounded-xl border border-[#e2e8f0] bg-white p-6 shadow-sm">
                     <div className="flex items-center justify-between">
