@@ -24,6 +24,9 @@ import {
 } from 'lucide-react';
 import { coursesAPI, progressAPI, gamificationAPI } from '../services/api';
 
+// API endpoint for ML risk predictions
+const ML_API_BASE = process.env.REACT_APP_ML_API_URL || 'https://smarteducation-mlmodel.onrender.com';
+
 const TeacherDashboard = () => {
     const { user } = useAuth();
     const [courses, setCourses] = useState([]);
@@ -35,6 +38,8 @@ const TeacherDashboard = () => {
     const [sortField, setSortField] = useState('totalPoints');
     const [sortDir, setSortDir] = useState('desc');
     const [expandedStudent, setExpandedStudent] = useState(null);
+    const [riskPredictions, setRiskPredictions] = useState({}); // Cache ML predictions
+    const [predictionsLoading, setPredictionsLoading] = useState(false);
 
     useEffect(() => {
         const fetchDashboard = async () => {
@@ -58,6 +63,63 @@ const TeacherDashboard = () => {
         };
         fetchDashboard();
     }, []);
+
+    // Fetch ML risk predictions for all students
+    useEffect(() => {
+        if (classOverview.students.length === 0) return;
+        
+        const fetchRiskPredictions = async () => {
+            setPredictionsLoading(true);
+            try {
+                const predictions = {};
+                
+                // Fetch risk predictions for each student
+                for (const student of classOverview.students) {
+                    try {
+                        // Map student gamification data to ML features
+                        const riskData = {
+                            prior_failures: Math.max(0, 3 - (student.level || 1)), // Infer from level
+                            study_time: Math.min(5, Math.floor((student.lessonsCompleted || 0) / 10)), // Lessons to study time
+                            absences: Math.max(0, 14 - (student.currentStreak || 0)), // Invert streak to absences
+                            parent_edu: 2, // Default assumption
+                            family_support: 3, // Default assumption
+                            health: 4, // Default assumption
+                            internet: 1, // Assume they have internet (1=yes)
+                            activities: Math.max(0, 1 - (student.badgeCount > 5 ? 1 : 0)),
+                            travel_time: 2, // Default assumption
+                            age: 18, // Default assumption
+                            paid_support: student.totalPoints > 5000 ? 1 : 0 // If high points, assume paid support
+                        };
+                        
+                        const res = await fetch(`${ML_API_BASE}/api/risk/predict`, {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify(riskData)
+                        });
+                        
+                        if (res.ok) {
+                            const prediction = await res.json();
+                            predictions[student.student?._id] = prediction;
+                        } else {
+                            console.error(`Risk prediction failed for student ${student.student?._id}`);
+                        }
+                    } catch (err) {
+                        console.error(`Error predicting risk for student:`, err);
+                    }
+                }
+                
+                setRiskPredictions(predictions);
+            } catch (err) {
+                console.error('Error fetching risk predictions:', err);
+            } finally {
+                setPredictionsLoading(false);
+            }
+        };
+        
+        // Debounce the risk prediction fetch
+        const timer = setTimeout(fetchRiskPredictions, 500);
+        return () => clearTimeout(timer);
+    }, [classOverview.students]);
 
     useEffect(() => {
         if (!selectedCourse) return;
@@ -96,8 +158,17 @@ const TeacherDashboard = () => {
     }, [students, searchTerm, sortField, sortDir]);
 
     const atRiskStudents = useMemo(() =>
-        students.filter(s => s.currentStreak < 2 || s.totalPoints < 1000).slice(0, 5),
-        [students]);
+        students
+            .filter(s => {
+                const prediction = riskPredictions[s.student?._id];
+                if (prediction && prediction.category) {
+                    return prediction.category === 'HIGH';
+                }
+                // Fallback to old logic if prediction not available
+                return s.currentStreak < 2 || s.totalPoints < 1000;
+            })
+            .slice(0, 5),
+        [students, riskPredictions]);
 
     const topPerformers = useMemo(() =>
         [...students].sort((a, b) => b.totalPoints - a.totalPoints).slice(0, 3),
@@ -240,7 +311,11 @@ const TeacherDashboard = () => {
                                             </td>
                                         </tr>
                                     ) : filteredStudents.map(s => {
-                                        const isRisk = s.currentStreak < 2 || s.totalPoints < 1000;
+                                        // Use ML risk prediction if available, otherwise fall back to legacy logic
+                                        const prediction = riskPredictions[s.student?._id];
+                                        const isRisk = prediction 
+                                            ? prediction.category === 'HIGH' 
+                                            : (s.currentStreak < 2 || s.totalPoints < 1000);
                                         const isTop = topPerformers.some(t => t.student?._id === s.student?._id);
                                         const isExpanded = expandedStudent === s.student?._id;
                                         return (
@@ -282,7 +357,10 @@ const TeacherDashboard = () => {
                                                     </td>
                                                     <td className="py-3">
                                                         {isRisk ? (
-                                                            <span className="inline-flex items-center gap-1 rounded-full bg-[#fee2e2] px-2.5 py-1 text-[10px] font-bold text-[#b91c1c]">
+                                                            <span 
+                                                                className="inline-flex items-center gap-1 rounded-full bg-[#fee2e2] px-2.5 py-1 text-[10px] font-bold text-[#b91c1c] cursor-help"
+                                                                title={prediction ? `Risk Score: ${(prediction.riskScore * 100).toFixed(1)}%` : 'Legacy at-risk'}
+                                                            >
                                                                 <ArrowDownRight className="h-3 w-3" /> At Risk
                                                             </span>
                                                         ) : isTop ? (
@@ -290,7 +368,10 @@ const TeacherDashboard = () => {
                                                                 <ArrowUpRight className="h-3 w-3" /> Top
                                                             </span>
                                                         ) : (
-                                                            <span className="inline-flex items-center gap-1 rounded-full bg-[#dbeafe] px-2.5 py-1 text-[10px] font-bold text-[#1d4ed8]">
+                                                            <span 
+                                                                className="inline-flex items-center gap-1 rounded-full bg-[#dbeafe] px-2.5 py-1 text-[10px] font-bold text-[#1d4ed8] cursor-help"
+                                                                title={prediction ? `Risk Score: ${(prediction.riskScore * 100).toFixed(1)}%` : 'On track'}
+                                                            >
                                                                 <TrendingUp className="h-3 w-3" /> Active
                                                             </span>
                                                         )}
@@ -323,6 +404,33 @@ const TeacherDashboard = () => {
                                                                     </p>
                                                                 </div>
                                                             </div>
+                                                            {/* ML Risk Prediction Section */}
+                                                            {prediction && (
+                                                                <div className="mt-4 rounded-xl bg-gradient-to-r from-[#fff7ed] to-[#fef2f2] p-4 shadow-sm ring-1 ring-[#fee2e2]">
+                                                                    <h3 className="text-sm font-bold text-[#7f1d1d] mb-3">ML Risk Assessment</h3>
+                                                                    <div className="grid gap-3 sm:grid-cols-3">
+                                                                        <div>
+                                                                            <p className="text-[10px] uppercase tracking-widest text-[#92400e]">Risk Score</p>
+                                                                            <p className="mt-1 text-lg font-bold text-[#b91c1c]">{(prediction.riskScore * 100).toFixed(1)}%</p>
+                                                                            <p className="text-[10px] text-[#a16207]">{prediction.category}</p>
+                                                                        </div>
+                                                                        <div>
+                                                                            <p className="text-[10px] uppercase tracking-widest text-[#92400e]">Confidence</p>
+                                                                            <div className="mt-1 h-2 rounded-full bg-[#fecaca]">
+                                                                                <div 
+                                                                                    className="h-2 rounded-full bg-[#dc2626]"
+                                                                                    style={{ width: `${(prediction.confidence || 80)}%` }}
+                                                                                />
+                                                                            </div>
+                                                                            <p className="text-[10px] text-[#7f1d1d] mt-1">{(prediction.confidence || 80).toFixed(0)}%</p>
+                                                                        </div>
+                                                                        <div>
+                                                                            <p className="text-[10px] uppercase tracking-widest text-[#92400e]">Intervention</p>
+                                                                            <p className="mt-1 text-[11px] font-semibold text-[#7f1d1d] line-clamp-2">{prediction.intervention || 'Monitoring recommended'}</p>
+                                                                        </div>
+                                                                    </div>
+                                                                </div>
+                                                            )}
                                                         </td>
                                                     </tr>
                                                 )}
