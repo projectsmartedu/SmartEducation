@@ -11,9 +11,25 @@ const { spawn } = require('child_process');
 const app = express();
 const PORT = process.env.PORT || 5001;
 
-// Middleware
-app.use(cors());
+// Middleware - Explicit CORS configuration
+const corsOptions = {
+  origin: '*', // Allow all origins (for development/MVP)
+  methods: ['GET', 'POST', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization'],
+  credentials: false
+};
+
+app.use(cors(corsOptions));
+app.options('*', cors(corsOptions)); // Handle preflight requests
 app.use(express.json({ limit: '50mb' }));
+
+// Explicit CORS headers on all responses
+app.use((req, res, next) => {
+  res.setHeader('Access-Control-Allow-Origin', '*');
+  res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+  next();
+});
 
 console.log('ML Service starting...');
 console.log(`   Models directory: ${path.join(__dirname, 'models')}`);
