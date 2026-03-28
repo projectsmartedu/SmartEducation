@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
-import { Send, Plus, Users, Settings, Smile, Paperclip, Zap, MessageCircle, X } from 'lucide-react';
+import { Send, Plus, Users, Settings, Smile, Paperclip, Zap, MessageCircle, X, Share2 } from 'lucide-react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { io } from 'socket.io-client';
 import './ChannelChat.css';
@@ -31,9 +31,12 @@ const ChannelChat = ({ classId, onClose }) => {
     const [typingUsers, setTypingUsers] = useState({});
     const [showSettings, setShowSettings] = useState(false);
     const [showEmojiPicker, setShowEmojiPicker] = useState(false);
+    const [showShareModal, setShowShareModal] = useState(false);
+    const [shareLink, setShareLink] = useState('');
     const messagesEndRef = useRef(null);
     const socketRef = useRef(null);
     const typingTimeoutRef = useRef(null);
+    const fileInputRef = useRef(null);
 
     const API_BASE = process.env.REACT_APP_API_URL || 'http://localhost:5000';
     const currentUser = JSON.parse(localStorage.getItem('user') || '{}');
@@ -370,6 +373,62 @@ const ChannelChat = ({ classId, onClose }) => {
 
     // Add emoji list
     const emojis = ['😀', '😂', '😍', '🤔', '😢', '😡', '👍', '👎', '🎉', '🔥', '💯', '✨'];
+
+    // Generate shareable link
+    const generateShareLink = () => {
+        const link = `${window.location.origin}/channels/${selectedChannel}`;
+        setShareLink(link);
+        setShowShareModal(true);
+    };
+
+    // Copy link to clipboard
+    const copyToClipboard = () => {
+        navigator.clipboard.writeText(shareLink);
+        alert('✅ Link copied to clipboard!');
+    };
+
+    // Handle file upload
+    const handleFileUpload = async (e) => {
+        const files = e.target.files;
+        if (!files || !files[0]) return;
+
+        const file = files[0];
+        console.log('📎 Uploading file:', file.name);
+
+        // Check file size (limit to 10MB)
+        if (file.size > 10 * 1024 * 1024) {
+            alert('❌ File too large! Max 10MB');
+            return;
+        }
+
+        try {
+            const formData = new FormData();
+            formData.append('file', file);
+            formData.append('channelId', selectedChannel);
+
+            const token = localStorage.getItem('token');
+            const res = await fetch(`${API_BASE}/api/channels/${selectedChannel}/upload`, {
+                method: 'POST',
+                headers: { 'Authorization': `Bearer ${token}` },
+                body: formData
+            });
+
+            if (res.ok) {
+                const data = await res.json();
+                console.log('✅ File uploaded:', data.attachment);
+                // Add file as message
+                setNewMessage(`📎 ${file.name}: ${data.attachment}`);
+            } else {
+                alert('❌ Upload failed');
+            }
+        } catch (err) {
+            console.error('❌ Upload error:', err);
+            alert('❌ Upload error');
+        }
+        
+        // Reset file input
+        if (fileInputRef.current) fileInputRef.current.value = '';
+    };
 
     // Load channels on mount
     useEffect(() => {
@@ -736,6 +795,13 @@ const ChannelChat = ({ classId, onClose }) => {
                                 </div>
                                 <button
                                     className="btn-icon"
+                                    onClick={generateShareLink}
+                                    title="Share channel link"
+                                >
+                                    <Share2 size={20} />
+                                </button>
+                                <button
+                                    className="btn-icon"
                                     onClick={() => setShowChannelMembers(!showChannelMembers)}
                                     title="View members"
                                 >
@@ -798,9 +864,21 @@ const ChannelChat = ({ classId, onClose }) => {
 
                         <form className="message-input-form" onSubmit={handleSendMessage}>
                             <div className="input-wrapper">
-                                <button type="button" className="btn-icon">
+                                <button
+                                    type="button"
+                                    className="btn-icon"
+                                    onClick={() => fileInputRef.current?.click()}
+                                    title="Attach file (PDF, notes, etc)"
+                                >
                                     <Paperclip size={20} />
                                 </button>
+                                <input
+                                    ref={fileInputRef}
+                                    type="file"
+                                    onChange={handleFileUpload}
+                                    style={{ display: 'none' }}
+                                    accept=".pdf,.doc,.docx,.txt,.png,.jpg,.jpeg,.zip"
+                                />
                                 <input
                                     type="text"
                                     placeholder="Type a message..."
@@ -1030,6 +1108,59 @@ const ChannelChat = ({ classId, onClose }) => {
                             <button
                                 className="btn btn-primary"
                                 onClick={() => setShowSettings(false)}
+                            >
+                                Close
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            {/* Share Modal */}
+            {showShareModal && (
+                <div className="modal-overlay" onClick={() => setShowShareModal(false)}>
+                    <div className="modal" onClick={(e) => e.stopPropagation()}>
+                        <h3>Share Channel</h3>
+                        <p style={{ color: '#718096', marginBottom: '16px' }}>
+                            Share this link to invite others to the channel:
+                        </p>
+                        <div style={{
+                            display: 'flex',
+                            gap: '8px',
+                            marginBottom: '16px'
+                        }}>
+                            <input
+                                type="text"
+                                value={shareLink}
+                                readOnly
+                                style={{
+                                    flex: 1,
+                                    padding: '10px 12px',
+                                    border: '1px solid #e2e8f0',
+                                    borderRadius: '6px',
+                                    fontSize: '14px',
+                                    fontFamily: 'monospace'
+                                }}
+                            />
+                            <button
+                                onClick={copyToClipboard}
+                                style={{
+                                    padding: '10px 16px',
+                                    background: '#3b82f6',
+                                    color: 'white',
+                                    border: 'none',
+                                    borderRadius: '6px',
+                                    cursor: 'pointer',
+                                    fontWeight: 500
+                                }}
+                            >
+                                Copy
+                            </button>
+                        </div>
+                        <div className="modal-actions">
+                            <button
+                                className="btn btn-primary"
+                                onClick={() => setShowShareModal(false)}
                             >
                                 Close
                             </button>
