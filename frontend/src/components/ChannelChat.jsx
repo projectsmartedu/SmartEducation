@@ -19,7 +19,6 @@ const ChannelChat = ({ classId, onClose }) => {
 
     const API_BASE = process.env.REACT_APP_API_URL || 'http://localhost:5000';
     const currentUser = JSON.parse(localStorage.getItem('user') || '{}');
-    const currentUser = JSON.parse(localStorage.getItem('user') || '{}');
 
     // Initialize Socket.io connection
     useEffect(() => {
