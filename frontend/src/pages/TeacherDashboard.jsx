@@ -96,11 +96,16 @@ const TeacherDashboard = () => {
                         };
 
                         const url = `${ML_API_BASE}/api/risk/predict`;
+                        const controller = new AbortController();
+                        const timeoutId = setTimeout(() => controller.abort(), 5000); // 5 second timeout
+
                         const res = await fetch(url, {
                             method: 'POST',
                             headers: { 'Content-Type': 'application/json' },
-                            body: JSON.stringify(riskData)
+                            body: JSON.stringify(riskData),
+                            signal: controller.signal
                         });
+                        clearTimeout(timeoutId);
 
                         if (res.ok) {
                             const prediction = await res.json();
@@ -112,7 +117,11 @@ const TeacherDashboard = () => {
                             console.error('Response:', errorText);
                         }
                     } catch (err) {
-                        console.error(`Error predicting risk for student:`, err);
+                        if (err.name === 'AbortError') {
+                            console.warn(`⏱️ ${student.student?.name}: Request timeout (5s)`);
+                        } else {
+                            console.error(`❌ Error predicting risk for ${student.student?.name}:`, err.message);
+                        }
                     }
                 }
 
