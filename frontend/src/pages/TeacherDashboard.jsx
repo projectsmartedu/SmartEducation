@@ -67,12 +67,12 @@ const TeacherDashboard = () => {
     // Fetch ML risk predictions for all students
     useEffect(() => {
         if (classOverview.students.length === 0) return;
-        
+
         const fetchRiskPredictions = async () => {
             setPredictionsLoading(true);
             try {
                 const predictions = {};
-                
+
                 // Fetch risk predictions for each student
                 for (const student of classOverview.students) {
                     try {
@@ -90,13 +90,13 @@ const TeacherDashboard = () => {
                             age: 18, // Default assumption
                             paid_support: student.totalPoints > 5000 ? 1 : 0 // If high points, assume paid support
                         };
-                        
+
                         const res = await fetch(`${ML_API_BASE}/api/risk/predict`, {
                             method: 'POST',
                             headers: { 'Content-Type': 'application/json' },
                             body: JSON.stringify(riskData)
                         });
-                        
+
                         if (res.ok) {
                             const prediction = await res.json();
                             predictions[student.student?._id] = prediction;
@@ -107,7 +107,7 @@ const TeacherDashboard = () => {
                         console.error(`Error predicting risk for student:`, err);
                     }
                 }
-                
+
                 setRiskPredictions(predictions);
             } catch (err) {
                 console.error('Error fetching risk predictions:', err);
@@ -115,7 +115,7 @@ const TeacherDashboard = () => {
                 setPredictionsLoading(false);
             }
         };
-        
+
         // Debounce the risk prediction fetch
         const timer = setTimeout(fetchRiskPredictions, 500);
         return () => clearTimeout(timer);
@@ -313,8 +313,8 @@ const TeacherDashboard = () => {
                                     ) : filteredStudents.map(s => {
                                         // Use ML risk prediction if available, otherwise fall back to legacy logic
                                         const prediction = riskPredictions[s.student?._id];
-                                        const isRisk = prediction 
-                                            ? prediction.category === 'HIGH' 
+                                        const isRisk = prediction
+                                            ? prediction.category === 'HIGH'
                                             : (s.currentStreak < 2 || s.totalPoints < 1000);
                                         const isTop = topPerformers.some(t => t.student?._id === s.student?._id);
                                         const isExpanded = expandedStudent === s.student?._id;
@@ -357,7 +357,7 @@ const TeacherDashboard = () => {
                                                     </td>
                                                     <td className="py-3">
                                                         {isRisk ? (
-                                                            <span 
+                                                            <span
                                                                 className="inline-flex items-center gap-1 rounded-full bg-[#fee2e2] px-2.5 py-1 text-[10px] font-bold text-[#b91c1c] cursor-help"
                                                                 title={prediction ? `Risk Score: ${(prediction.riskScore * 100).toFixed(1)}%` : 'Legacy at-risk'}
                                                             >
@@ -368,7 +368,7 @@ const TeacherDashboard = () => {
                                                                 <ArrowUpRight className="h-3 w-3" /> Top
                                                             </span>
                                                         ) : (
-                                                            <span 
+                                                            <span
                                                                 className="inline-flex items-center gap-1 rounded-full bg-[#dbeafe] px-2.5 py-1 text-[10px] font-bold text-[#1d4ed8] cursor-help"
                                                                 title={prediction ? `Risk Score: ${(prediction.riskScore * 100).toFixed(1)}%` : 'On track'}
                                                             >
@@ -417,7 +417,7 @@ const TeacherDashboard = () => {
                                                                         <div>
                                                                             <p className="text-[10px] uppercase tracking-widest text-[#92400e]">Confidence</p>
                                                                             <div className="mt-1 h-2 rounded-full bg-[#fecaca]">
-                                                                                <div 
+                                                                                <div
                                                                                     className="h-2 rounded-full bg-[#dc2626]"
                                                                                     style={{ width: `${(prediction.confidence || 80)}%` }}
                                                                                 />
