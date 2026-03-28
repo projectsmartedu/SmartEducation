@@ -5,6 +5,9 @@ import { io } from 'socket.io-client';
 import './ChannelChat.css';
 
 const ChannelChat = ({ classId, onClose }) => {
+    const { channelId: urlChannelId } = useParams();
+    const navigate = useNavigate();
+    
     // View mode: 'channels' or 'dms'
     const [viewMode, setViewMode] = useState('channels');
 
@@ -117,11 +120,14 @@ const ChannelChat = ({ classId, onClose }) => {
                         console.log('✅ Created default channel:', newChannel);
                         setChannels([newChannel]);
                         setSelectedChannel(newChannel._id);
+                        navigate(`/channels/${newChannel._id}`);
                     }
                 } else {
                     setChannels(uniqueChannels);
                     if (uniqueChannels.length > 0) {
-                        setSelectedChannel(uniqueChannels[0]._id);
+                        // Use URL channel if available, otherwise use first channel
+                        const channelToSelect = urlChannelId || uniqueChannels[0]._id;
+                        setSelectedChannel(channelToSelect);
                     }
                 }
             } else {
@@ -370,6 +376,16 @@ const ChannelChat = ({ classId, onClose }) => {
         fetchChannels();
     }, [fetchChannels]);
 
+    // Handle URL channel ID parameter
+    useEffect(() => {
+        if (urlChannelId && channels.length > 0) {
+            const channel = channels.find(c => c._id === urlChannelId);
+            if (channel) {
+                setSelectedChannel(urlChannelId);
+            }
+        }
+    }, [urlChannelId, channels]);
+
     // Load initial messages when channel changes
     useEffect(() => {
         console.log('📨 Channel changed, fetching messages for:', selectedChannel);
@@ -601,7 +617,10 @@ const ChannelChat = ({ classId, onClose }) => {
                                 <div
                                     key={channel._id}
                                     className={`channel-item ${selectedChannel === channel._id ? 'active' : ''}`}
-                                    onClick={() => setSelectedChannel(channel._id)}
+                                    onClick={() => {
+                                        setSelectedChannel(channel._id);
+                                        navigate(`/channels/${channel._id}`);
+                                    }}
                                 >
                                     <div className="channel-icon">#</div>
                                     <div className="channel-info">
