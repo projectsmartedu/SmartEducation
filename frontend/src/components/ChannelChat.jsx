@@ -75,8 +75,24 @@ const ChannelChat = ({ classId, onClose }) => {
             if (res.ok) {
                 const data = await res.json();
                 console.log('📋 Fetched channels:', data);
+                
+                // Filter out duplicate "General" channels - keep only one
+                const uniqueChannels = [];
+                let generalChannelExists = false;
+                
+                for (const channel of data) {
+                    if (channel.name === 'General') {
+                        if (!generalChannelExists) {
+                            uniqueChannels.push(channel);
+                            generalChannelExists = true;
+                        }
+                        // Skip duplicate General channels
+                    } else {
+                        uniqueChannels.push(channel);
+                    }
+                }
 
-                if (data.length === 0) {
+                if (uniqueChannels.length === 0) {
                     // No channels exist - create a default "General" channel
                     console.log('📝 Creating default General channel...');
                     const createRes = await fetch(`${API_BASE}/api/channels`, {
@@ -100,9 +116,9 @@ const ChannelChat = ({ classId, onClose }) => {
                         setSelectedChannel(newChannel._id);
                     }
                 } else {
-                    setChannels(data);
-                    if (data.length > 0) {
-                        setSelectedChannel(data[0]._id);
+                    setChannels(uniqueChannels);
+                    if (uniqueChannels.length > 0) {
+                        setSelectedChannel(uniqueChannels[0]._id);
                     }
                 }
             } else {
@@ -137,6 +153,8 @@ const ChannelChat = ({ classId, onClose }) => {
     useEffect(() => {
         if (!selectedChannel || !socketRef.current) return;
 
+        console.log('🔄 Channel changed to:', selectedChannel);
+
         // Remove any existing listeners to avoid duplicates
         socketRef.current.off('newMessage');
         socketRef.current.off('messageEdited');
@@ -146,6 +164,7 @@ const ChannelChat = ({ classId, onClose }) => {
         socketRef.current.off('userStoppedTyping');
 
         // Join channel room
+        console.log('👉 Joining channel room:', `channel_${selectedChannel}`);
         socketRef.current.emit('joinChannel', {
             channelId: selectedChannel,
             userId: currentUser._id
@@ -153,23 +172,31 @@ const ChannelChat = ({ classId, onClose }) => {
 
         // Listen for real-time message events (fresh listeners)
         const handleNewMessage = ({ message }) => {
-            console.log('📨 New message received:', message.content, 'from', message.sender?.name);
-            setMessages(prev => [...prev, message]);
-            // Update channel message count
-            setChannels(prev => prev.map(ch => 
-                ch._id === selectedChannel 
-                    ? { ...ch, messageCount: (ch.messageCount || 0) + 1 }
-                    : ch
-            ));
+            console.log('✅ NEW MESSAGE EVENT RECEIVED!');
+            console.log('   📨 Content:', message.content, 'from', message.sender?.name);
+            console.log('   Channel:', message.channel, 'Selected:', selectedChannel);
+            
+            // Only add message if it belongs to the current channel
+            if (message.channel === selectedChannel) {
+                setMessages(prev => [...prev, message]);
+                // Update channel message count
+                setChannels(prev => prev.map(ch => 
+                    ch._id === selectedChannel 
+                        ? { ...ch, messageCount: (ch.messageCount || 0) + 1 }
+                        : ch
+                ));
+            }
         };
 
         const handleEditMessage = ({ messageId, newContent }) => {
+            console.log('✏️ Message edited:', messageId);
             setMessages(prev => prev.map(msg =>
                 msg._id === messageId ? { ...msg, content: newContent, edited: true } : msg
             ));
         };
 
         const handleDeleteMessage = ({ messageId }) => {
+            console.log('🗑️ Message deleted:', messageId);
             setMessages(prev => prev.filter(msg => msg._id !== messageId));
             setChannels(prev => prev.map(ch => 
                 ch._id === selectedChannel 
@@ -202,6 +229,7 @@ const ChannelChat = ({ classId, onClose }) => {
             });
         };
 
+        console.log('🎧 Adding Socket.io listeners for channel:', selectedChannel);
         socketRef.current.on('newMessage', handleNewMessage);
         socketRef.current.on('messageEdited', handleEditMessage);
         socketRef.current.on('messageDeleted', handleDeleteMessage);
@@ -210,6 +238,7 @@ const ChannelChat = ({ classId, onClose }) => {
         socketRef.current.on('userStoppedTyping', handleStopTyping);
 
         return () => {
+            console.log('🧹 Cleaning up listeners for channel:', selectedChannel);
             if (socketRef.current) {
                 socketRef.current.off('newMessage', handleNewMessage);
                 socketRef.current.off('messageEdited', handleEditMessage);
