@@ -135,12 +135,12 @@ const StudentRevisionDashboard = ({ studentId = 'student-001' }) => {
         predictions: Object.keys(predictions).length,
     });
 
-    } catch (err) {
-        console.error('❌ Error loading mind map data:', err);
-        setError(err.message || 'Failed to load revision plan');
-    } finally {
-        setLoading(false);
-    }
+} catch (err) {
+    console.error('❌ Error loading mind map data:', err);
+    setError(err.message || 'Failed to load revision plan');
+} finally {
+    setLoading(false);
+}
     }, [studentId, calculateUrgencyScore, getRecommendation]);
 
 // Load data on mount and set up polling

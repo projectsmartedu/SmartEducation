@@ -237,7 +237,7 @@ const StudentRevisions = () => {
                         </div>
                     )}
                 </section>
-=======
+
                 {/* Interactive Revision Planner */}
                 {revisionSchedule.length > 0 && predictions && (
                     <section>
@@ -247,7 +247,6 @@ const StudentRevisions = () => {
                         />
                     </section>
                 )}
->>>>>>> Stashed changes
             </div>
         </DashboardLayout>
     );
