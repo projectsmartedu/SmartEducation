@@ -40,6 +40,7 @@ const ChannelChat = ({ classId, onClose }) => {
     const socketRef = useRef(null);
     const typingTimeoutRef = useRef(null);
     const fileInputRef = useRef(null);
+    const isInitialLoadRef = useRef(true);
 
     const API_BASE = process.env.REACT_APP_API_URL || 'http://localhost:5000';
     const currentUser = JSON.parse(localStorage.getItem('user') || '{}');
@@ -654,8 +655,12 @@ const ChannelChat = ({ classId, onClose }) => {
         fetchConversations();
     }, [fetchCourseMembers, fetchConversations]);
 
-    // Auto-scroll to bottom when messages change
+    // Auto-scroll to bottom when messages change (but not on initial load)
     useEffect(() => {
+        if (isInitialLoadRef.current) {
+            isInitialLoadRef.current = false;
+            return;
+        }
         setTimeout(() => {
             messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
         }, 0);
