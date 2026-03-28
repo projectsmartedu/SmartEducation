@@ -49,7 +49,7 @@ app.post('/api/risk/predict', async (req, res) => {
       path.join(__dirname, 'ml_inference.py'),
       'risk',
       JSON.stringify(studentData)
-    ]);
+    ], { stdio: ['pipe', 'pipe', 'pipe'] });
 
     let result = '';
     let error = '';
@@ -60,6 +60,14 @@ app.post('/api/risk/predict', async (req, res) => {
 
     pythonProcess.stderr.on('data', (data) => {
       error += data.toString();
+      console.error('[Python stderr]:', data.toString());
+    });
+
+    pythonProcess.on('error', (err) => {
+      if (responseSent) return;
+      responseSent = true;
+      console.error('[Python spawn error]:', err);
+      res.status(503).json({ error: 'Python service unavailable', details: err.message });
     });
 
     pythonProcess.on('close', (code) => {
@@ -67,14 +75,15 @@ app.post('/api/risk/predict', async (req, res) => {
       responseSent = true;
       
       if (code !== 0) {
-        console.error('Python error:', error);
+        console.error('Python error (code ' + code + '):', error);
         return res.status(500).json({ error: 'Risk prediction failed', details: error });
       }
       try {
         const prediction = JSON.parse(result);
         res.json(prediction);
       } catch (e) {
-        res.status(500).json({ error: 'Failed to parse prediction' });
+        console.error('Parse error:', e, 'Result was:', result);
+        res.status(500).json({ error: 'Failed to parse prediction', details: e.message });
       }
     });
 
@@ -87,8 +96,10 @@ app.post('/api/risk/predict', async (req, res) => {
     }, 30000);
 
   } catch (error) {
-    console.error('Risk prediction error:', error);
-    res.status(500).json({ error: error.message });
+    if (!res.headersSent) {
+      console.error('Risk prediction error:', error);
+      res.status(500).json({ error: error.message });
+    }
   }
 });
 
