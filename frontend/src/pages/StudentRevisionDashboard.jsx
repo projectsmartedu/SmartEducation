@@ -126,32 +126,21 @@ const StudentRevisionDashboard = ({ studentId = 'student-001' }) => {
         };
     });
 
-<<<<<<< Updated upstream
-    setPredictions(revisionPredictions);
-    console.log('Revision predictions:', revisionPredictions);
+    setMlPredictions(predictions);
+    setLastUpdate(new Date());
     setLoading(false);
-} catch (err) {
-    console.error('Error loading data:', err);
-    setError(err.message);
-    setLoading(false);
-}
-        };
-=======
-            setMlPredictions(predictions);
-            setLastUpdate(new Date());
->>>>>>> Stashed changes
 
-console.log('✅ Mind map data loaded:', {
-    topics: mockTopicProgress.length,
-    predictions: Object.keys(predictions).length,
-});
+    console.log('✅ Mind map data loaded:', {
+        topics: mockTopicProgress.length,
+        predictions: Object.keys(predictions).length,
+    });
 
-        } catch (err) {
-    console.error('❌ Error loading mind map data:', err);
-    setError(err.message || 'Failed to load revision plan');
-} finally {
-    setLoading(false);
-}
+    } catch (err) {
+        console.error('❌ Error loading mind map data:', err);
+        setError(err.message || 'Failed to load revision plan');
+    } finally {
+        setLoading(false);
+    }
     }, [studentId, calculateUrgencyScore, getRecommendation]);
 
 // Load data on mount and set up polling
