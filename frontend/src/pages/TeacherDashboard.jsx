@@ -77,51 +77,69 @@ const TeacherDashboard = () => {
                 console.log('📊 Fetching ML predictions for', classOverview.students.length, 'students');
                 const predictions = {};
 
+                // Helper function to retry failed requests
+                const fetchWithRetry = async (url, body, studentName, maxRetries = 2) => {
+                    for (let attempt = 1; attempt <= maxRetries; attempt++) {
+                        try {
+                            const controller = new AbortController();
+                            const timeoutId = setTimeout(() => controller.abort(), 10000);
+
+                            const res = await fetch(url, {
+                                method: 'POST',
+                                headers: { 'Content-Type': 'application/json' },
+                                body: JSON.stringify(body),
+                                signal: controller.signal
+                            });
+                            clearTimeout(timeoutId);
+
+                            if (res.ok) {
+                                return await res.json();
+                            } else if (attempt < maxRetries) {
+                                console.warn(`⚠️ ${studentName}: Attempt ${attempt} failed (${res.status}), retrying...`);
+                                await new Promise(r => setTimeout(r, 1000 * attempt)); // Exponential backoff
+                            } else {
+                                console.error(`❌ ${studentName}: Failed after ${maxRetries} attempts (${res.status})`);
+                                return null;
+                            }
+                        } catch (err) {
+                            if (err.name === 'AbortError') {
+                                if (attempt < maxRetries) {
+                                    console.warn(`⏱️ ${studentName}: Timeout on attempt ${attempt}, retrying...`);
+                                    await new Promise(r => setTimeout(r, 1000 * attempt));
+                                } else {
+                                    console.warn(`⏱️ ${studentName}: Timeout after ${maxRetries} attempts`);
+                                    return null;
+                                }
+                            } else {
+                                console.error(`❌ ${studentName}: Error on attempt ${attempt}:`, err.message);
+                                return null;
+                            }
+                        }
+                    }
+                };
+
                 // Fetch risk predictions for each student
                 for (const student of classOverview.students) {
-                    try {
-                        // Map student gamification data to ML features
-                        const riskData = {
-                            prior_failures: Math.max(0, 3 - (student.level || 1)),
-                            study_time: Math.min(5, Math.floor((student.lessonsCompleted || 0) / 10)),
-                            absences: Math.max(0, 14 - (student.currentStreak || 0)),
-                            parent_edu: 2,
-                            family_support: 3,
-                            health: 4,
-                            internet: 1,
-                            activities: Math.max(0, 1 - (student.badgeCount > 5 ? 1 : 0)),
-                            travel_time: 2,
-                            age: 18,
-                            paid_support: student.totalPoints > 5000 ? 1 : 0
-                        };
+                    const riskData = {
+                        prior_failures: Math.max(0, 3 - (student.level || 1)),
+                        study_time: Math.min(5, Math.floor((student.lessonsCompleted || 0) / 10)),
+                        absences: Math.max(0, 14 - (student.currentStreak || 0)),
+                        parent_edu: 2,
+                        family_support: 3,
+                        health: 4,
+                        internet: 1,
+                        activities: Math.max(0, 1 - (student.badgeCount > 5 ? 1 : 0)),
+                        travel_time: 2,
+                        age: 18,
+                        paid_support: student.totalPoints > 5000 ? 1 : 0
+                    };
 
-                        const url = `${ML_API_BASE}/api/risk/predict`;
-                        const controller = new AbortController();
-                        const timeoutId = setTimeout(() => controller.abort(), 10000); // 10 second timeout for free tier Render
-
-                        const res = await fetch(url, {
-                            method: 'POST',
-                            headers: { 'Content-Type': 'application/json' },
-                            body: JSON.stringify(riskData),
-                            signal: controller.signal
-                        });
-                        clearTimeout(timeoutId);
-
-                        if (res.ok) {
-                            const prediction = await res.json();
-                            predictions[student.student?._id] = prediction;
-                            console.log(`✅ ${student.student?.name}: Risk ${(prediction.riskScore * 100).toFixed(1)}% (${prediction.category})`);
-                        } else {
-                            console.error(`❌ Risk prediction failed for ${student.student?.name}:`, res.status, res.statusText);
-                            const errorText = await res.text();
-                            console.error('Response:', errorText);
-                        }
-                    } catch (err) {
-                        if (err.name === 'AbortError') {
-                            console.warn(`⏱️ ${student.student?.name}: Request timeout (5s)`);
-                        } else {
-                            console.error(`❌ Error predicting risk for ${student.student?.name}:`, err.message);
-                        }
+                    const url = `${ML_API_BASE}/api/risk/predict`;
+                    const prediction = await fetchWithRetry(url, riskData, student.student?.name);
+                    
+                    if (prediction) {
+                        predictions[student.student?._id] = prediction;
+                        console.log(`✅ ${student.student?.name}: Risk ${(prediction.riskScore * 100).toFixed(1)}% (${prediction.category})`);
                     }
                 }
 
