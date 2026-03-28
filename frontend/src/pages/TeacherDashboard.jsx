@@ -109,8 +109,6 @@ const TeacherDashboard = () => {
                 setRiskPredictions(predictions);
             } catch (err) {
                 console.error('Error fetching risk predictions:', err);
-            } catch (err) {
-                console.error('Error catching risk predictions error:', err);
             }
         };
 
