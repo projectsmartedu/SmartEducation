@@ -29,6 +29,7 @@ import StudentOfflineDownloads from './pages/StudentOfflineDownloads';
 import OfflineIndicator from './components/OfflineIndicator';
 import StudentMindMap from './pages/StudentMindMap';
 import StudentRevisionDashboard from './pages/StudentRevisionDashboard';
+import ChannelsPage from './pages/ChannelsPage';
 
 function App() {
     return (
@@ -90,6 +91,16 @@ function App() {
                         element={
                             <ProtectedRoute allowedRoles={['teacher']}>
                                 <TeacherCourses />
+                            </ProtectedRoute>
+                        }
+                    />
+
+                    {/* Channels Route */}
+                    <Route
+                        path="/channels"
+                        element={
+                            <ProtectedRoute allowedRoles={['teacher', 'student']}>
+                                <ChannelsPage />
                             </ProtectedRoute>
                         }
                     />
