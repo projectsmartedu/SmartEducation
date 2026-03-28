@@ -208,10 +208,9 @@
     animation: slideIn 0.3s ease;
     align-items: flex-end;
     margin-bottom: 12px;
-    padding: 0 8px;
+    padding: 0 4px;
+    width: 100%;
 }
-
-@keyframes slideIn {
     from {
         opacity: 0;
         transform: translateY(10px);
@@ -255,8 +254,9 @@
 
 .message-content {
     flex: 0 1 auto;
-    max-width: 450px;
+    max-width: 500px;
     word-break: break-word;
+    overflow-wrap: break-word;
 }
 
 .message.sent .message-content {

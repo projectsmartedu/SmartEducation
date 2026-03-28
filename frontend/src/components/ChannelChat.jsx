@@ -87,11 +87,18 @@ const ChannelChat = ({ classId, onClose }) => {
             });
             if (res.ok) {
                 const data = await res.json();
-                console.log('📚 Course info:', data.course?.name);
-                setCourseInfo(data.course);
+                const courseName = data.course?.name || data.courseName || data.name;
+                console.log('📚 Course info:', courseName);
+                setCourseInfo(data.course || { name: courseName });
+            } else {
+                console.warn('Course fetch returned:', res.status);
+                // Set fallback course name
+                setCourseInfo({ name: 'Course' });
             }
         } catch (err) {
             console.error('❌ Error fetching course:', err);
+            // Set fallback
+            setCourseInfo({ name: 'Course' });
         }
     }, [API_BASE, classId]);
 
