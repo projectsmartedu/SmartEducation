@@ -24,8 +24,9 @@ console.log(`   Inference script: ${path.join(__dirname, 'ml_inference.py')}`);
 app.post('/api/risk/predict', async (req, res) => {
   try {
     const studentData = req.body;
+    let responseSent = false;
     
-    const pythonProcess = spawn('python3', [
+    const pythonProcess = spawn('C:\\Users\\harsh\\Downloads\\finalpro\\.venv\\Scripts\\python.exe', [
       path.join(__dirname, 'ml_inference.py'),
       'risk',
       JSON.stringify(studentData)
@@ -43,6 +44,9 @@ app.post('/api/risk/predict', async (req, res) => {
     });
 
     pythonProcess.on('close', (code) => {
+      if (responseSent) return;
+      responseSent = true;
+      
       if (code !== 0) {
         console.error('Python error:', error);
         return res.status(500).json({ error: 'Risk prediction failed', details: error });
@@ -57,6 +61,8 @@ app.post('/api/risk/predict', async (req, res) => {
 
     // Timeout after 30s
     setTimeout(() => {
+      if (responseSent) return;
+      responseSent = true;
       pythonProcess.kill();
       res.status(408).json({ error: 'Request timeout' });
     }, 30000);
@@ -74,7 +80,9 @@ app.post('/api/risk/batch-predict', async (req, res) => {
       return res.status(400).json({ error: 'Expected array of students' });
     }
 
-    const pythonProcess = spawn('python3', [
+    let responseSent = false;
+
+    const pythonProcess = spawn('C:\\Users\\harsh\\Downloads\\finalpro\\.venv\\Scripts\\python.exe', [
       path.join(__dirname, 'ml_inference.py'),
       'batch_risk',
       JSON.stringify(students)
@@ -92,6 +100,9 @@ app.post('/api/risk/batch-predict', async (req, res) => {
     });
 
     pythonProcess.on('close', (code) => {
+      if (responseSent) return;
+      responseSent = true;
+      
       if (code !== 0) {
         return res.status(500).json({ error: 'Batch prediction failed' });
       }
@@ -104,6 +115,8 @@ app.post('/api/risk/batch-predict', async (req, res) => {
     });
 
     setTimeout(() => {
+      if (responseSent) return;
+      responseSent = true;
       pythonProcess.kill();
       res.status(408).json({ error: 'Request timeout' });
     }, 60000);
@@ -119,12 +132,13 @@ app.post('/api/risk/batch-predict', async (req, res) => {
 app.post('/api/revision/mindmap', async (req, res) => {
   try {
     const { studentId, topicProgress } = req.body;
+    let responseSent = false;
     
     if (!studentId || !topicProgress) {
       return res.status(400).json({ error: 'studentId and topicProgress required' });
     }
 
-    const pythonProcess = spawn('python3', [
+    const pythonProcess = spawn('C:\\Users\\harsh\\Downloads\\finalpro\\.venv\\Scripts\\python.exe', [
       path.join(__dirname, 'ml_inference.py'),
       'mindmap',
       JSON.stringify({ studentId, topicProgress })
@@ -142,6 +156,9 @@ app.post('/api/revision/mindmap', async (req, res) => {
     });
 
     pythonProcess.on('close', (code) => {
+      if (responseSent) return;
+      responseSent = true;
+      
       if (code !== 0) {
         return res.status(500).json({ error: 'Mind map generation failed', details: error });
       }
@@ -154,6 +171,8 @@ app.post('/api/revision/mindmap', async (req, res) => {
     });
 
     setTimeout(() => {
+      if (responseSent) return;
+      responseSent = true;
       pythonProcess.kill();
       res.status(408).json({ error: 'Request timeout' });
     }, 30000);
@@ -167,12 +186,13 @@ app.post('/api/revision/mindmap', async (req, res) => {
 app.post('/api/revision/topic-urgency', async (req, res) => {
   try {
     const { mastery, lastStudied, attempts, lastScore, practiceHours } = req.body;
+    let responseSent = false;
     
     if (mastery === undefined || lastStudied === undefined) {
       return res.status(400).json({ error: 'Missing required fields' });
     }
 
-    const pythonProcess = spawn('python3', [
+    const pythonProcess = spawn('C:\\Users\\harsh\\Downloads\\finalpro\\.venv\\Scripts\\python.exe', [
       path.join(__dirname, 'ml_inference.py'),
       'topic_urgency',
       JSON.stringify({ 
@@ -196,6 +216,9 @@ app.post('/api/revision/topic-urgency', async (req, res) => {
     });
 
     pythonProcess.on('close', (code) => {
+      if (responseSent) return;
+      responseSent = true;
+      
       if (code !== 0) {
         return res.status(500).json({ error: 'Topic urgency prediction failed' });
       }
@@ -208,6 +231,8 @@ app.post('/api/revision/topic-urgency', async (req, res) => {
     });
 
     setTimeout(() => {
+      if (responseSent) return;
+      responseSent = true;
       pythonProcess.kill();
       res.status(408).json({ error: 'Request timeout' });
     }, 30000);

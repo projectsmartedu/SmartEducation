@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import DashboardLayout from '../components/Layout/DashboardLayout';
-import TraditionalMindMap from '../components/TraditionalMindMap';
+import InteractiveRevisionPlanner from '../components/InteractiveRevisionPlanner';
 import { revisionsAPI } from '../services/api';
 import { BarChart3 } from 'lucide-react';
 
@@ -9,9 +9,8 @@ const StudentRevisions = () => {
     const [stats, setStats] = useState(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState('');
-    const [showMindMap, setShowMindMap] = useState(false);
-    const [studentData, setStudentData] = useState(null);
     const [predictions, setPredictions] = useState(null);
+    const [mlPredictions, setMlPredictions] = useState({});
 
     const fetchRevisions = useCallback(async () => {
         setLoading(true);
@@ -44,54 +43,39 @@ const StudentRevisions = () => {
     }, [fetchRevisions]);
 
     // Load mind map data once revision schedule is populated
-    const loadMindMapData = React.useCallback(async () => {
-        // Mock student data
-        const mockStudent = {
-            id: 'student-001',
-            name: 'Student',
-            prior_failures: 1,
-            study_time: 3,
-            absences: 5,
-            parent_edu: 3,
-            family_support: 1,
-            health: 4,
-            internet: 1,
-            activities: 1,
-            travel_time: 2,
-            age: 18,
-            paid_support: 0,
-        };
-        setStudentData(mockStudent);
-
-        // Try to get risk prediction, but continue if it fails
-        try {
-            // Risk prediction call here if needed
-        } catch (err) {
-            console.log('ML risk service unavailable, using mock data');
-        }
-
-        // Transform revision schedule into topic progress format
+    const loadMindMapData = useCallback(() => {
+        // Transform revision schedule into topic progress format for InteractiveRevisionPlanner
         const topicProgress = revisionSchedule.map((slot, idx) => ({
+            id: `topic-${idx}`,
             name: slot.concept,
-            mastery: 0.4 + (idx % 3) * 0.2 + Math.random() * 0.2,
-            last_studied: 5 + (idx % 4) * 8,
-            attempts: 2 + (idx % 5),
-            last_score: 60 + (idx % 4) * 10,
-            practice_hours: 2 + (idx % 6)
+            masteryPercentage: Math.round((0.4 + (idx % 3) * 0.2 + Math.random() * 0.2) * 100),
+            daysSinceReview: 5 + (idx % 4) * 8,
+            quizzesTaken: 2 + (idx % 5),
+            videosWatched: 3 + (idx % 6),
+            revisionCount: 1 + (idx % 3),
+            lastScore: 60 + (idx % 4) * 10,
         }));
 
-        // Generate urgency predictions based on topic data
-        const urgencyPredictions = topicProgress.map(topic => {
-            const masteryFactor = (1 - topic.mastery) * 0.6;
-            const staleFactor = Math.min(topic.last_studied / 30, 1) * 0.4;
+        // Generate ML predictions based on topic data
+        const predictions = {};
+        topicProgress.forEach((topic) => {
+            const masteryFactor = (1 - topic.masteryPercentage / 100) * 0.6;
+            const staleFactor = Math.min(topic.daysSinceReview / 30, 1) * 0.4;
             const urgencyScore = Math.min(masteryFactor + staleFactor, 1);
-            return {
-                topicName: topic.name,
-                urgencyScore: urgencyScore,
-                urgency: urgencyScore > 0.66 ? 'URGENT' : urgencyScore > 0.33 ? 'MODERATE' : 'LOW'
+
+            predictions[topic.id] = {
+                urgencyScore,
+                riskCategory: urgencyScore > 0.66 ? 'HIGH' : urgencyScore > 0.33 ? 'MEDIUM' : 'LOW',
+                recommendation: urgencyScore > 0.66
+                    ? 'Start revision immediately. This topic needs urgent focus.'
+                    : urgencyScore > 0.33
+                        ? 'Schedule regular revision this week to maintain understanding.'
+                        : 'Well-maintained topic. Continue with current learning pace.'
             };
         });
-        setPredictions(urgencyPredictions);
+
+        setPredictions(topicProgress);
+        setMlPredictions(predictions);
     }, [revisionSchedule]);
 
     useEffect(() => {
@@ -213,6 +197,7 @@ const StudentRevisions = () => {
                     )}
                 </section>
 
+<<<<<<< Updated upstream
                 {/* Visual Mind Map Section */}
                 <section className="rounded-xl border border-[#e2e8f0] bg-white p-6 shadow-sm">
                     <div className="flex items-center justify-between">
@@ -250,6 +235,17 @@ const StudentRevisions = () => {
                         </div>
                     )}
                 </section>
+=======
+                {/* Interactive Revision Planner */}
+                {revisionSchedule.length > 0 && predictions && (
+                    <section>
+                        <InteractiveRevisionPlanner
+                            topicProgress={predictions}
+                            mlPredictions={mlPredictions}
+                        />
+                    </section>
+                )}
+>>>>>>> Stashed changes
             </div>
         </DashboardLayout>
     );

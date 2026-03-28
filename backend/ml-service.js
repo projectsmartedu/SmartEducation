@@ -20,7 +20,7 @@ app.post('/api/risk/predict', async (req, res) => {
   try {
     const studentData = req.body;
     
-    const pythonProcess = spawn('python3', [
+    const pythonProcess = spawn('python', [
       path.join(__dirname, 'ml_inference.py'),
       'risk',
       JSON.stringify(studentData)
@@ -69,7 +69,7 @@ app.post('/api/risk/batch-predict', async (req, res) => {
       return res.status(400).json({ error: 'Expected array of students' });
     }
 
-    const pythonProcess = spawn('python3', [
+    const pythonProcess = spawn('python', [
       path.join(__dirname, 'ml_inference.py'),
       'batch_risk',
       JSON.stringify(students)
@@ -119,7 +119,7 @@ app.post('/api/revision/mindmap', async (req, res) => {
       return res.status(400).json({ error: 'studentId and topicProgress required' });
     }
 
-    const pythonProcess = spawn('python3', [
+    const pythonProcess = spawn('python', [
       path.join(__dirname, 'ml_inference.py'),
       'mindmap',
       JSON.stringify({ studentId, topicProgress })
@@ -167,7 +167,7 @@ app.post('/api/revision/topic-urgency', async (req, res) => {
       return res.status(400).json({ error: 'Missing required fields' });
     }
 
-    const pythonProcess = spawn('python3', [
+    const pythonProcess = spawn('python', [
       path.join(__dirname, 'ml_inference.py'),
       'topic_urgency',
       JSON.stringify({ 
