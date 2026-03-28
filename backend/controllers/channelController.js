@@ -46,6 +46,7 @@ exports.getChannels = async (req, res) => {
             isArchived: false
         })
             .populate('createdBy', 'name email avatar')
+            .populate('members', 'name email avatar')
             .populate('lastMessage')
             .sort({ isPinned: -1, lastMessageTime: -1, createdAt: -1 });
 
