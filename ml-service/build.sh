@@ -4,7 +4,9 @@
 set -e
 
 echo "📦 Installing Node.js dependencies..."
+cd ml-service
 npm install
+cd ..
 echo "✅ Node.js dependencies installed"
 
 echo "📦 Installing Python dependencies..."
