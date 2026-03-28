@@ -7,7 +7,7 @@ import './ChannelChat.css';
 const ChannelChat = ({ classId, onClose }) => {
     const { channelId: urlChannelId } = useParams();
     const navigate = useNavigate();
-    
+
     // View mode: 'channels' or 'dms'
     const [viewMode, setViewMode] = useState('channels');
 
@@ -173,7 +173,14 @@ const ChannelChat = ({ classId, onClose }) => {
             if (res.ok) {
                 const data = await res.json();
                 console.log('💬 Fetched messages:', data.messages?.length || 0);
+                console.log('📋 Channel data:', data.channel);
                 setMessages(data.messages || []);
+                // Update the channel in state with populated member data
+                if (data.channel) {
+                    setChannels(prev => prev.map(ch =>
+                        ch._id === selectedChannel ? data.channel : ch
+                    ));
+                }
             } else {
                 console.error('Failed to fetch messages:', res.status, res.statusText);
             }
@@ -248,6 +255,13 @@ const ChannelChat = ({ classId, onClose }) => {
         fetchCourseInfo();
         fetchChannels();
     }, [fetchCourseInfo, fetchChannels]);
+
+    // Fetch messages when channel is selected
+    useEffect(() => {
+        if (selectedChannel) {
+            fetchMessages();
+        }
+    }, [selectedChannel, fetchMessages]);
 
     // Handle channel selection - listen for real-time events
     useEffect(() => {
@@ -452,7 +466,7 @@ const ChannelChat = ({ classId, onClose }) => {
             console.error('❌ Upload error:', err);
             alert('❌ Upload error');
         }
-        
+
         // Reset file input
         if (fileInputRef.current) fileInputRef.current.value = '';
     };
@@ -979,21 +993,35 @@ const ChannelChat = ({ classId, onClose }) => {
                                     </button>
                                 </div>
                                 <div className="members-list-panel">
-                                    {currentChannel.members?.map(member => (
-                                        <div key={member._id} className="member-item-panel">
-                                            <div className="member-avatar">
-                                                {member.avatar ? (
-                                                    <img src={member.avatar} alt="" />
-                                                ) : (
-                                                    <div>{member.name?.[0] || 'U'}</div>
-                                                )}
-                                            </div>
-                                            <div className="member-info">
-                                                <div className="member-name">{member.name}</div>
-                                                <div className="member-email">{member.email}</div>
-                                            </div>
-                                        </div>
-                                    )) || <p>No members yet</p>}
+                                    {currentChannel.members && currentChannel.members.length > 0 ? (
+                                        currentChannel.members.map(member => {
+                                            // Handle both object and ID cases
+                                            const memberObj = typeof member === 'object' ? member : { _id: member };
+                                            const memberName = memberObj.name || memberObj.username || 'Unknown';
+                                            const memberEmail = memberObj.email || '';
+                                            const memberInitial = memberName?.[0] || 'U';
+                                            
+                                            console.log('👤 Member data:', { memberName, memberEmail, memberInitial });
+                                            
+                                            return (
+                                                <div key={memberObj._id} className="member-item-panel">
+                                                    <div className="member-avatar">
+                                                        {memberObj.avatar ? (
+                                                            <img src={memberObj.avatar} alt="" />
+                                                        ) : (
+                                                            <div>{memberInitial}</div>
+                                                        )}
+                                                    </div>
+                                                    <div className="member-info">
+                                                        <div className="member-name">{memberName}</div>
+                                                        <div className="member-email">{memberEmail}</div>
+                                                    </div>
+                                                </div>
+                                            );
+                                        })
+                                    ) : (
+                                        <p style={{ padding: '16px', textAlign: 'center', color: '#94a3b8' }}>No members yet</p>
+                                    )}
                                 </div>
                             </div>
                         )}
