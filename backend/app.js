@@ -15,6 +15,7 @@ const gamificationRoutes = require('./routes/gamification');
 const aiRoutes = require('./routes/ai');
 const notificationRoutes = require('./routes/notifications');
 const quizRoutes = require('./routes/quiz');
+const channelRoutes = require('./routes/channels');
 
 const app = express();
 
@@ -41,6 +42,7 @@ app.use('/api/gamification', gamificationRoutes);
 app.use('/api/ai', aiRoutes);
 app.use('/api/quiz', quizRoutes);
 app.use('/api/notifications', notificationRoutes);
+app.use('/api/channels', channelRoutes);
 
 // ========== MACHINE LEARNING SERVICE PROXY ENDPOINTS ==========
 // These endpoints forward requests to the ML microservice
