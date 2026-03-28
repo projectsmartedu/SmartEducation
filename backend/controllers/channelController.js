@@ -40,14 +40,22 @@ exports.getChannels = async (req, res) => {
         const { classId } = req.params;
         const userId = req.user._id;
 
+        // Get all channels for this class
         const channels = await Channel.find({ 
             class: classId,
-            isArchived: false,
-            members: userId  // Only show channels user is member of
+            isArchived: false
         })
             .populate('createdBy', 'name email avatar')
             .populate('lastMessage')
             .sort({ isPinned: -1, lastMessageTime: -1, createdAt: -1 });
+
+        // Auto-add user to channels they're not yet a member of
+        for (let channel of channels) {
+            if (!channel.members.includes(userId)) {
+                channel.members.push(userId);
+                await channel.save();
+            }
+        }
 
         res.json(channels);
     } catch (err) {
