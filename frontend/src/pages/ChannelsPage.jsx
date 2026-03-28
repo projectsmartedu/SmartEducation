@@ -35,7 +35,7 @@ const ChannelsPage = () => {
             }
         };
         fetchCourses();
-    }, []);
+    }, [user]);
 
     const filteredCourses = courses.filter(course =>
         course.name?.toLowerCase().includes(searchTerm.toLowerCase())
