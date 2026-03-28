@@ -38,7 +38,7 @@ const ChannelsPage = () => {
     }, [user]);
 
     const filteredCourses = courses.filter(course =>
-        course.name?.toLowerCase().includes(searchTerm.toLowerCase())
+        (course.title || course.name)?.toLowerCase().includes(searchTerm.toLowerCase())
     );
 
     return (
@@ -116,14 +116,14 @@ const ChannelsPage = () => {
                                         >
                                             <div className="class-card-header">
                                                 <div className="class-icon">
-                                                    {course.name?.[0] || 'C'}
+                                                    {(course.title || course.name)?.[0] || 'C'}
                                                 </div>
                                                 <button className="card-action">
                                                     <Settings size={20} />
                                                 </button>
                                             </div>
                                             <div className="class-card-content">
-                                                <h3>{course.name}</h3>
+                                                <h3>{course.title || course.name}</h3>
                                                 <p>{course.description}</p>
                                                 <div className="class-stats">
                                                     <span>{course.enrolledStudents?.length || 0} students</span>
