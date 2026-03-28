@@ -4,7 +4,11 @@ services:
     env: node
     region: oregon
     plan: free
-    startCommand: bash start.sh
+    buildCommand: |
+      pip install --upgrade pip &&
+      pip install -r ml-service/requirements.txt &&
+      npm install
+    startCommand: cd ml-service && node server.js
     envVars:
       - key: NODE_ENV
         value: production
