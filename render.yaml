@@ -1,14 +1,10 @@
 services:
   - type: web
     name: smart-education-ml-service
-    env: node
+    env: docker
     region: oregon
     plan: free
-    buildCommand: |
-      pip install --upgrade pip &&
-      pip install -r ml-service/requirements.txt &&
-      npm install
-    startCommand: cd ml-service && node server.js
+    dockerfile: ./Dockerfile
     envVars:
       - key: NODE_ENV
         value: production
