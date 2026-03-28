@@ -136,7 +136,7 @@ const TeacherDashboard = () => {
 
                     const url = `${ML_API_BASE}/api/risk/predict`;
                     const prediction = await fetchWithRetry(url, riskData, student.student?.name);
-                    
+
                     if (prediction) {
                         predictions[student.student?._id] = prediction;
                         console.log(`✅ ${student.student?.name}: Risk ${(prediction.riskScore * 100).toFixed(1)}% (${prediction.category})`);
@@ -189,7 +189,7 @@ const TeacherDashboard = () => {
             return sortDir === 'desc' ? bVal - aVal : aVal - bVal;
         });
         return list;
-    }, [students, searchTerm, sortField, sortDir, riskPredictions]);
+    }, [students, searchTerm, sortField, sortDir]);
 
     const atRiskStudents = useMemo(() =>
         students
