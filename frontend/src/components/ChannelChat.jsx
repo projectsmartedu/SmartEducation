@@ -1,17 +1,29 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
-import { Send, Plus, Users, Settings, Smile, Paperclip, Zap } from 'lucide-react';
+import { Send, Plus, Users, Settings, Smile, Paperclip, Zap, MessageCircle, X } from 'lucide-react';
 import { io } from 'socket.io-client';
 import './ChannelChat.css';
 
 const ChannelChat = ({ classId, onClose }) => {
+    // View mode: 'channels' or 'dms'
+    const [viewMode, setViewMode] = useState('channels');
+    
+    // Channel states
     const [channels, setChannels] = useState([]);
     const [selectedChannel, setSelectedChannel] = useState(null);
     const [messages, setMessages] = useState([]);
-    const [newMessage, setNewMessage] = useState('');
     const [showCreateChannel, setShowCreateChannel] = useState(false);
     const [newChannelName, setNewChannelName] = useState('');
     const [newChannelDesc, setNewChannelDesc] = useState('');
-    const [typingUsers, setTypingUsers] = useState({}); // {userId: userName}
+    
+    // DM states
+    const [conversations, setConversations] = useState([]);
+    const [selectedConversation, setSelectedConversation] = useState(null);
+    const [courseMembers, setCourseMembers] = useState([]);
+    const [showMemberList, setShowMemberList] = useState(false);
+    
+    // General states
+    const [newMessage, setNewMessage] = useState('');
+    const [typingUsers, setTypingUsers] = useState({});
     const messagesEndRef = useRef(null);
     const socketRef = useRef(null);
     const typingTimeoutRef = useRef(null);
@@ -273,46 +285,266 @@ const ChannelChat = ({ classId, onClose }) => {
         }
     };
 
+    // Fetch course members for DM
+    const fetchCourseMembers = useCallback(async () => {
+        try {
+            const token = localStorage.getItem('token');
+            const res = await fetch(`${API_BASE}/api/courses/${classId}`, {
+                headers: { 'Authorization': `Bearer ${token}` }
+            });
+            if (res.ok) {
+                const data = await res.json();
+                const members = data.course?.enrolledStudents || [];
+                // Filter out current user
+                const filtered = members.filter(m => m._id !== currentUser._id);
+                setCourseMembers(filtered);
+                console.log('👥 Fetched course members:', filtered);
+            }
+        } catch (err) {
+            console.error('❌ Error fetching members:', err);
+        }
+    }, [API_BASE, classId, currentUser._id]);
+
+    // Fetch DM conversations
+    const fetchConversations = useCallback(async () => {
+        try {
+            const token = localStorage.getItem('token');
+            const res = await fetch(`${API_BASE}/api/direct-messages/conversations/${classId}`, {
+                headers: { 'Authorization': `Bearer ${token}` }
+            });
+            if (res.ok) {
+                const data = await res.json();
+                setConversations(data);
+                console.log('💬 Fetched conversations:', data);
+            }
+        } catch (err) {
+            console.error('❌ Error fetching conversations:', err);
+        }
+    }, [API_BASE, classId]);
+
+    // Start DM with a user
+    const startDM = useCallback(async (userId) => {
+        try {
+            const token = localStorage.getItem('token');
+            const res = await fetch(`${API_BASE}/api/direct-messages/conversations`, {
+                method: 'POST',
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ userId, courseId: classId })
+            });
+            if (res.ok) {
+                const conversation = await res.json();
+                setSelectedConversation(conversation._id);
+                setViewMode('dms');
+                setMessages([]);
+                setShowMemberList(false);
+                
+                // Fetch messages for this conversation
+                await fetchDMMessages(conversation._id);
+                
+                // Join DM room
+                socketRef.current?.emit('joinDMConversation', {
+                    conversationId: conversation._id,
+                    userId: currentUser._id
+                });
+            }
+        } catch (err) {
+            console.error('❌ Error starting DM:', err);
+        }
+    }, [classId, currentUser._id, API_BASE]);
+
+    // Fetch DM messages
+    const fetchDMMessages = useCallback(async (conversationId) => {
+        try {
+            const token = localStorage.getItem('token');
+            const res = await fetch(`${API_BASE}/api/direct-messages/conversations/${conversationId}/messages`, {
+                headers: { 'Authorization': `Bearer ${token}` }
+            });
+            if (res.ok) {
+                const data = await res.json();
+                setMessages(data.messages || []);
+                console.log('💬 Fetched DM messages:', data.messages?.length || 0);
+            }
+        } catch (err) {
+            console.error('❌ Error fetching DM messages:', err);
+        }
+    }, [API_BASE]);
+
+    // Send DM
+    const handleSendDM = async (e) => {
+        e.preventDefault();
+        if (!newMessage.trim() || !selectedConversation) return;
+
+        try {
+            const token = localStorage.getItem('token');
+            const res = await fetch(`${API_BASE}/api/direct-messages/conversations/${selectedConversation}/messages`, {
+                method: 'POST',
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ content: newMessage })
+            });
+            if (res.ok) {
+                setNewMessage('');
+            }
+        } catch (err) {
+            console.error('❌ Error sending DM:', err);
+        }
+    };
+
+    // Load members and conversations on mount
+    useEffect(() => {
+        fetchCourseMembers();
+        fetchConversations();
+    }, [fetchCourseMembers, fetchConversations]);
+
     // Auto-scroll to bottom when messages change
     useEffect(() => {
         messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
     }, [messages]);
 
     const currentChannel = channels.find(c => c._id === selectedChannel);
+    const currentConversation = conversations.find(c => c._id === selectedConversation);
 
     return (
         <div className="channel-chat-container">
             <div className="channels-sidebar">
-                <div className="sidebar-header">
-                    <h3>Channels</h3>
+                {/* View Mode Tabs */}
+                <div className="view-mode-tabs">
                     <button
-                        className="btn-icon"
-                        onClick={() => setShowCreateChannel(true)}
-                        title="Create channel"
+                        className={`tab ${viewMode === 'channels' ? 'active' : ''}`}
+                        onClick={() => setViewMode('channels')}
                     >
-                        <Plus size={20} />
+                        # Channels
+                    </button>
+                    <button
+                        className={`tab ${viewMode === 'dms' ? 'active' : ''}`}
+                        onClick={() => setViewMode('dms')}
+                    >
+                        💬 Direct
                     </button>
                 </div>
 
-                <div className="channels-list">
-                    {channels.map(channel => (
-                        <div
-                            key={channel._id}
-                            className={`channel-item ${selectedChannel === channel._id ? 'active' : ''}`}
-                            onClick={() => setSelectedChannel(channel._id)}
-                        >
-                            <div className="channel-icon">#</div>
-                            <div className="channel-info">
-                                <div className="channel-name">{channel.name}</div>
-                                <div className="channel-meta">{channel.messageCount} messages</div>
-                            </div>
+                {/* Channels View */}
+                {viewMode === 'channels' && (
+                    <>
+                        <div className="sidebar-header">
+                            <h3>Channels</h3>
+                            <button
+                                className="btn-icon"
+                                onClick={() => setShowCreateChannel(true)}
+                                title="Create channel"
+                            >
+                                <Plus size={20} />
+                            </button>
                         </div>
-                    ))}
-                </div>
+
+                        <div className="channels-list">
+                            {channels.map(channel => (
+                                <div
+                                    key={channel._id}
+                                    className={`channel-item ${selectedChannel === channel._id ? 'active' : ''}`}
+                                    onClick={() => setSelectedChannel(channel._id)}
+                                >
+                                    <div className="channel-icon">#</div>
+                                    <div className="channel-info">
+                                        <div className="channel-name">{channel.name}</div>
+                                        <div className="channel-meta">{channel.messageCount} messages</div>
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
+                    </>
+                )}
+
+                {/* DMs View */}
+                {viewMode === 'dms' && (
+                    <>
+                        <div className="sidebar-header">
+                            <h3>Messages</h3>
+                            <button
+                                className="btn-icon"
+                                onClick={() => setShowMemberList(!showMemberList)}
+                                title="New message"
+                            >
+                                <Plus size={20} />
+                            </button>
+                        </div>
+
+                        {showMemberList && (
+                            <div className="members-list">
+                                <div className="members-header">
+                                    <h4>Start Chat</h4>
+                                    <button onClick={() => setShowMemberList(false)}>
+                                        <X size={16} />
+                                    </button>
+                                </div>
+                                {courseMembers.map(member => (
+                                    <div
+                                        key={member._id}
+                                        className="member-item"
+                                        onClick={() => startDM(member._id)}
+                                    >
+                                        <div className="member-avatar">
+                                            {member.avatar ? (
+                                                <img src={member.avatar} alt="" />
+                                            ) : (
+                                                <div>{member.name?.[0] || 'U'}</div>
+                                            )}
+                                        </div>
+                                        <div className="member-info">
+                                            <div>{member.name}</div>
+                                            <div style={{ fontSize: '0.85em', color: '#666' }}>
+                                                {member.email}
+                                            </div>
+                                        </div>
+                                    </div>
+                                ))}
+                            </div>
+                        )}
+
+                        <div className="conversations-list">
+                            {conversations.map(conv => {
+                                const otherUser = conv.participants.find(p => p._id !== currentUser._id);
+                                return (
+                                    <div
+                                        key={conv._id}
+                                        className={`conversation-item ${selectedConversation === conv._id ? 'active' : ''}`}
+                                        onClick={() => {
+                                            setSelectedConversation(conv._id);
+                                            fetchDMMessages(conv._id);
+                                            socketRef.current?.emit('joinDMConversation', {
+                                                conversationId: conv._id,
+                                                userId: currentUser._id
+                                            });
+                                        }}
+                                    >
+                                        <div className="member-avatar">
+                                            {otherUser?.avatar ? (
+                                                <img src={otherUser.avatar} alt="" />
+                                            ) : (
+                                                <div>{otherUser?.name?.[0] || 'U'}</div>
+                                            )}
+                                        </div>
+                                        <div className="conversation-info">
+                                            <div>{otherUser?.name}</div>
+                                            <div style={{ fontSize: '0.85em', color: '#999', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                                                {conv.lastMessage?.content || 'No messages yet'}
+                                            </div>
+                                        </div>
+                                    </div>
+                                );
+                            })}
+                        </div>
+                    </>
+                )}
             </div>
 
             <div className="chat-main">
-                {currentChannel && (
+                {viewMode === 'channels' && currentChannel && (
                     <>
                         <div className="chat-header">
                             <div className="header-info">
@@ -396,6 +628,90 @@ const ChannelChat = ({ classId, onClose }) => {
                             </button>
                         </form>
                     </>
+                )}
+
+                {/* DM View */}
+                {viewMode === 'dms' && currentConversation && (
+                    <>
+                        <div className="chat-header">
+                            <div className="header-info">
+                                <h2>
+                                    {currentConversation.participants
+                                        .find(p => p._id !== currentUser._id)?.name || 'Unknown'}
+                                </h2>
+                                <p>Direct Message</p>
+                            </div>
+                            <div className="header-actions">
+                                <div className="online-badge">
+                                    <Zap size={18} />
+                                    <span>Real-time</span>
+                                </div>
+                                <button className="btn-icon" onClick={onClose}>
+                                    ✕
+                                </button>
+                            </div>
+                        </div>
+
+                        <div className="messages-container">
+                            {messages.length === 0 ? (
+                                <div className="no-messages">
+                                    <p>📨 Start the conversation!</p>
+                                </div>
+                            ) : (
+                                messages.map((msg, idx) => (
+                                    <div key={msg._id || idx} className="message">
+                                        <div className="message-avatar">
+                                            {msg.sender?.avatar ? (
+                                                <img src={msg.sender.avatar} alt="" />
+                                            ) : (
+                                                <div>{msg.sender?.name?.[0] || 'U'}</div>
+                                            )}
+                                        </div>
+                                        <div className="message-content">
+                                            <div className="message-header">
+                                                <strong>{msg.sender?.name}</strong>
+                                                <span className="message-time">
+                                                    {new Date(msg.createdAt).toLocaleTimeString()}
+                                                </span>
+                                            </div>
+                                            <div className="message-text">{msg.content}</div>
+                                            {msg.edited && <span className="edited">(edited)</span>}
+                                        </div>
+                                    </div>
+                                ))
+                            )}
+                            <div ref={messagesEndRef} />
+                        </div>
+
+                        <form className="message-input-form" onSubmit={handleSendDM}>
+                            <div className="input-wrapper">
+                                <button type="button" className="btn-icon">
+                                    <Paperclip size={20} />
+                                </button>
+                                <input
+                                    type="text"
+                                    placeholder="Type a message..."
+                                    value={newMessage}
+                                    onChange={(e) => setNewMessage(e.target.value)}
+                                    className="message-input"
+                                />
+                                <button type="button" className="btn-icon">
+                                    <Smile size={20} />
+                                </button>
+                            </div>
+                            <button type="submit" className="btn-send">
+                                <Send size={20} />
+                            </button>
+                        </form>
+                    </>
+                )}
+
+                {/* Empty state */}
+                {viewMode === 'dms' && !currentConversation && (
+                    <div className="empty-chat">
+                        <MessageCircle size={48} />
+                        <p>Select a conversation or start a new one</p>
+                    </div>
                 )}
             </div>
 

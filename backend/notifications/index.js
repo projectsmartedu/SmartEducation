@@ -146,6 +146,27 @@ function emitDeadlineAlert(alert, userIds = []) {
   userIds.forEach((id) => io.to(`user_${id}`).emit('deadlineAlert', { alert }));
 }
 
+// Direct Message emissions
+function emitDirectMessage(conversationId, message) {
+  if (!io) return;
+  io.to(`dm_${conversationId}`).emit('directMessage', { conversationId, message });
+}
+
+function emitDirectMessageEdited(conversationId, messageId, newContent) {
+  if (!io) return;
+  io.to(`dm_${conversationId}`).emit('directMessageEdited', { conversationId, messageId, newContent });
+}
+
+function emitDirectMessageDeleted(conversationId, messageId) {
+  if (!io) return;
+  io.to(`dm_${conversationId}`).emit('directMessageDeleted', { conversationId, messageId });
+}
+
+function emitDirectMessageReaction(conversationId, messageId, emoji, userId) {
+  if (!io) return;
+  io.to(`dm_${conversationId}`).emit('directMessageReaction', { conversationId, messageId, emoji, userId });
+}
+
 module.exports = {
   init,
   getIO,
@@ -157,6 +178,11 @@ module.exports = {
   emitChannelCreated,
   emitChannelUpdated,
   emitChannelDeleted,
+  // DM emissions
+  emitDirectMessage,
+  emitDirectMessageEdited,
+  emitDirectMessageDeleted,
+  emitDirectMessageReaction,
   // Legacy emissions
   emitNewCourse,
   emitNewTopic,

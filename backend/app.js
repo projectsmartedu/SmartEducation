@@ -16,6 +16,7 @@ const aiRoutes = require('./routes/ai');
 const notificationRoutes = require('./routes/notifications');
 const quizRoutes = require('./routes/quiz');
 const channelRoutes = require('./routes/channels');
+const directMessageRoutes = require('./routes/directMessages');
 
 const app = express();
 
@@ -43,6 +44,7 @@ app.use('/api/ai', aiRoutes);
 app.use('/api/quiz', quizRoutes);
 app.use('/api/notifications', notificationRoutes);
 app.use('/api/channels', channelRoutes);
+app.use('/api/direct-messages', directMessageRoutes);
 
 // ========== MACHINE LEARNING SERVICE PROXY ENDPOINTS ==========
 // These endpoints forward requests to the ML microservice
