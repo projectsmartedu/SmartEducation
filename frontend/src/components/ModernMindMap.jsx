@@ -57,14 +57,6 @@ const ModernMindMap = ({
         return { urgent, moderate, low };
     }, [topicProgress, mlPredictions]);
 
-    // Get filtered view
-    const getDisplayTopics = () => {
-        if (filterLevel === 'urgent') return categorizedTopics.urgent;
-        if (filterLevel === 'moderate') return categorizedTopics.moderate;
-        if (filterLevel === 'low') return categorizedTopics.low;
-        return [...categorizedTopics.urgent, ...categorizedTopics.moderate, ...categorizedTopics.low];
-    };
-
     // Summary stats
     const stats = {
         total: topicProgress.length,
