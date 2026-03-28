@@ -508,9 +508,9 @@
 .members-panel {
     position: absolute;
     right: 0;
-    top: 0;
+    top: 60px;
     width: 280px;
-    height: 100%;
+    bottom: 0;
     background: #f9fafb;
     border-left: 1px solid #e2e8f0;
     display: flex;
@@ -559,6 +559,7 @@
     padding: 12px 8px;
     border-radius: 8px;
     transition: background 0.2s;
+    flex-shrink: 0;
 }
 
 .member-item-panel:hover {
@@ -584,6 +585,28 @@
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
+}
+
+/* Member avatar in panel */
+.member-item-panel .member-avatar {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-weight: 600;
+    font-size: 14px;
+    flex-shrink: 0;
+    overflow: hidden;
+}
+
+.member-item-panel .member-avatar img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
 }
 
 .chat-main {
