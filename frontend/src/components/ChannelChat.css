@@ -164,6 +164,15 @@
     animation: slideIn 0.3s ease;
 }
 
+.message.received {
+    justify-content: flex-start;
+}
+
+.message.sent {
+    justify-content: flex-end;
+    flex-direction: row-reverse;
+}
+
 @keyframes slideIn {
     from {
         opacity: 0;

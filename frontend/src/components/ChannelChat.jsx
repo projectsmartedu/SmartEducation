@@ -682,8 +682,10 @@ const ChannelChat = ({ classId, onClose }) => {
                                     <p>No messages yet. Start the conversation!</p>
                                 </div>
                             ) : (
-                                messages.map((msg, idx) => (
-                                    <div key={msg._id || idx} className="message">
+                                messages.map((msg, idx) => {
+                                    const isSent = msg.sender?._id === currentUser._id;
+                                    return (
+                                    <div key={msg._id || idx} className={`message ${isSent ? 'sent' : 'received'}`}>
                                         <div className="message-avatar">
                                             {msg.sender?.avatar ? (
                                                 <img src={msg.sender.avatar} alt="" />
@@ -702,7 +704,7 @@ const ChannelChat = ({ classId, onClose }) => {
                                             {msg.edited && <span className="edited">(edited)</span>}
                                         </div>
                                     </div>
-                                ))
+                                );})
                             )}
                             {Object.entries(typingUsers).length > 0 && (
                                 <div className="typing-indicator">
@@ -795,8 +797,10 @@ const ChannelChat = ({ classId, onClose }) => {
                                     <p>📨 Start the conversation!</p>
                                 </div>
                             ) : (
-                                messages.map((msg, idx) => (
-                                    <div key={msg._id || idx} className="message">
+                                messages.map((msg, idx) => {
+                                    const isSent = msg.sender?._id === currentUser._id;
+                                    return (
+                                    <div key={msg._id || idx} className={`message ${isSent ? 'sent' : 'received'}`}>
                                         <div className="message-avatar">
                                             {msg.sender?.avatar ? (
                                                 <img src={msg.sender.avatar} alt="" />
@@ -815,7 +819,7 @@ const ChannelChat = ({ classId, onClose }) => {
                                             {msg.edited && <span className="edited">(edited)</span>}
                                         </div>
                                     </div>
-                                ))
+                                );})
                             )}
                             <div ref={messagesEndRef} />
                         </div>

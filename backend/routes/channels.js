@@ -19,9 +19,9 @@ router.delete('/:channelId/members/:memberId', channelController.removeMember);
 
 // Message operations
 router.post('/:channelId/messages', channelController.addMessage);
-router.patch('/messages/:messageId', channelController.editMessage);
-router.delete('/messages/:messageId', channelController.deleteMessage);
-router.post('/messages/:messageId/reactions', channelController.addReaction);
-router.post('/messages/:messageId/pin', channelController.pinMessage);
+router.put('/:channelId/messages/:messageId', channelController.editMessage);
+router.delete('/:channelId/messages/:messageId', channelController.deleteMessage);
+router.post('/:channelId/messages/:messageId/reactions', channelController.addReaction);
+router.post('/:channelId/messages/:messageId/pin', channelController.pinMessage);
 
 module.exports = router;
