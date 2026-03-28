@@ -27,10 +27,7 @@ import { coursesAPI, progressAPI, gamificationAPI } from '../services/api';
 // API endpoint for ML risk predictions
 const ML_API_BASE = process.env.REACT_APP_ML_API_URL || 'https://smarteducation-mlmodel.onrender.com';
 
-// Log the ML API URL for debugging
-if (typeof window !== 'undefined') {
-    console.log('🤖 ML API Base URL:', ML_API_BASE);
-}
+// Suppress ML API URL logging in production
 
 const TeacherDashboard = () => {
     const { user } = useAuth();
@@ -74,7 +71,7 @@ const TeacherDashboard = () => {
                 if (myCourses.length > 0) {
                     setSelectedCourse(myCourses[0]._id);
                 }
-                
+
                 // Try to load cached predictions from localStorage
                 const studentHash = getStudentHash(overviewRes.data?.students || []);
                 const cachedKey = `riskPredictions_${studentHash}`;
@@ -101,22 +98,19 @@ const TeacherDashboard = () => {
             // Check if student data actually changed
             const currentHash = getStudentHash(classOverview.students);
             if (prevStudentHashRef.current === currentHash) {
-                console.log('✓ Student data unchanged, skipping API calls');
-                return;
+                return; // Skip if unchanged
             }
-            
+
             // Try loading from localStorage first
             const cachedKey = `riskPredictions_${currentHash}`;
             const cached = localStorage.getItem(cachedKey);
             if (cached) {
-                console.log('💾 Loading cached predictions from localStorage');
                 setRiskPredictions(JSON.parse(cached));
                 prevStudentHashRef.current = currentHash;
                 return;
             }
 
             try {
-                console.log('📊 Fetching NEW ML predictions for', classOverview.students.length, 'students');
                 const predictions = {};
 
                 // Helper function to retry failed requests
@@ -137,23 +131,27 @@ const TeacherDashboard = () => {
                             if (res.ok) {
                                 return await res.json();
                             } else if (attempt < maxRetries) {
-                                console.warn(`⚠️ ${studentName}: Attempt ${attempt} failed (${res.status}), retrying...`);
                                 await new Promise(r => setTimeout(r, 1000 * attempt)); // Exponential backoff
                             } else {
-                                console.error(`❌ ${studentName}: Failed after ${maxRetries} attempts (${res.status})`);
+                                if (process.env.REACT_APP_DEBUG) {
+                                    console.error(`❌ ${studentName}: Failed after ${maxRetries} attempts (${res.status})`);
+                                }
                                 return null;
                             }
                         } catch (err) {
                             if (err.name === 'AbortError') {
                                 if (attempt < maxRetries) {
-                                    console.warn(`⏱️ ${studentName}: Timeout on attempt ${attempt}, retrying...`);
                                     await new Promise(r => setTimeout(r, 1000 * attempt));
                                 } else {
-                                    console.warn(`⏱️ ${studentName}: Timeout after ${maxRetries} attempts`);
+                                    if (process.env.REACT_APP_DEBUG) {
+                                        console.warn(`⏱️ ${studentName}: Timeout after ${maxRetries} attempts`);
+                                    }
                                     return null;
                                 }
                             } else {
-                                console.error(`❌ ${studentName}: Error on attempt ${attempt}:`, err.message);
+                                if (process.env.REACT_APP_DEBUG) {
+                                    console.error(`❌ ${studentName}: Error on attempt ${attempt}:`, err.message);
+                                }
                                 return null;
                             }
                         }
@@ -181,18 +179,21 @@ const TeacherDashboard = () => {
 
                     if (prediction) {
                         predictions[student.student?._id] = prediction;
-                        console.log(`✅ ${student.student?.name}: Risk ${(prediction.riskScore * 100).toFixed(1)}% (${prediction.category})`);
                     }
                 }
 
-                console.log(`📈 ML Predictions loaded for ${Object.keys(predictions).length} students:`, predictions);
+                if (Object.keys(predictions).length > 0) {
+                    console.log(`✅ ML Predictions loaded for ${Object.keys(predictions).length}/${classOverview.students.length} students`);
+                }
                 setRiskPredictions(predictions);
-                
+
                 // Save to localStorage
                 localStorage.setItem(cachedKey, JSON.stringify(predictions));
                 prevStudentHashRef.current = currentHash;
             } catch (err) {
-                console.error('❌ Error fetching risk predictions:', err);
+                if (process.env.REACT_APP_DEBUG) {
+                    console.error('❌ Error fetching risk predictions:', err);
+                }
             }
         };
 
