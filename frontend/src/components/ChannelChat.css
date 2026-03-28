@@ -667,19 +667,24 @@
     display: flex;
     align-items: center;
     gap: 12px;
-    padding: 12px 12px;
+    padding: 14px 12px;
     border-radius: 10px;
     transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
     flex-shrink: 0;
+    cursor: pointer;
 }
 
 .member-item-panel:hover {
-    background: #eff3f8;
+    background: #dbeafe;
+    transform: translateX(4px);
 }
 
 .member-info {
     min-width: 0;
     flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
 }
 
 .member-name {
@@ -692,7 +697,7 @@
 }
 
 .member-email {
-    font-size: 12px;
+    font-size: 11px;
     color: #64748b;
     white-space: nowrap;
     overflow: hidden;
