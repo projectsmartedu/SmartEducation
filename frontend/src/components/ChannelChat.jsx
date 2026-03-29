@@ -931,75 +931,60 @@ const ChannelChat = ({ classId, onClose }) => {
                             <div ref={messagesEndRef} />
                         </div>
 
-                        <form className="message-input-form" onSubmit={handleSendMessage}>
-                            <div className="input-wrapper">
-                                <button
-                                    type="button"
-                                    className="btn-icon"
-                                    onClick={() => fileInputRef.current?.click()}
-                                    title="Attach file (PDF, notes, etc)"
-                                >
-                                    <Paperclip size={20} />
-                                </button>
-                                <input
-                                    ref={fileInputRef}
-                                    type="file"
-                                    onChange={handleFileUpload}
-                                    style={{ display: 'none' }}
-                                    accept=".pdf,.doc,.docx,.txt,.png,.jpg,.jpeg,.zip"
-                                />
-                                <input
-                                    type="text"
-                                    placeholder="Type a message..."
-                                    value={newMessage}
-                                    onChange={(e) => handleTyping(e.target.value)}
-                                    className="message-input"
-                                />
-                                <button
-                                    type="button"
-                                    className="btn-icon"
-                                    onClick={() => setShowEmojiPicker(!showEmojiPicker)}
-                                >
-                                    <Smile size={20} />
-                                </button>
-                            </div>
-                            <button type="submit" className="btn-send">
-                                <Send size={20} />
-                            </button>
-                        </form>
-
-                        {/* Emoji Picker */}
-                        {showEmojiPicker && (
-                            <div style={{
-                                padding: '12px',
-                                background: '#f7fafc',
-                                borderTop: '1px solid #e2e8f0',
-                                display: 'flex',
-                                gap: '8px',
-                                flexWrap: 'wrap'
-                            }}>
-                                {emojis.map((emoji, idx) => (
+                        <div className="input-area">
+                            <form className="message-input-form" onSubmit={handleSendMessage}>
+                                <div className="input-wrapper">
                                     <button
-                                        key={idx}
                                         type="button"
-                                        onClick={() => addEmoji(emoji)}
-                                        style={{
-                                            background: 'white',
-                                            border: '1px solid #e2e8f0',
-                                            borderRadius: '6px',
-                                            padding: '8px 12px',
-                                            cursor: 'pointer',
-                                            fontSize: '18px',
-                                            transition: 'all 0.2s'
-                                        }}
-                                        onMouseOver={(e) => e.target.style.background = '#edf2f7'}
-                                        onMouseOut={(e) => e.target.style.background = 'white'}
+                                        className="btn-icon"
+                                        onClick={() => fileInputRef.current?.click()}
+                                        title="Attach file (PDF, notes, etc)"
                                     >
-                                        {emoji}
+                                        <Paperclip size={20} />
                                     </button>
-                                ))}
-                            </div>
-                        )}
+                                    <input
+                                        ref={fileInputRef}
+                                        type="file"
+                                        onChange={handleFileUpload}
+                                        style={{ display: 'none' }}
+                                        accept=".pdf,.doc,.docx,.txt,.png,.jpg,.jpeg,.zip"
+                                    />
+                                    <input
+                                        type="text"
+                                        placeholder="Type a message..."
+                                        value={newMessage}
+                                        onChange={(e) => handleTyping(e.target.value)}
+                                        className="message-input"
+                                    />
+                                    <button
+                                        type="button"
+                                        className="btn-icon"
+                                        onClick={() => setShowEmojiPicker(!showEmojiPicker)}
+                                    >
+                                        <Smile size={20} />
+                                    </button>
+                                </div>
+                                <button type="submit" className="btn-send">
+                                    <Send size={20} />
+                                </button>
+                            </form>
+
+                            {/* Emoji Picker */}
+                            {showEmojiPicker && (
+                                <div className="emoji-picker-container">
+                                    {emojis.map((emoji, idx) => (
+                                        <button
+                                            key={idx}
+                                            type="button"
+                                            onClick={() => addEmoji(emoji)}
+                                            className="emoji-btn"
+                                        >
+                                            {emoji}
+                                        </button>
+                                    ))}
+                                </div>
+                            )}
+                        </div>
 
                         {/* Members Panel */}
                         {showChannelMembers && (
@@ -1102,26 +1087,60 @@ const ChannelChat = ({ classId, onClose }) => {
                             <div ref={messagesEndRef} />
                         </div>
 
-                        <form className="message-input-form" onSubmit={handleSendDM}>
-                            <div className="input-wrapper">
-                                <button type="button" className="btn-icon">
-                                    <Paperclip size={20} />
+                        <div className="input-area">
+                            <form className="message-input-form" onSubmit={handleSendDM}>
+                                <div className="input-wrapper">
+                                    <button
+                                        type="button"
+                                        className="btn-icon"
+                                        onClick={() => fileInputRef.current?.click()}
+                                        title="Attach file"
+                                    >
+                                        <Paperclip size={20} />
+                                    </button>
+                                    <input
+                                        ref={fileInputRef}
+                                        type="file"
+                                        onChange={handleFileUpload}
+                                        style={{ display: 'none' }}
+                                        accept=".pdf,.doc,.docx,.txt,.png,.jpg,.jpeg,.zip"
+                                    />
+                                    <input
+                                        type="text"
+                                        placeholder="Type a message..."
+                                        value={newMessage}
+                                        onChange={(e) => setNewMessage(e.target.value)}
+                                        className="message-input"
+                                    />
+                                    <button
+                                        type="button"
+                                        className="btn-icon"
+                                        onClick={() => setShowEmojiPicker(!showEmojiPicker)}
+                                    >
+                                        <Smile size={20} />
+                                    </button>
+                                </div>
+                                <button type="submit" className="btn-send">
+                                    <Send size={20} />
                                 </button>
-                                <input
-                                    type="text"
-                                    placeholder="Type a message..."
-                                    value={newMessage}
-                                    onChange={(e) => setNewMessage(e.target.value)}
-                                    className="message-input"
-                                />
-                                <button type="button" className="btn-icon">
-                                    <Smile size={20} />
-                                </button>
-                            </div>
-                            <button type="submit" className="btn-send">
-                                <Send size={20} />
-                            </button>
-                        </form>
+                            </form>
+
+                            {/* Emoji Picker */}
+                            {showEmojiPicker && (
+                                <div className="emoji-picker-container">
+                                    {emojis.map((emoji, idx) => (
+                                        <button
+                                            key={idx}
+                                            type="button"
+                                            onClick={() => addEmoji(emoji)}
+                                            className="emoji-btn"
+                                        >
+                                            {emoji}
+                                        </button>
+                                    ))}
+                                </div>
+                            )}
+                        </div>
                     </>
                 )}
 
