@@ -43,13 +43,15 @@ const ChannelChat = ({ classId, onClose }) => {
     const isInitialLoadRef = useRef(true);
     const prevMessageCountRef = useRef(0);
 
-    const API_BASE = process.env.REACT_APP_API_URL || 'http://localhost:5000';
+    // API configuration - use /api for production (Vercel) or construct full URL for development
+    const API_BASE = process.env.REACT_APP_API_URL || '/api';
+    const SOCKET_URL = process.env.REACT_APP_API_URL ? window.location.origin : 'http://localhost:5000';
     const currentUser = JSON.parse(localStorage.getItem('user') || '{}');
 
     // Initialize Socket.io connection
     useEffect(() => {
         const token = localStorage.getItem('token');
-        socketRef.current = io(API_BASE, {
+        socketRef.current = io(SOCKET_URL, {
             auth: { token },
             reconnection: true,
             reconnectionDelay: 1000,
@@ -83,7 +85,7 @@ const ChannelChat = ({ classId, onClose }) => {
     const fetchCourseInfo = useCallback(async () => {
         try {
             const token = localStorage.getItem('token');
-            const res = await fetch(`${API_BASE}/api/courses/${classId}`, {
+            const res = await fetch(`${API_BASE}/courses/${classId}`, {
                 headers: { 'Authorization': `Bearer ${token}` }
             });
             if (res.ok) {
@@ -107,7 +109,7 @@ const ChannelChat = ({ classId, onClose }) => {
     const fetchChannels = useCallback(async () => {
         try {
             const token = localStorage.getItem('token');
-            const res = await fetch(`${API_BASE}/api/channels/class/${classId}`, {
+            const res = await fetch(`${API_BASE}/channels/class/${classId}`, {
                 headers: { 'Authorization': `Bearer ${token}` }
             });
             if (res.ok) {
@@ -133,7 +135,7 @@ const ChannelChat = ({ classId, onClose }) => {
                 if (uniqueChannels.length === 0) {
                     // No channels exist - create a default "General" channel
                     console.log('📝 Creating default General channel...');
-                    const createRes = await fetch(`${API_BASE}/api/channels`, {
+                    const createRes = await fetch(`${API_BASE}/channels`, {
                         method: 'POST',
                         headers: {
                             'Authorization': `Bearer ${token}`,
@@ -175,7 +177,7 @@ const ChannelChat = ({ classId, onClose }) => {
         if (!selectedChannel) return;
         try {
             const token = localStorage.getItem('token');
-            const res = await fetch(`${API_BASE}/api/channels/${selectedChannel}`, {
+            const res = await fetch(`${API_BASE}/channels/${selectedChannel}`, {
                 headers: { 'Authorization': `Bearer ${token}` }
             });
             if (res.ok) {
@@ -201,7 +203,7 @@ const ChannelChat = ({ classId, onClose }) => {
     const fetchCourseMembers = useCallback(async () => {
         try {
             const token = localStorage.getItem('token');
-            const res = await fetch(`${API_BASE}/api/courses/${classId}`, {
+            const res = await fetch(`${API_BASE}/courses/${classId}`, {
                 headers: { 'Authorization': `Bearer ${token}` }
             });
             if (res.ok) {
@@ -221,7 +223,7 @@ const ChannelChat = ({ classId, onClose }) => {
     const fetchConversations = useCallback(async () => {
         try {
             const token = localStorage.getItem('token');
-            const res = await fetch(`${API_BASE}/api/direct-messages/conversations/${classId}`, {
+            const res = await fetch(`${API_BASE}/direct-messages/conversations/${classId}`, {
                 headers: { 'Authorization': `Bearer ${token}` }
             });
             if (res.ok) {
@@ -241,7 +243,7 @@ const ChannelChat = ({ classId, onClose }) => {
         try {
             console.log('📥 Fetching DM messages for conversation:', conversationId);
             const token = localStorage.getItem('token');
-            const res = await fetch(`${API_BASE}/api/direct-messages/conversations/${conversationId}/messages`, {
+            const res = await fetch(`${API_BASE}/direct-messages/conversations/${conversationId}/messages`, {
                 headers: { 'Authorization': `Bearer ${token}` }
             });
             if (res.ok) {
@@ -469,7 +471,7 @@ const ChannelChat = ({ classId, onClose }) => {
             formData.append('channelId', selectedChannel);
 
             const token = localStorage.getItem('token');
-            const res = await fetch(`${API_BASE}/api/channels/${selectedChannel}/upload`, {
+            const res = await fetch(`${API_BASE}/channels/${selectedChannel}/upload`, {
                 method: 'POST',
                 headers: { 'Authorization': `Bearer ${token}` },
                 body: formData
@@ -542,7 +544,7 @@ const ChannelChat = ({ classId, onClose }) => {
 
         try {
             const token = localStorage.getItem('token');
-            const res = await fetch(`${API_BASE}/api/channels/${selectedChannel}/messages`, {
+            const res = await fetch(`${API_BASE}/channels/${selectedChannel}/messages`, {
                 method: 'POST',
                 headers: {
                     'Authorization': `Bearer ${token}`,
@@ -591,7 +593,7 @@ const ChannelChat = ({ classId, onClose }) => {
 
         try {
             const token = localStorage.getItem('token');
-            const res = await fetch(`${API_BASE}/api/channels`, {
+            const res = await fetch(`${API_BASE}/channels`, {
                 method: 'POST',
                 headers: {
                     'Authorization': `Bearer ${token}`,
@@ -621,7 +623,7 @@ const ChannelChat = ({ classId, onClose }) => {
     const startDM = useCallback(async (userId) => {
         try {
             const token = localStorage.getItem('token');
-            const res = await fetch(`${API_BASE}/api/direct-messages/conversations`, {
+            const res = await fetch(`${API_BASE}/direct-messages/conversations`, {
                 method: 'POST',
                 headers: {
                     'Authorization': `Bearer ${token}`,
@@ -668,7 +670,7 @@ const ChannelChat = ({ classId, onClose }) => {
 
         try {
             const token = localStorage.getItem('token');
-            const res = await fetch(`${API_BASE}/api/direct-messages/conversations/${selectedConversation}/messages`, {
+            const res = await fetch(`${API_BASE}/direct-messages/conversations/${selectedConversation}/messages`, {
                 method: 'POST',
                 headers: {
                     'Authorization': `Bearer ${token}`,
