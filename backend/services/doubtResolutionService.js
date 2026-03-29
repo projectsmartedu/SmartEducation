@@ -1,19 +1,87 @@
 /**
  * Doubt Resolution Service
- * Handles AI-powered doubt resolution using RAG
+ * Handles AI-powered doubt resolution using RAG with Groq (FREE API)
  * Modular component for answer generation
  */
 
-const { GoogleGenerativeAI } = require('@google/generative-ai');
+const https = require('https');
 const Doubt = require('../models/Doubt');
 const embeddingService = require('./embeddingService');
 const semanticSearchService = require('./semanticSearchService');
 
 class DoubtResolutionService {
   constructor() {
-    this.genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
-    // gemini-2.0-flash is the model available with this API key
-    this.models = ['gemini-2.0-flash'];
+    this.apiKey = process.env.GROQ_API_KEY;
+  }
+
+  /**
+   * Call Groq API for answer generation
+   */
+  async callGroqAPI(messages) {
+    const models = ['llama-3.1-8b-instant', 'mixtral-8x7b-32768', 'gemma-2-9b-it'];
+    let lastError = null;
+
+    for (const model of models) {
+      try {
+        return await new Promise((resolve, reject) => {
+          const url = 'https://api.groq.com/openai/v1/chat/completions';
+          const postData = JSON.stringify({
+            model: model,
+            messages: messages,
+            temperature: 0.7,
+            max_tokens: 1024
+          });
+
+          const urlObj = new URL(url);
+          const options = {
+            hostname: urlObj.hostname,
+            path: urlObj.pathname,
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'Content-Length': Buffer.byteLength(postData),
+              'Authorization': `Bearer ${this.apiKey}`
+            }
+          };
+
+          const req = https.request(options, (res) => {
+            let responseData = '';
+            res.on('data', chunk => responseData += chunk);
+            res.on('end', () => {
+              try {
+                const parsed = JSON.parse(responseData);
+                if (res.statusCode >= 200 && res.statusCode < 300) {
+                  const reply = parsed.choices?.[0]?.message?.content;
+                  if (reply) {
+                    console.log(`Groq model ${model} success`);
+                    resolve(reply);
+                  } else {
+                    reject(new Error('No response'));
+                  }
+                } else {
+                  reject(new Error(`${res.statusCode}: ${parsed.error?.message}`));
+                }
+              } catch (e) {
+                reject(new Error(`Parse: ${responseData}`));
+              }
+            });
+          });
+
+          req.on('error', reject);
+          req.setTimeout(30000, () => {
+            req.destroy();
+            reject(new Error('Timeout'));
+          });
+          req.write(postData);
+          req.end();
+        });
+      } catch (err) {
+        console.log(`${model} failed: ${err.message}`);
+        lastError = err;
+      }
+    }
+    
+    throw lastError || new Error('All models failed');
   }
 
   /**
@@ -81,35 +149,18 @@ class DoubtResolutionService {
   }
 
   /**
-   * Generate answer using LLM with context (with model fallback)
+   * Generate answer using Groq API with context
    * @param {string} question - Student's question
    * @param {string} context - Retrieved course material context
    * @returns {Promise<string>} - Generated answer
    */
   async generateAnswer(question, context) {
-    // Mock mode for testing when API quota is exhausted
-    if (process.env.MOCK_AI_RESPONSES === 'true') {
-      console.log('MOCK MODE: Returning simulated answer');
-      const mockAnswers = {
-        'photosynthesis': 'Photosynthesis is the process by which plants convert light energy from the sun into chemical energy stored in glucose. This occurs in the chloroplasts using chlorophyll, water, and carbon dioxide, producing oxygen as a byproduct. The process has two main stages: the light-dependent reactions (which occur in the thylakoids) and the light-independent reactions or Calvin cycle (which occur in the stroma).',
-        'mitochondria': 'Mitochondria are membrane-bound organelles found in eukaryotic cells that serve as the powerhouse of the cell. They generate ATP (adenosine triphosphate) through cellular respiration, primarily through the electron transport chain. The mitochondria has an outer membrane, inner membrane, and matrix. They contain their own DNA and ribosomes, suggesting they originated from ancient bacteria through endosymbiotism.',
-        'gravity': 'Gravity is a fundamental force of nature that attracts objects with mass toward each other. Newton\'s law of universal gravitation states that the gravitational force between two objects is proportional to the product of their masses and inversely proportional to the square of the distance between them (F = G × m₁ × m₂ / r²). Einstein\'s general relativity describes gravity as the curvature of spacetime caused by mass and energy.',
-        'dna': 'DNA (deoxyribonucleic acid) is the molecule that carries genetic instructions for life. It consists of two complementary strands twisted in a double helix, made up of nucleotides containing deoxyribose sugar, a phosphate group, and a nitrogenous base (adenine, thymine, guanine, or cytosine). DNA replicates during cell division and is transcribed into RNA to produce proteins.',
-      };
-      
-      // Try to find a matching mock answer based on keywords
-      const lowerQuestion = question.toLowerCase();
-      for (const [key, answer] of Object.entries(mockAnswers)) {
-        if (lowerQuestion.includes(key)) {
-          return answer;
-        }
+    try {
+      if (!this.apiKey) {
+        throw new Error('Groq API key not configured');
       }
-      
-      // Default mock answer
-      return `Based on your course materials:\n\n${context ? context.substring(0, 500) : 'Your question is interesting and important for understanding this topic.'} \n\nKey points to consider:\n• Review the core concepts related to your question\n• Connect this to real-world applications\n• Practice problems to reinforce understanding\n\nFor a detailed answer, please ask your instructor or review the textbook section on this topic.`;
-    }
 
-    const systemPrompt = `You are an expert educational assistant for students. Your role is to answer academic questions clearly and helpfully.
+      const systemPrompt = `You are an expert educational assistant for students. Your role is to answer academic questions clearly and helpfully.
 
 INSTRUCTIONS:
 1. Use the provided course material context to answer the question accurately
@@ -117,66 +168,43 @@ INSTRUCTIONS:
 3. If the context is not sufficient, use your general knowledge but indicate this
 4. Explain concepts in a clear, student-friendly manner
 5. Use examples when helpful
-6. Structure your answer with proper formatting (use bullet points, numbered lists when appropriate)
+6. Structure your answer with proper formatting
 7. Be concise but thorough
-8. If you're unsure about something, say so honestly
+8. If you're unsure, say so honestly
 
 CONTEXT FROM COURSE MATERIALS:
-${context}
+${context}`;
 
-STUDENT'S QUESTION:
-${question}
+      const messages = [
+        { role: 'system', content: systemPrompt },
+        { role: 'user', content: question }
+      ];
 
-Please provide a helpful, accurate, and educational answer:`;
-
-    // Try multiple models with fallback
-    let quotaExceeded = false;
-    for (const modelName of this.models) {
-      try {
-        console.log(`Trying model: ${modelName} for doubt resolution...`);
-        const model = this.genAI.getGenerativeModel({ model: modelName });
-        const result = await model.generateContent(systemPrompt);
-        console.log(`Doubt resolution success with ${modelName}`);
-        return result.response.text();
-      } catch (error) {
-        // Inspect common error cases to provide clearer diagnostics
-        console.warn(`Model ${modelName} failed:`, error && (error.message || error));
-        const msg = (error && (error.message || '')).toString().toLowerCase();
-        
-        if (msg.includes('quota') || msg.includes('rate limit') || msg.includes('429')) {
-          // Mark that quota was exceeded but don't throw - provide fallback instead
-          quotaExceeded = true;
-          console.warn('API quota exceeded - using fallback response');
-          continue;
+      console.log('Trying Groq API for doubt resolution...');
+      const response = await this.callGroqAPI(messages);
+      console.log('Doubt resolution success with Groq');
+      return response;
+    } catch (error) {
+      console.error('Groq API failed:', error.message);
+      
+      // Fallback to mock response
+      const mockAnswers = {
+        'photosynthesis': 'Photosynthesis is the process by which plants convert light energy from the sun into chemical energy stored in glucose. This occurs in the chloroplasts using chlorophyll, water, and carbon dioxide, producing oxygen as a byproduct.',
+        'mitochondria': 'Mitochondria are membrane-bound organelles that serve as the powerhouse of the cell. They generate ATP through cellular respiration. They contain their own DNA and ribosomes.',
+        'gravity': 'Gravity is a fundamental force that attracts objects with mass. Newton\'s law: F = G × m₁ × m₂ / r²',
+        'dna': 'DNA carries genetic instructions for life. It consists of two complementary strands in a double helix, made up of nucleotides with nitrogenous bases.'
+      };
+      
+      const lowerQuestion = question.toLowerCase();
+      for (const [key, answer] of Object.entries(mockAnswers)) {
+        if (lowerQuestion.includes(key)) {
+          return `**Fallback Answer:** ${answer}`;
         }
-        
-        if (msg.includes('unauthorized') || (msg.includes('invalid') && msg.includes('key')) || msg.includes('401') || msg.includes('leaked')) {
-          const err = new Error('AI service authentication failed: invalid or misconfigured API key');
-          err.status = 401;
-          throw err;
-        }
-        // Non-fatal: try next model
-        continue;
       }
+      
+      // Generic fallback
+      return `Based on your course materials:\n\n${context ? context.substring(0, 500) : 'This is an interesting academic question.'}\n\nKey points:\n• Review the core concepts related to your question\n• Connect this to real-world applications\n• Ask your instructor for deeper explanation`;
     }
-    
-    // All models failed — provide a graceful fallback answer
-    const fallback = [
-      quotaExceeded 
-        ? 'AI service is temporarily rate-limited. Here\'s context from your course materials:'
-        : 'AI service is temporarily unavailable. Here\'s relevant context from your course materials:',
-      '',
-      '• Context from materials:',
-      context ? context.split('\n').slice(0, 10).join('\n') : 'No relevant context available.',
-      '',
-      '• Guidance:',
-      '- Review the highlighted sections above for direct explanations.',
-      '- If the context seems unrelated, try refining the subject/topic.',
-      '- Ask a more specific follow-up (e.g., define the term, show a formula, or step-by-step derivation).',
-      '',
-      'Once the AI service is restored, you\'ll receive a full explanation.'
-    ].join('\n');
-    return fallback;
   }
 
   /**

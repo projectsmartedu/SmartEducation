@@ -57,45 +57,80 @@ const makeRequest = (url, data) => {
   });
 };
 
-// Gemini API call using native HTTPS
-const getGeminiResponse = async (messages) => {
+// Groq API call (FREE - no billing needed!)
+const getGroqResponse = async (messages) => {
   try {
-    const apiKey = process.env.GEMINI_API_KEY;
+    const apiKey = process.env.GROQ_API_KEY;
     if (!apiKey) {
-      throw new Error('Gemini API key not configured');
+      throw new Error('Groq API key not configured');
     }
 
-    // Build conversation history for context
-    const conversationHistory = messages.map(msg => {
-      return `${msg.role === 'user' ? 'Student' : 'SmartEdu AI'}: ${msg.content}`;
-    }).join('\n\n');
+    // Format messages for Groq API (OpenAI-compatible format)
+    const formattedMessages = [
+      { role: 'system', content: SYSTEM_PROMPT },
+      ...messages.map(msg => ({
+        role: msg.role,
+        content: msg.content
+      }))
+    ];
 
-    // Create the full prompt with system instruction and history
-    const fullPrompt = `${SYSTEM_PROMPT}\n\n--- Conversation History ---\n${conversationHistory}\n\n--- End of History ---\n\nPlease respond to the student's last message as SmartEdu AI:`;
-
-    // Try different models - lite models may have separate quota
-    const models = ['gemini-2.0-flash-lite', 'gemini-2.5-flash', 'gemini-2.0-flash'];
+    // Try multiple models in order of preference
+    const models = ['llama-3.1-8b-instant', 'mixtral-8x7b-32768', 'gemma-2-9b-it'];
     let lastError = null;
-    
+
     for (const model of models) {
       try {
-        const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`;
-        
-        const response = await makeRequest(url, {
-          contents: [{
-            parts: [{
-              text: fullPrompt
-            }]
-          }],
-          generationConfig: {
-            temperature: 0.7,
-            maxOutputTokens: 1024,
-          }
+        const url = 'https://api.groq.com/openai/v1/chat/completions';
+        const postData = JSON.stringify({
+          model: model,
+          messages: formattedMessages,
+          temperature: 0.7,
+          max_tokens: 1024
         });
 
-        if (response?.candidates?.[0]?.content?.parts?.[0]?.text) {
-          console.log(`Gemini API success with ${model}`);
-          return response.candidates[0].content.parts[0].text;
+        const urlObj = new URL(url);
+        const options = {
+          hostname: urlObj.hostname,
+          path: urlObj.pathname,
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Content-Length': Buffer.byteLength(postData),
+            'Authorization': `Bearer ${apiKey}`
+          }
+        };
+
+        const response = await new Promise((resolve, reject) => {
+          const req = https.request(options, (res) => {
+            let responseData = '';
+            res.on('data', (chunk) => responseData += chunk);
+            res.on('end', () => {
+              try {
+                const parsed = JSON.parse(responseData);
+                if (res.statusCode >= 200 && res.statusCode < 300) {
+                  resolve(parsed);
+                } else {
+                  reject(new Error(`${res.statusCode}: ${parsed.error?.message || responseData}`));
+                }
+              } catch (e) {
+                reject(new Error(`Parse error: ${responseData}`));
+              }
+            });
+          });
+
+          req.on('error', reject);
+          req.setTimeout(30000, () => {
+            req.destroy();
+            reject(new Error('Request timeout'));
+          });
+          req.write(postData);
+          req.end();
+        });
+
+        const reply = response.choices?.[0]?.message?.content;
+        if (reply) {
+          console.log(`✅ Groq API success with ${model}`);
+          return reply;
         }
       } catch (err) {
         console.log(`${model} failed: ${err.message}`);
@@ -103,9 +138,9 @@ const getGeminiResponse = async (messages) => {
       }
     }
     
-    throw lastError || new Error('All models failed');
+    throw lastError || new Error('All Groq models failed');
   } catch (error) {
-    console.error('Gemini API error:', error.message);
+    console.error('Groq API error:', error.message);
     throw error;
   }
 };
@@ -300,12 +335,12 @@ const sendMessage = async (req, res) => {
       content: message.trim()
     });
 
-    // Get AI response from Gemini
+    // Get AI response from Groq (FREE!)
     let aiResponse;
     try {
-      aiResponse = await getGeminiResponse(chat.messages);
+      aiResponse = await getGroqResponse(chat.messages);
     } catch (error) {
-      console.error('Gemini API failed, using fallback:', error.message);
+      console.error('Groq API failed, using fallback:', error.message);
       aiResponse = generateMockResponse(message.trim());
     }
 
