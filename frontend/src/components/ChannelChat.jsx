@@ -168,7 +168,7 @@ const ChannelChat = ({ classId, onClose }) => {
         } catch (err) {
             console.error('❌ Error fetching channels:', err);
         }
-    }, [API_BASE, classId]);
+    }, [API_BASE, classId, navigate, urlChannelId]);
 
     // Fetch initial messages for selected channel
     const fetchMessages = useCallback(async () => {
@@ -513,7 +513,7 @@ const ChannelChat = ({ classId, onClose }) => {
         if (selectedChannel) {
             fetchMessages();
         }
-    }, [selectedChannel]);
+    }, [selectedChannel, fetchMessages]);
 
     // Load DM messages when conversation changes
     useEffect(() => {
@@ -521,7 +521,7 @@ const ChannelChat = ({ classId, onClose }) => {
         if (selectedConversation && viewMode === 'dms') {
             fetchDMMessages(selectedConversation);
         }
-    }, [selectedConversation, viewMode]);
+    }, [selectedConversation, viewMode, fetchDMMessages]);
 
     // Switch view mode and load appropriate messages
     useEffect(() => {
@@ -697,7 +697,7 @@ const ChannelChat = ({ classId, onClose }) => {
             prevMessageCountRef.current = messages.length;
             return;
         }
-        
+
         // Only scroll if a new message was added (count increased by 1)
         const newMessageCount = messages.length;
         if (newMessageCount > prevMessageCountRef.current) {
@@ -706,7 +706,7 @@ const ChannelChat = ({ classId, onClose }) => {
                 messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
             }, 0);
         }
-        
+
         prevMessageCountRef.current = newMessageCount;
     }, [messages]);
 
@@ -1030,9 +1030,9 @@ const ChannelChat = ({ classId, onClose }) => {
                                             const memberName = memberObj.name || memberObj.username || 'Unknown';
                                             const memberEmail = memberObj.email || '';
                                             const memberInitial = memberName?.[0] || 'U';
-                                            
+
                                             console.log('👤 Member data:', { memberName, memberEmail, memberInitial });
-                                            
+
                                             return (
                                                 <div key={memberObj._id} className="member-item-panel">
                                                     <div className="member-avatar">
