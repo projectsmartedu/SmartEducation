@@ -45,7 +45,8 @@ const ChannelChat = ({ classId, onClose }) => {
 
     // API configuration - use /api for production (Vercel) or construct full URL for development
     const API_BASE = process.env.REACT_APP_API_URL || '/api';
-    const SOCKET_URL = process.env.REACT_APP_API_URL ? window.location.origin : 'http://localhost:5000';
+    // For Socket.io: use provided URL or default to localhost dev
+    const SOCKET_URL = process.env.REACT_APP_SOCKET_URL || 'http://localhost:5000';
     const currentUser = JSON.parse(localStorage.getItem('user') || '{}');
 
     // Initialize Socket.io connection
@@ -286,6 +287,16 @@ const ChannelChat = ({ classId, onClose }) => {
         }
     }, [selectedConversation, fetchDMMessages]);
 
+    // Handle URL channel ID parameter
+    useEffect(() => {
+        if (urlChannelId && channels.length > 0) {
+            const channel = channels.find(c => c._id === urlChannelId);
+            if (channel) {
+                setSelectedChannel(urlChannelId);
+            }
+        }
+    }, [urlChannelId, channels]);
+
     // Handle channel selection - listen for real-time events
     useEffect(() => {
         if (!selectedChannel || !socketRef.current) return;
@@ -496,46 +507,21 @@ const ChannelChat = ({ classId, onClose }) => {
 
     // Load channels on mount
     useEffect(() => {
+        fetchCourseInfo();
         fetchChannels();
-    }, [fetchChannels]);
+        fetchCourseMembers();
+        fetchConversations();
+    }, [fetchCourseInfo, fetchChannels, fetchCourseMembers, fetchConversations]);
 
-    // Handle URL channel ID parameter
+    // Fetch messages when channel is selected
     useEffect(() => {
-        if (urlChannelId && channels.length > 0) {
-            const channel = channels.find(c => c._id === urlChannelId);
-            if (channel) {
-                setSelectedChannel(urlChannelId);
-            }
-        }
-    }, [urlChannelId, channels]);
-
-    // Load initial messages when channel changes
-    useEffect(() => {
-        console.log('📨 Channel changed, fetching messages for:', selectedChannel);
         if (selectedChannel) {
+            // Reset scroll tracking when changing channels
+            isInitialLoadRef.current = true;
+            prevMessageCountRef.current = 0;
             fetchMessages();
         }
     }, [selectedChannel, fetchMessages]);
-
-    // Load DM messages when conversation changes
-    useEffect(() => {
-        console.log('💬 Conversation changed, fetching DM messages for:', selectedConversation);
-        if (selectedConversation && viewMode === 'dms') {
-            fetchDMMessages(selectedConversation);
-        }
-    }, [selectedConversation, viewMode, fetchDMMessages]);
-
-    // Switch view mode and load appropriate messages
-    useEffect(() => {
-        console.log('🔄 View mode changed to:', viewMode);
-        if (viewMode === 'channels' && selectedChannel) {
-            console.log('📨 Loading channel messages...');
-            fetchMessages();
-        } else if (viewMode === 'dms' && selectedConversation) {
-            console.log('💬 Loading DM messages...');
-            fetchDMMessages(selectedConversation);
-        }
-    }, [viewMode, selectedChannel, selectedConversation, fetchMessages, fetchDMMessages]);
 
     // Send message
     const handleSendMessage = async (e) => {
